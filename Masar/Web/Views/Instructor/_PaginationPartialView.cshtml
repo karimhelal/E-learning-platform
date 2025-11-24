@@ -1,0 +1,72 @@
+﻿@model PaginationSettingsViewModel
+
+@{
+    // CONFIG: How many buttons to show on left/right of current?
+    // 1 means: [1] ... [4] [5] [6] ... [10]
+    int siblings = 1;
+    int current = Model.CurrentPage;
+    int total = Model.TotalPages;
+
+    // Calculate the "Window" of middle buttons
+    // We force it to stay within bounds (2 to Total-1)
+    int startPage = Math.Max(2, current - siblings);
+    int endPage = Math.Min(total - 1, current + siblings);
+
+    // Adjust window if near the start or end to keep button count consistent
+    if (current <= siblings + 2)
+    {
+        endPage = Math.Min(total - 1, 5); // Show first 5
+    }
+    if (current >= total - (siblings + 1))
+    {
+        startPage = Math.Max(2, total - 4); // Show last 5
+    }
+}
+
+@if(total <= 1)
+{
+    return;
+}
+
+<div class="pagination-options" hidden>
+    <div id="pageSize">@Model.PageSize</div>
+</div>
+
+<button class="pagination-btn ajax-pager @(current == 1 ? "disabled" : "")"
+        onclick="updateCourses(this, -1)"
+        aria-label="Previous Page"
+        @(current == 1 ? "disabled" : "")>
+    <i class="fas fa-chevron-left"></i>
+</button>
+
+@if (total > 0)
+{
+    <button class="pagination-btn ajax-pager @(current == 1 ? "active" : "")" onclick="updateCourses(this, 0)">1</button>
+}
+
+@if (startPage > 2)
+{
+    <span class="pagination-dots">...</span>
+}
+
+@for (int i = startPage; i <= endPage; i++)
+{
+    <button class="pagination-btn ajax-pager @(current == i ? "active" : "")" onclick="updateCourses(this, 0)">@i</button>
+}
+
+@if (endPage < total - 1)
+{
+    <span class="pagination-dots">...</span>
+}
+
+@if (total > 1)
+{
+    <button class="pagination-btn last-pagination-btn ajax-pager @(current == total ? "active" : "")" onclick="updateCourses(this, 0)">@total</button>
+}
+
+<button class="pagination-btn ajax-pager @(current == total ? "disabled" : "")"
+        onclick="updateCourses(this, 1)"
+        aria-label="Next Page"
+        @(current == total ? "disabled" : "")>
+    <i class="fas fa-chevron-right"></i>
+</button>

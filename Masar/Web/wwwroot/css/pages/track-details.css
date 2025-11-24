@@ -1,0 +1,750 @@
+/* ========================================
+   TRACK DETAILS PAGE
+   ======================================== */
+
+/* ========================================
+   TRACK HERO
+   ======================================== */
+.track-hero {
+    position: relative;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.1));
+    border-bottom: 1px solid var(--border-color);
+    padding: 2rem 0 3rem;
+    overflow: hidden;
+}
+
+.track-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(rgba(124, 58, 237, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 58, 237, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+
+.track-hero-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    margin-bottom: 2rem;
+}
+
+.breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all var(--transition-base);
+}
+
+.breadcrumb-link:hover {
+    color: var(--accent-cyan);
+    transform: translateX(-3px);
+}
+
+/* Track Hero Content */
+.track-hero-content {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 3rem;
+    align-items: start;
+}
+
+.track-hero-left {
+    display: flex;
+    gap: 2rem;
+}
+
+.track-icon-wrapper {
+    flex-shrink: 0;
+}
+
+.track-icon-large {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+}
+
+.track-info {
+    flex: 1;
+}
+
+.track-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin: 1rem 0;
+    line-height: 1.2;
+}
+
+.track-description {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.track-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.meta-item i {
+    color: var(--accent-cyan);
+    font-size: 1.1rem;
+}
+
+/* Track Progress Widget */
+.track-progress-widget {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.progress-circle {
+    position: relative;
+    width: 140px;
+    height: 140px;
+}
+
+.progress-circle svg {
+    width: 100%;
+    height: 100%;
+}
+
+.progress-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.progress-percent {
+    font-size: 2rem;
+    font-weight: 800;
+    font-family: var(--code-font);
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    display: block;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+    display: block;
+}
+
+.widget-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    width: 100%;
+}
+
+.widget-stat {
+    text-align: center;
+    padding: 1rem;
+    background: var(--secondary-bg);
+    border-radius: var(--border-radius-md);
+}
+
+.widget-stat-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    font-family: var(--code-font);
+    color: var(--text-primary);
+    display: block;
+    line-height: 1;
+}
+
+.widget-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+    display: block;
+}
+
+/* ========================================
+   TRACK CONTENT
+   ======================================== */
+.track-content {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.content-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+}
+
+/* Section Card */
+.section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+}
+
+.section-header {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.section-title i {
+    color: var(--accent-purple);
+}
+
+.section-description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* ========================================
+   LEARNING PATH
+   ======================================== */
+.learning-path {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.path-item {
+    display: flex;
+    gap: 1.5rem;
+    position: relative;
+}
+
+/* Path Line */
+.path-line {
+    position: absolute;
+    left: 24px;
+    top: 50px;
+    bottom: -2rem;
+    width: 3px;
+    background: var(--border-color);
+}
+
+.path-item.completed .path-line {
+    background: linear-gradient(180deg, var(--accent-green), var(--accent-cyan));
+}
+
+.path-item.in-progress .path-line {
+    background: linear-gradient(180deg, var(--accent-purple), var(--accent-cyan));
+}
+
+.path-item:last-child .path-line {
+    display: none;
+}
+
+/* Path Node */
+.path-node {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--secondary-bg);
+    border: 3px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 800;
+    font-family: var(--code-font);
+    color: var(--text-muted);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.path-item.completed .path-node {
+    background: var(--accent-green);
+    border-color: var(--accent-green);
+    color: white;
+}
+
+.path-item.in-progress .path-node {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+    border-color: var(--accent-purple);
+    color: white;
+}
+
+/* Path Content */
+.path-content {
+    flex: 1;
+}
+
+/* ========================================
+   COURSE CARD
+   ======================================== */
+.course-card {
+    background: var(--secondary-bg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-base);
+}
+
+.course-card:hover {
+    border-color: var(--accent-purple);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.2);
+}
+
+.path-item.completed .course-card {
+    background: rgba(16, 185, 129, 0.05);
+    border-color: var(--accent-green);
+}
+
+.path-item.in-progress .course-card {
+    background: rgba(124, 58, 237, 0.05);
+    border-color: var(--accent-purple);
+}
+
+/* Course Header */
+.course-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.course-number {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: rgba(124, 58, 237, 0.1);
+    border: 2px solid var(--accent-purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    font-family: var(--code-font);
+    color: var(--accent-purple);
+    flex-shrink: 0;
+}
+
+.course-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.course-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+}
+
+.course-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(6, 182, 212, 0.15);
+    color: var(--accent-cyan);
+    border: 1px solid var(--accent-cyan);
+    flex-shrink: 0;
+}
+
+.course-badge.completed {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-green);
+    border-color: var(--accent-green);
+}
+
+.course-badge.in-progress {
+    background: rgba(124, 58, 237, 0.15);
+    color: var(--accent-purple);
+    border-color: var(--accent-purple);
+}
+
+/* Course Body */
+.course-body {
+    padding: 1.5rem;
+}
+
+.course-info-row {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.info-item i {
+    color: var(--accent-cyan);
+}
+
+/* Course Progress */
+.course-progress-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.progress-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.progress-time {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-family: var(--code-font);
+}
+
+.progress-bar-full {
+    height: 8px;
+    background: var(--secondary-bg);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s ease;
+}
+
+.progress-fill.completed {
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+}
+
+.progress-fill.in-progress {
+    background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+}
+
+/* Course Tags */
+.course-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.tag {
+    padding: 0.4rem 1rem;
+    background: rgba(124, 58, 237, 0.1);
+    border: 1px solid var(--accent-purple);
+    border-radius: 15px;
+    color: var(--accent-purple);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Course Footer */
+.course-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+}
+
+/* ========================================
+   SIDEBAR WIDGETS
+   ======================================== */
+.track-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sidebar-widget {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.widget-header {
+    padding: 1.5rem;
+    background: rgba(124, 58, 237, 0.05);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.widget-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.widget-title i {
+    color: var(--accent-purple);
+}
+
+.widget-body {
+    padding: 1.5rem;
+}
+
+/* Stats List */
+.stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--secondary-bg);
+    border-radius: var(--border-radius-md);
+}
+
+.stat-row .stat-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(124, 58, 237, 0.15);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-purple);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    font-family: var(--code-font);
+    color: var(--text-primary);
+    display: block;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+    display: block;
+}
+
+/* Skills Cloud */
+.skills-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.skill-pill {
+    padding: 0.6rem 1.2rem;
+    background: rgba(6, 182, 212, 0.1);
+    border: 1px solid var(--accent-cyan);
+    border-radius: 20px;
+    color: var(--accent-cyan);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all var(--transition-base);
+    cursor: pointer;
+}
+
+.skill-pill:hover {
+    background: var(--accent-cyan);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Reward Widget */
+.reward-widget {
+    border: 2px solid var(--accent-purple);
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.1));
+}
+
+.reward-content {
+    padding: 2rem;
+    text-align: center;
+}
+
+.reward-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);
+}
+
+.reward-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.reward-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.reward-progress-text {
+    padding: 0.8rem;
+    background: var(--card-bg);
+    border-radius: var(--border-radius-md);
+    font-weight: 700;
+    font-family: var(--code-font);
+    color: var(--accent-cyan);
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 1200px) {
+    .content-container {
+        grid-template-columns: 1fr;
+    }
+
+    .track-hero-content {
+        grid-template-columns: 1fr;
+    }
+
+    .track-progress-widget {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .track-hero-left {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .track-icon-large {
+        margin: 0 auto;
+    }
+
+    .track-meta {
+        justify-content: center;
+    }
+
+    .track-title {
+        font-size: 2rem;
+    }
+
+    .course-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .course-footer {
+        flex-direction: column;
+    }
+
+    .course-info-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .track-content {
+        padding: 1.5rem;
+    }
+
+    .path-line {
+        display: none;
+    }
+
+    .path-item {
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .track-title {
+        font-size: 1.5rem;
+    }
+
+    .widget-stats {
+        grid-template-columns: 1fr;
+    }
+}

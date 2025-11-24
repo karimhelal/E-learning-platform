@@ -1,18 +1,20 @@
 using System.Diagnostics;
 using Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using BLL.DTOs.Misc;
-using BLL.Interfaces;
+using DAL.Data;
+
 
 namespace Web.Controllers.Home
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly AppDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, AppDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Core.Entities.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace Core.Entities;
 
@@ -31,7 +30,6 @@ public class User
 
     [Required(ErrorMessage = "{0} is required")]
     [EmailAddress(ErrorMessage = "Invalid {0}")]
-    [StringLength(100)]
     [Column("email")]
     [Display(Name = "Email Address")]
     public string Email { get; set; }
@@ -58,6 +56,7 @@ public class User
     public string FullName => $"{FirstName} {LastName}";
 
 
+    // 5
 
     // Navigation Properties
     public virtual StudentProfile? StudentProfile { get; set; }

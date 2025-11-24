@@ -12,7 +12,7 @@ public interface IGenericRepository<T>
     Task<T?> GetByIdAsync(int id);
     IQueryable<T> GetAllQueryable();
     Task<IEnumerable<T>> GetAllAsync();
-    Task AddAsync(T course);
+    Task AddAsync(T entity);
     bool Delete(int id);
     bool Delete(T entity);
     bool Update(T entity);

@@ -49,11 +49,12 @@ public class Course : LearningEntity
     [ForeignKey(nameof(InstructorId))]
     public virtual InstructorProfile? Instructor { get; set; }
 
-    public virtual ICollection<Module>? Modules { get; set; }
     public virtual ICollection<Track_Course>? CourseTracks { get; set; }
+    public virtual ICollection<Module>? Modules { get; set; }
     public virtual ICollection<Track>? Tracks { get; set; }
     public virtual ICollection<CourseEnrollment>? Enrollments { get; set; }
     public virtual ICollection<CourseCertificate>? Certificates { get; set; }
+    public virtual ICollection<CourseLearningOutcome> LearningOutcomes { get; set; }
 
     public Course()
     {
@@ -62,5 +63,6 @@ public class Course : LearningEntity
         CourseTracks = new HashSet<Track_Course>();
         Enrollments = new HashSet<CourseEnrollment>();
         Certificates = new HashSet<CourseCertificate>();
+        LearningOutcomes = new HashSet<CourseLearningOutcome>();
     }
 }

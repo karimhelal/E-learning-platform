@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Core.Entities;
 using Core.Entities.Enums;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace DAL.Data
 {
@@ -10,10 +12,9 @@ namespace DAL.Data
     /// </summary>
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
+        public AppDbContext() { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        }
 
         // DbSets - Entity Collections
         public DbSet<User> Users { get; set; }
@@ -26,6 +27,7 @@ namespace DAL.Data
         public DbSet<LessonContent> LessonContents { get; set; }
         public DbSet<LessonResource> LessonResources { get; set; }
         public DbSet<LessonProgress> LessonProgress { get; set; }
+        public DbSet<CourseLearningOutcome> CourseLearningOutcomes { get; set; }
         public DbSet<Assignment> Assignments { get; set; }
         public DbSet<Track_Course> TrackCourses { get; set; }
         public DbSet<EnrollmentBase> Enrollments { get; set; }
@@ -316,6 +318,23 @@ namespace DAL.Data
                     .HasForeignKey(lp => lp.StudentId)
                     .IsRequired()
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CourseLearningOutcome>(entity =>
+            {
+                // CourseLearningOutcome - Table Name
+                entity.ToTable("CourseLearningOutcomes");
+
+                // CourseLearningOutcome - Composite Primary Key
+                entity.HasKey(co => new { co.Id, co.CourseId });
+
+                // CourseLearningOutcome - Course (One-to-Many - WEAK Entity)
+                entity
+                    .HasOne(co => co.Course)
+                    .WithMany(c => c.LearningOutcomes)
+                    .HasForeignKey(co => co.CourseId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
             });
 
             modelBuilder.Entity<EnrollmentBase>(entity =>

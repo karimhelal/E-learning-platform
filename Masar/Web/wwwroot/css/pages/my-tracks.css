@@ -1,0 +1,420 @@
+/* ========================================
+   MY TRACKS PAGE
+   ======================================== */
+
+/* ========================================
+   PAGE HEADER
+   ======================================== */
+.page-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(6, 182, 212, 0.05));
+}
+
+.page-header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+}
+
+/* ========================================
+   TRACKS CONTENT
+   ======================================== */
+.tracks-content {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   FILTER TABS
+   ======================================== */
+.filter-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.filter-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+
+.filter-tabs::-webkit-scrollbar-thumb {
+    background: var(--accent-purple);
+    border-radius: 2px;
+}
+
+.filter-tab {
+    padding: 1rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--ui-font);
+}
+
+.filter-tab:hover {
+    color: var(--text-primary);
+    background: rgba(124, 58, 237, 0.05);
+}
+
+.filter-tab.active {
+    color: var(--accent-cyan);
+    border-bottom-color: var(--accent-cyan);
+}
+
+.filter-count {
+    padding: 0.2rem 0.6rem;
+    background: rgba(124, 58, 237, 0.2);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-family: var(--code-font);
+}
+
+.filter-tab.active .filter-count {
+    background: var(--accent-cyan);
+    color: var(--primary-bg);
+}
+
+/* ========================================
+   TRACKS GRID
+   ======================================== */
+.tracks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+/* ========================================
+   TRACK CARD DETAILED
+   ======================================== */
+.track-card-detailed {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-base);
+    display: flex;
+    flex-direction: column;
+}
+
+.track-card-detailed:hover {
+    border-color: var(--accent-purple);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.track-card-detailed[data-status="completed"] {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Track Card Header */
+.track-card-header {
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.1));
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.track-icon-large {
+    width: 70px;
+    height: 70px;
+    border-radius: var(--border-radius-md);
+    background: rgba(124, 58, 237, 0.15);
+    color: var(--accent-purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.track-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.track-status-badge.in-progress {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--accent-orange);
+    border: 1px solid var(--accent-orange);
+}
+
+.track-status-badge.completed {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-green);
+    border: 1px solid var(--accent-green);
+}
+
+/* Track Card Body */
+.track-card-body {
+    padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.track-card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.track-card-description {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+/* Track Stats Grid */
+.track-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--secondary-bg);
+    border-radius: var(--border-radius-md);
+}
+
+.track-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.track-stat-item i {
+    font-size: 1.5rem;
+    color: var(--accent-purple);
+}
+
+.track-stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.track-stat-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    font-family: var(--code-font);
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.track-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+/* Progress Section */
+.track-progress-section {
+    padding: 1.5rem;
+    background: rgba(124, 58, 237, 0.05);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.track-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+
+.track-progress-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.track-progress-percentage {
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-family: var(--code-font);
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.track-progress-details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Courses Preview */
+.track-courses-preview {
+    padding: 1.5rem;
+    background: var(--secondary-bg);
+    border-radius: var(--border-radius-md);
+}
+
+.courses-preview-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.courses-preview-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.course-preview-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-base);
+}
+
+.course-preview-item:hover {
+    background: rgba(124, 58, 237, 0.05);
+}
+
+.course-preview-item.completed {
+    color: var(--text-primary);
+}
+
+.course-preview-item.completed i {
+    color: var(--accent-green);
+}
+
+.course-preview-item.active {
+    color: var(--text-primary);
+    background: rgba(124, 58, 237, 0.1);
+}
+
+.course-preview-item.active i {
+    color: var(--accent-cyan);
+}
+
+.course-preview-item.locked i {
+    color: var(--text-muted);
+}
+
+/* Track Completion Badge */
+.track-completion-badge {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1));
+    border: 1px solid var(--accent-green);
+    border-radius: var(--border-radius-md);
+}
+
+.track-completion-badge i {
+    font-size: 2.5rem;
+    color: var(--accent-green);
+}
+
+.completion-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    margin-bottom: 0.3rem;
+}
+
+.completion-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Track Card Footer */
+.track-card-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background: rgba(124, 58, 237, 0.03);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 1.5rem;
+    }
+
+    .page-title {
+        font-size: 1.6rem;
+    }
+
+    .tracks-content {
+        padding: 1.5rem;
+    }
+
+    .tracks-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .track-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .track-progress-details {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filter-tabs {
+        gap: 0.5rem;
+    }
+
+    .filter-tab {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+}

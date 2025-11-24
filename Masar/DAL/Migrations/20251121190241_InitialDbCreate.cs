@@ -52,7 +52,7 @@ namespace DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     first_name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     last_name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    email = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     password_hash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     role = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     picture = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -208,6 +208,26 @@ namespace DAL.Migrations
                         column: x => x.track_id,
                         principalTable: "Tracks",
                         principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseLearningOutcomes",
+                columns: table => new
+                {
+                    course_outcome_id = table.Column<int>(type: "int", nullable: false),
+                    course_id = table.Column<int>(type: "int", nullable: false),
+                    title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseLearningOutcomes", x => new { x.course_outcome_id, x.course_id });
+                    table.ForeignKey(
+                        name: "FK_CourseLearningOutcomes_Courses_course_id",
+                        column: x => x.course_id,
+                        principalTable: "Courses",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -442,6 +462,11 @@ namespace DAL.Migrations
                 column: "track_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CourseLearningOutcomes_course_id",
+                table: "CourseLearningOutcomes",
+                column: "course_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Courses_instructor_id",
                 table: "Courses",
                 column: "instructor_id");
@@ -536,6 +561,9 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Certificates");
+
+            migrationBuilder.DropTable(
+                name: "CourseLearningOutcomes");
 
             migrationBuilder.DropTable(
                 name: "Enrollments");

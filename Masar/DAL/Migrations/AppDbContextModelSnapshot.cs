@@ -131,6 +131,33 @@ namespace DAL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Core.Entities.CourseLearningOutcome", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int")
+                        .HasColumnName("course_outcome_id");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int")
+                        .HasColumnName("course_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id", "CourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CourseLearningOutcomes", (string)null);
+                });
+
             modelBuilder.Entity("Core.Entities.EnrollmentBase", b =>
                 {
                     b.Property<int>("EnrollmentId")
@@ -480,8 +507,7 @@ namespace DAL.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("email");
 
                     b.Property<string>("FirstName")
@@ -729,6 +755,17 @@ namespace DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Core.Entities.CourseLearningOutcome", b =>
+                {
+                    b.HasOne("Core.Entities.Course", "Course")
+                        .WithMany("LearningOutcomes")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Core.Entities.EnrollmentBase", b =>
@@ -989,6 +1026,8 @@ namespace DAL.Migrations
                     b.Navigation("CourseTracks");
 
                     b.Navigation("Enrollments");
+
+                    b.Navigation("LearningOutcomes");
 
                     b.Navigation("Modules");
                 });

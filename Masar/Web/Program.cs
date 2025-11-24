@@ -1,13 +1,26 @@
-using Microsoft.EntityFrameworkCore;
+using BLL.Helpers;
+using BLL.Interfaces;
+using BLL.Interfaces.Instructor;
+using BLL.Services;
+using BLL.Services.Instructor;
 using Core.RepositoryInterfaces;
-using DAL.Data.RepositoryServices;
 using DAL.Data;
-using Web.ViewModels.Course;
+using DAL.Data.RepositoryServices;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
+builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
+
+
+builder.Services.AddScoped<RazorViewToStringRenderer>();
+
 builder.Services.AddControllersWithViews();
 
 // Configure DbContext with SQL Server
@@ -55,7 +68,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"
+    pattern: "{controller=Instructor}/{action=Dashboard}"
 );
 
 

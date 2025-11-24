@@ -63,12 +63,17 @@ public class CourseRepository : ICourseRepository
         // save changes happen in the Service Layer (BLL)
     }
 
-
-
     public IQueryable<Course> GetCoursesByInstructorQueryable(int instrutorId)
     {
         return _context.Courses
             .Where(c => c.InstructorId == instrutorId)
+            .AsNoTracking();
+    }
+
+    public IQueryable<Course> GetCourseByIdQueryable(int courseId)
+    {
+        return _context.Courses
+            .Where(c => c.Id == courseId)
             .AsNoTracking();
     }
 }

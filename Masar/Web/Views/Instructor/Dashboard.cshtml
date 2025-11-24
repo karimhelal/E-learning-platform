@@ -1,0 +1,485 @@
+﻿@using Web.ViewModels.Instructor.Dashboard
+@model InstructorDashboardViewModel
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <h1 class="page-title">
+                @Model.GreetingMessage, Dr. @Model.Data.InstructorName! 👨‍🏫
+            </h1>
+            <p class="page-subtitle">
+                Here's what's happening with your courses today
+            </p>
+        </div>
+        <div class="page-actions">
+            <a href="/instructor/create-course"
+               class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                <span>Create New Course</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Dashboard Content -->
+<section class="dashboard-content">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon-wrapper">
+                <div class="stat-icon total-courses">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">@Model.Data.GeneralStats.TotalCourses</div>
+                <div class="stat-label">Total Courses</div>
+                <div class="stat-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>2 new this month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-wrapper">
+                <div class="stat-icon total-students">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">@Model.Data.GeneralStats.TotalStudents</div>
+                <div class="stat-label">Total Students</div>
+                <div class="stat-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+12% this month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-wrapper">
+                <div class="stat-icon avg-rating">
+                    <i class="fas fa-star"></i>
+                </div>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">@Model.Data.GeneralStats.AverageRating</div>
+                <div class="stat-label">Average Rating</div>
+                <div class="stat-trend neutral">
+                    <i class="fas fa-minus"></i>
+                    <span>Stable</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-wrapper">
+                <div class="stat-icon completion-rate">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">@Model.Data.GeneralStats.CompletionRate%</div>
+                <div class="stat-label">Completion Rate</div>
+                <div class="stat-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+5% this month</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Left Column -->
+        <div class="dashboard-main">
+            <!-- Recent Courses -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">
+                            My Courses
+                        </h2>
+                        <p class="section-subtitle">
+                            <i class="fas fa-book"></i>
+                            Recent courses you're working on
+                        </p>
+                    </div>
+                    <a href="/instructor/my-courses"
+                       class="btn btn-secondary">
+                        View All
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="courses-grid-simple">
+                    <!-- Course Cards -->
+                    @foreach(var course in Model.Data.CourseCards)
+                    {
+                        <!-- Course Card 1 -->
+                        <div class="course-card-simple">
+                            <div class="course-card-top">
+                                <div class="course-badges-inline">
+                                    <span class="badge-published">@course.Status</span>
+                                    <span class="badge-level advanced">@course.Level</span>
+                                </div>
+                                <div class="course-rating-small">
+                                    <i class="fas fa-star"></i>
+                                    <span>@course.Rating</span>
+                                </div>
+                            </div>
+
+                            <span class="course-category-tag">
+                                <i class="fas fa-laptop-code"></i>
+                                @course.MainCategory
+                            </span>
+
+                            <h3 class="course-title-simple">
+                                @course.Title
+                            </h3>
+                            <p class="course-desc-simple">
+                                @course.Description
+                            </p>
+
+                            <div class="course-stats-simple">
+                                <div class="stat-simple">
+                                    <i class="fas fa-users"></i>
+                                    <span>@course.StudentsCount</span>
+                                </div>
+                                <div class="stat-simple">
+                                    <i class="fas fa-book-open"></i>
+                                    <span>@course.ModulesCount <span>modules</span></span>
+                                </div>
+                                <div class="stat-simple">
+                                    <i class="fas fa-clock"></i>
+                                    <span>@course.DurationHours<span>h</span></span>
+                                </div>
+                            </div>
+
+                            <div class="progress-section-simple">
+                                <div class="progress-top">
+                                    <span>Avg. Completion</span>
+                                    <span>68%</span>
+                                </div>
+                                <div class="progress-bar-simple">
+                                    <div class="progress-fill"
+                                         style="width: 68%"></div>
+                                </div>
+                            </div>
+
+                            <div class="course-actions-simple">
+                                <a href="/instructor/edit-course" class="btn btn-secondary btn-small">
+                                    <i class="fas fa-edit"></i>
+                                    Edit
+                                </a>
+                                <a href="#"
+                                   class="btn btn-primary btn-small">
+                                    <i class="fas fa-chart-bar"></i>
+                                    Analytics
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+
+                </div>
+            </div>
+
+            <!-- Recent Student Activity -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-history"></i>
+                        Recent Student Activity
+                    </h2>
+                    <a href="student-progress.html"
+                       class="section-link">
+                        View All
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="activity-timeline">
+                    <div class="activity-item">
+                        <div class="activity-avatar">
+                            <div class="avatar avatar-sm">
+                                JD
+                            </div>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <strong>John Doe</strong>
+                                completed lesson
+                                <strong>"React Hooks"</strong>
+                            </div>
+                            <div class="activity-course">
+                                Advanced React & Redux
+                            </div>
+                            <div class="activity-time">
+                                2 hours ago
+                            </div>
+                        </div>
+                        <div class="activity-badge completed">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-avatar">
+                            <div class="avatar avatar-sm">
+                                MK
+                            </div>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <strong>Maria Kim</strong>
+                                enrolled in
+                                <strong>
+                                    "React Native
+                                    Mastery"
+                                </strong>
+                            </div>
+                            <div class="activity-course">
+                                New Student
+                            </div>
+                            <div class="activity-time">
+                                5 hours ago
+                            </div>
+                        </div>
+                        <div class="activity-badge enrolled">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-avatar">
+                            <div class="avatar avatar-sm">
+                                AB
+                            </div>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <strong>Ahmed Bakr</strong>
+                                submitted assignment
+                                <strong>
+                                    "Build a Redux
+                                    Store"
+                                </strong>
+                            </div>
+                            <div class="activity-course">
+                                Advanced React & Redux
+                            </div>
+                            <div class="activity-time">
+                                1 day ago
+                            </div>
+                        </div>
+                        <div class="activity-badge assignment">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-avatar">
+                            <div class="avatar avatar-sm">
+                                LS
+                            </div>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <strong>Lisa Smith</strong>
+                                completed course
+                                <strong>
+                                    "Advanced React &
+                                    Redux"
+                                </strong>
+                            </div>
+                            <div class="activity-course">
+                                Certificate Earned
+                            </div>
+                            <div class="activity-time">
+                                2 days ago
+                            </div>
+                        </div>
+                        <div class="activity-badge completed">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <aside class="dashboard-sidebar">
+            <!-- Quick Stats -->
+            <div class="sidebar-widget">
+                <h3 class="widget-title">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>This Month</span>
+                </h3>
+                <div class="quick-stats">
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value">
+                                @Model.Data.CurrentMonthStats.NewStudents
+                            </div>
+                            <div class="quick-stat-label">
+                                New Students
+                            </div>
+                        </div>
+                        <div class="quick-stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>12%</span>
+                        </div>
+                    </div>
+
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value">
+                                @Model.Data.CurrentMonthStats.Completions
+                            </div>
+                            <div class="quick-stat-label">
+                                Completions
+                            </div>
+                        </div>
+                        <div class="quick-stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>8%</span>
+                        </div>
+                    </div>
+
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value">
+                                @Model.Data.CurrentMonthStats.NewReviews
+                            </div>
+                            <div class="quick-stat-label">
+                                New Reviews
+                            </div>
+                        </div>
+                        <div class="quick-stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>15%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Performing Courses -->
+            <div class="sidebar-widget">
+                <h3 class="widget-title">
+                    <i class="fas fa-fire"></i>
+                    <span>Top Performing</span>
+                </h3>
+                <div class="top-courses-list">
+                    @{
+                        int rank = 1;
+                    }
+                    @foreach(var topCourse in Model.Data.TopPerformingCourses)
+                    {
+                        <div class="top-course-item">
+                            <div class="top-course-rank">@rank</div>
+                            <div class="top-course-info">
+                                <div class="top-course-title">
+                                    @topCourse.Title
+                                </div>
+                                <div class="top-course-students">
+                                    @topCourse.StudentsEnrolled students
+                                </div>
+                            </div>
+                            <div class="top-course-rating">
+                                <i class="fas fa-star"></i>
+                                <span>@topCourse.AverageRating</span>
+                            </div>
+                        </div>
+                        rank++;
+                    }
+                </div>
+            </div>
+
+            <!-- Recent Reviews -->
+            <div class="sidebar-widget">
+                <h3 class="widget-title">
+                    <i class="fas fa-comments"></i>
+                    <span>Recent Reviews</span>
+                </h3>
+                <div class="reviews-list">
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="avatar avatar-sm">
+                                JD
+                            </div>
+                            <div class="review-author">
+                                <div class="review-name">
+                                    John Doe
+                                </div>
+                                <div class="review-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-text">
+                            "Excellent course! Very well
+                            structured and easy to follow."
+                        </div>
+                        <div class="review-course">
+                            Advanced React & Redux
+                        </div>
+                    </div>
+
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="avatar avatar-sm">
+                                MK
+                            </div>
+                            <div class="review-author">
+                                <div class="review-name">
+                                    Maria Kim
+                                </div>
+                                <div class="review-rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-text">
+                            "Best React Native course I've
+                            taken. Highly recommended!"
+                        </div>
+                        <div class="review-course">
+                            React Native Mastery
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</section>
+
+
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/dashboard.css" />
+    <link rel="stylesheet" href="~/css/pages/instructor-dashboard.css" />
+}
+
+@section Scripts {
+    <script src="~/js/instructor-dashboard.js"></script>
+}
