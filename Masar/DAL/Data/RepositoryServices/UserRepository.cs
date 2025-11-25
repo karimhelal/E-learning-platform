@@ -71,17 +71,20 @@ public class UserRepository : IUserRepository
 
     public bool IsAdmin(int userId)
     {
-        return _context.Users.Any(u => u.Id == userId);
+        return _context.UserRoles.Any(UserRoles => UserRoles.UserId == userId && UserRoles.RoleId == (int)UserRolesEnum.Admin);
+        //return _context.Users.Any(u => u.Id == userId);
     }
 
     public bool IsInstructor(int userId)
     {
-        return _context.Users.Any(u => u.Id == userId);
+        return _context.UserRoles.Any(UserRoles => UserRoles.UserId == userId && UserRoles.RoleId == (int)UserRolesEnum.Instructor);
+        //return _context.Users.Any(u => u.Id == userId);
     }
 
     public bool IsStudent(int userId)
     {
-        return _context.Users.Any(u => u.Id == userId);
+        return _context.UserRoles.Any(UserRoles => UserRoles.UserId == userId && UserRoles.RoleId == (int)UserRolesEnum.Student);
+        //return _context.Users.Any(u => u.Id == userId);
     }
 
     public Task<InstructorProfile?> GetInstructorProfileAsync(int instructorId, bool includeUserBase)
