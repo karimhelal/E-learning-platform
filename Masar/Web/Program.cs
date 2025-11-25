@@ -3,9 +3,11 @@ using BLL.Interfaces;
 using BLL.Interfaces.Instructor;
 using BLL.Services;
 using BLL.Services.Instructor;
+using Core.Entities;
 using Core.RepositoryInterfaces;
 using DAL.Data;
 using DAL.Data.RepositoryServices;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +35,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             errorNumbersToAdd: null
     )
 ));
+
+builder.Services.AddIdentity<User, IdentityRole<int>>(options => {
+    //Add some Restirictions on Password
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 8;
+
+    // Make the Account Block if I enter the password five times wrong
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true; // for new users
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
 
 // Add Session support
 builder.Services.AddSession(options =>
@@ -64,6 +82,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -72,81 +91,5 @@ app.MapControllerRoute(
 );
 
 
-//// scope to get services
-//using (var scope = app.Services.CreateScope())
-//{
-//    var services = scope.ServiceProvider;
-//    var _context = services.GetRequiredService<AppDbContext>();
-//    try {
-//        var Courses = GetInstructorCourses(_context, 1);
-//    }
-//    catch (Exception ex) {
-
-//    }
-//}
-//// --- END: TEST CODE ---
-
 app.Run();
 
-
-//// Tag
-//// Title
-//// Desc
-//// # students
-//// # modules
-//// # hours
-//// # lessons
-//// # assignments
-//// thumbnail
-
-//static ICollection<CourseViewModel> GetInstructorCourses (AppDbContext _context, int instructor_id)
-//{
-//    var courses = _context.Courses
-//        .Where(c => c.InstructorId == instructor_id)
-//        .Include(c => c.Categories)
-//        .Include(c => c.Enrollments)
-//        .Include(c => c.Modules!)
-//            .ThenInclude(m => m.Lessons!)
-//                .ThenInclude(l => l.LessonContent)
-//        .Include(c => c.Modules!)
-//            .ThenInclude(m => m.Assignments);
-
-//    ICollection<CourseViewModel> lst = new List<CourseViewModel>();
-
-//    foreach (var c in courses)
-//    {
-//        int numberOfStudents = c.Enrollments!.Where(ce => ce.CourseId == c.Id).Count();
-//        int numberOfModules = c.Modules!.Count();
-//        int numberOfLessons = c.Modules!.Sum(m => m.Lessons!.Count());
-//        int numberOfMinutes = c.Modules!
-//            .SelectMany(c => c.Lessons!)
-//            .Select(l => l.LessonContent)
-//            .OfType<VideoContent>()
-//            .Sum(vc => vc.DurationInSeconds);
-
-//        numberOfMinutes = (int)Math.Ceiling(numberOfMinutes / 60.0);
-
-//        int numberOfAssignments = c.Modules!
-//            .SelectMany(m => m.Assignments!)
-//            .Count();
-
-//        lst.Add(
-//        new CourseViewModel(
-//            c.Id,
-//            c.Title,
-//            c.Description!,
-//            c.ThumbnailImageUrl!,
-//            c.Language!,
-//            c.Level!,
-//            c.Categories!,
-//            numberOfStudents,
-//            numberOfModules,
-//            numberOfLessons,
-//            numberOfAssignments,
-//            numberOfMinutes
-//            )
-//        );
-//    }
-
-//    return lst;
-//}

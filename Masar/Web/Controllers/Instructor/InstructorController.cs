@@ -30,7 +30,7 @@ public class InstructorController : Controller
     {
         ViewBag.Title = "Instructor Dashboard | Masar";
 
-        var instructorId = 5;     // TODO: Get from logged in user context
+        var instructorId = 3;     // TODO: Get from logged in user context
         var dashboardData = await _dashboardService.GetInstructorDashboardAsync(instructorId);
 
         var viewModel = new InstructorDashboardViewModel
@@ -100,7 +100,7 @@ public class InstructorController : Controller
     {
         ViewBag.Title = "My Courses | Masar";
         
-        var userId = 5;     // TODO: Get from logged in user context
+        var userId = 1;     // TODO: Get from logged in user context
         var initialRequest = new PagingRequest() { CurrentPage = 1, PageSize = 4 }; // Default paging request
         var coursesData = await _coursesService.GetInstructorCoursesPagedAsync(userId, initialRequest);
         
@@ -146,7 +146,7 @@ public class InstructorController : Controller
     [HttpPost("/instructor/my-courses")]
     public async Task<IActionResult> GetCoursesPartial([FromBody] PagingRequest request)
     {
-        var userId = 5;     // TODO: Get from logged in user context
+        var userId = 1;     // TODO: Get from logged in user context
         var coursesData = await _coursesService.GetInstructorCoursesPagedAsync(userId, request);
         
         var pagedResult = new PagedResultViewModel<InstructorCourseViewModel>
