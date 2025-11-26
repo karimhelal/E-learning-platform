@@ -1,1 +1,177 @@
-﻿
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Masar</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="~/css/masar-core.css" />
+    <link rel="stylesheet" href="~/css/pages/auth.css">
+</head>
+<body>
+
+    <!-- Background Grid -->
+    <div class="grid-background"></div>
+
+    <!-- Auth Container -->
+    <div class="auth-container">
+
+        <!-- Left Side - Branding -->
+        <div class="auth-branding">
+            <div class="branding-content">
+                <a href="../../index.html" class="logo-large">
+                    <div class="logo-icon-large"></div>
+                    <span class="logo-text-large">Masar</span>
+                </a>
+                <h1 class="branding-title">Every Code is a Step Forward</h1>
+                <p class="branding-subtitle">
+                    Join thousands of developers learning to build amazing applications with modern technologies.
+                </p>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>Expert Instructors</h3>
+                            <p>Learn from industry professionals</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>Hands-on Projects</h3>
+                            <p>Build real-world applications</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>Verified Certificates</h3>
+                            <p>Earn recognized credentials</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-value">10K+</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">500+</div>
+                        <div class="stat-label">Courses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">4.9★</div>
+                        <div class="stat-label">Rating</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Login Form -->
+        <div class="auth-form-section">
+            <div class="auth-form-container">
+
+                <!-- Mobile Logo -->
+                <a href="../../index.html" class="logo-mobile">
+                    <div class="logo-icon"></div>
+                    <span class="logo-text">Masar</span>
+                </a>
+
+                <!-- Form Header -->
+                <div class="form-header">
+                    <h2 class="form-title">Welcome Back! 👋</h2>
+                    <p class="form-subtitle">Login to continue your journey</p>
+                </div>
+
+                <!-- Login Form -->
+                <form class="auth-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i>
+                            Email Address
+                        </label>
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               class="form-input"
+                               placeholder="your.email@example.com"
+                               required
+                               autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock"></i>
+                            Password
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password"
+                                   id="password"
+                                   name="password"
+                                   class="form-input"
+                                   placeholder="Enter your password"
+                                   required
+                                   autocomplete="current-password">
+                            <button type="button" class="toggle-password" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember" id="remember">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">Remember me</span>
+                        </label>
+                        <a asp-controller="Account" asp-action="Forgot-Password" class="link-text">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-large">
+                        <span>Login</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <!-- Sign Up Link -->
+                <div class="form-footer">
+                    <p>Don't have an account? <a asp-controller="Account" asp-action="Register" class="link-primary">Sign Up</a></p>
+                </div>
+
+                <!-- Terms -->
+                <div class="terms-text">
+                    By continuing, you agree to our
+                    <a href="#" class="link-text">Terms of Service</a> and
+                    <a href="#" class="link-text">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/js/auth.js"></script>
+</body>
+</html>

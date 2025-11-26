@@ -1,7 +1,9 @@
 using BLL.Helpers;
 using BLL.Interfaces;
+using BLL.Interfaces.Account;
 using BLL.Interfaces.Instructor;
 using BLL.Services;
+using BLL.Services.Account;
 using BLL.Services.Instructor;
 using Core.Entities;
 using Core.RepositoryInterfaces;
@@ -19,6 +21,9 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
+
+// Authentication Services
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 builder.Services.AddScoped<RazorViewToStringRenderer>();
@@ -41,7 +46,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options => {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = true;
+    //options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
 
     // Make the Account Block if I enter the password five times wrong
