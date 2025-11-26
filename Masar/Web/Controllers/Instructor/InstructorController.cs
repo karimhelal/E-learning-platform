@@ -11,15 +11,18 @@ public class InstructorController : Controller
 {
     private readonly IInstructorDashboardService _dashboardService;
     private readonly IInstructorCoursesService _coursesService;
+    private readonly IInstructorProfileService _profileService;
     private readonly RazorViewToStringRenderer _razorRenderer;
 
     public InstructorController(
         IInstructorDashboardService dashboardService, 
-        IInstructorCoursesService courseService, 
+        IInstructorCoursesService courseService,
+        IInstructorProfileService profileService,
         RazorViewToStringRenderer razorRenderer)
     {
         _dashboardService = dashboardService;
         _coursesService = courseService;
+        _profileService = profileService;
         _razorRenderer = razorRenderer;
     }
 
@@ -187,5 +190,88 @@ public class InstructorController : Controller
             CoursesGrid = CoursesGrid,
             Pagination = Pagination
         });
+    }
+
+    [HttpGet("/instructor/profile")]
+    public async Task<IActionResult> Profile()
+    {
+        ViewBag.Title = "Instructor Profile | Masar";
+
+        var instructorId = 3; // TODO: Get from logged in user context
+        var profileData = await _profileService.GetInstructorProfileAsync(instructorId);
+
+        if (profileData == null)
+        {
+            return NotFound();
+        }
+
+        // Generate random gradients for courses
+        var gradients = new[]
+        {
+            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+            "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+            "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+            "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+            "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)"
+        };
+
+        var viewModel = new InstructorProfileViewModel
+        {
+            Data = new InstructorProfileDataViewModel
+            {
+                InstructorId = profileData.InstructorId,
+                UserId = profileData.UserId,
+                FirstName = profileData.FirstName,
+                LastName = profileData.LastName,
+                FullName = profileData.FullName,
+                Username = $"@{profileData.FirstName.ToLower()}_{profileData.LastName.ToLower()}",
+                Email = profileData.Email,
+                Phone = profileData.Phone,
+                ProfilePicture = profileData.ProfilePicture,
+                Bio = profileData.Bio,
+                Initials = $"{profileData.FirstName[0]}{profileData.LastName[0]}",
+
+                YearsOfExperience = profileData.YearsOfExperience,
+                Location = profileData.Location,
+                Languages = profileData.Languages,
+                JoinedDate = profileData.JoinedDate.ToString("MMMM yyyy"),
+
+                GithubUrl = profileData.GithubUrl,
+                LinkedInUrl = profileData.LinkedInUrl,
+                TwitterUrl = profileData.TwitterUrl,
+                WebsiteUrl = profileData.WebsiteUrl,
+
+                Stats = new InstructorProfileStatsViewModel
+                {
+                    TotalCourses = profileData.TotalCourses,
+                    TotalStudents = profileData.TotalStudents,
+                    AverageRating = profileData.AverageRating,
+                    TotalReviews = profileData.TotalReviews,
+                    TeachingStreak = profileData.TeachingStreak,
+                    TotalTeachingHours = profileData.TotalTeachingHours,
+                    StudentInteractions = profileData.StudentInteractions,
+                    CertificatesIssued = profileData.CertificatesIssued
+                },
+
+                TeachingExpertise = profileData.TeachingExpertise,
+
+                Courses = profileData.Courses.Select((c, index) => new InstructorProfileCourseCardViewModel
+                {
+                    CourseId = c.CourseId,
+                    Title = c.Title,
+                    Description = c.Description,
+                    Status = c.Status,
+                    StatusBadgeClass = c.Status.ToLower() == "published" ? "badge-green" : "badge-orange",
+                    StudentsCount = c.StudentsCount,
+                    Rating = c.Rating,
+                    GradientStyle = gradients[index % gradients.Length]
+                }).ToList()
+            },
+
+            PageTitle = "Instructor Profile"
+        };
+
+        return View(viewModel);
     }
 }

@@ -21,6 +21,7 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
+builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
