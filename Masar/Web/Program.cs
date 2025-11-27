@@ -1,7 +1,9 @@
 using BLL.Helpers;
 using BLL.Interfaces;
+using BLL.Interfaces.Account;
 using BLL.Interfaces.Instructor;
 using BLL.Services;
+using BLL.Services.Account;
 using BLL.Services.Instructor;
 using Core.Entities;
 using Core.RepositoryInterfaces;
@@ -32,6 +34,9 @@ builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>(
 // WEB SERVICES (Your simplified layer)
 // ========================================
 builder.Services.AddScoped<IStudentDashboardService, StudentDashboardService>();
+// Authentication Services
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 
 builder.Services.AddScoped<RazorViewToStringRenderer>();
 
@@ -52,7 +57,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options => {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = true;
+    //options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
 
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
