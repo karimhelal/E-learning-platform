@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class m1 : Migration
+    public partial class intialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -58,24 +58,6 @@ namespace DAL.Migrations
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
                 });
-
-            // Insert default roles (Student, Instructor, Admin) in Table Roles
-            migrationBuilder.Sql(
-                @"-- 1. Student
-                IF NOT EXISTS (SELECT 1 FROM Roles WHERE Name = 'Student')
-                    INSERT INTO Roles (Name, NormalizedName, ConcurrencyStamp) 
-                    VALUES ('Student', 'STUDENT', NEWID());
-
-                -- 2. Instructor
-                IF NOT EXISTS (SELECT 1 FROM Roles WHERE Name = 'Instructor')
-                    INSERT INTO Roles (Name, NormalizedName, ConcurrencyStamp) 
-                    VALUES ('Instructor', 'INSTRUCTOR', NEWID());
-
-                -- 3. Admin
-                IF NOT EXISTS (SELECT 1 FROM Roles WHERE Name = 'Admin')
-                    INSERT INTO Roles (Name, NormalizedName, ConcurrencyStamp) 
-                    VALUES ('Admin', 'ADMIN', NEWID());
-            ");
 
             migrationBuilder.CreateTable(
                 name: "Users",
