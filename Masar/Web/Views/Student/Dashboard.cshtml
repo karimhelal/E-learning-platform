@@ -1,0 +1,222 @@
+@model Web.ViewModels.Student.StudentDashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <h1 class="page-title">@Model.GreetingMessage, @Model.Data.StudentName! ??</h1>
+            <p class="page-subtitle">
+                Continue your learning journey and track your progress
+            </p>
+        </div>
+        <div class="page-actions">
+            <a href="/student/browse-tracks" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                <span>Explore Tracks</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Dashboard Content -->
+<section class="dashboard-content">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="icon-box icon-box-gradient">
+                <i class="fas fa-route"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">@Model.Data.Stats.ActiveTracks</div>
+                <div class="stat-label">Active Tracks</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon-box icon-box-cyan">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">@Model.Data.Stats.EnrolledCourses</div>
+                <div class="stat-label">Enrolled Courses</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon-box icon-box-green">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">@Model.Data.Stats.CompletedCourses</div>
+                <div class="stat-label">Completed Courses</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon-box icon-box-orange">
+                <i class="fas fa-certificate"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">@Model.Data.Stats.CertificatesEarned</div>
+                <div class="stat-label">Certificates Earned</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-full-width">
+        <!-- Continue Learning Section -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-play-circle"></i>
+                    Continue Learning
+                </h2>
+                <a href="/student/my-courses" class="section-link">
+                    View All
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="courses-grid">
+                @if (Model.Data.ContinueLearningCourses.Any())
+                {
+                    @foreach (var course in Model.Data.ContinueLearningCourses)
+                    {
+                        <div class="course-card">
+                            <div class="course-card-header">
+                                <span class="badge @course.CategoryBadgeClass">
+                                    <i class="fas @course.CategoryIcon"></i>
+                                    @course.CategoryName
+                                </span>
+                            </div>
+                            <div class="course-card-body">
+                                <h3 class="course-card-title">@course.Title</h3>
+                                <p class="course-card-description">
+                                    @course.Description
+                                </p>
+                                <div class="course-card-meta">
+                                    <div class="meta-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>@course.InstructorName</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>@course.DurationHours Hours</span>
+                                    </div>
+                                </div>
+                                <div class="course-card-progress">
+                                    <div class="progress-header">
+                                        <span class="progress-label">Progress</span>
+                                        <span class="progress-percentage">@course.ProgressPercentage%</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: @course.ProgressPercentage%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="course-card-footer">
+                                <a href="/student/course/@course.CourseId" class="btn btn-primary btn-block">
+                                    <span>Continue Course</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>No courses in progress. <a href="/student/browse-courses">Browse courses</a> to get started!</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- My Tracks Section -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-route"></i>
+                    My Learning Tracks
+                </h2>
+                <a href="/student/my-tracks" class="section-link">
+                    View All
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="tracks-list">
+                @if (Model.Data.EnrolledTracks.Any())
+                {
+                    @foreach (var track in Model.Data.EnrolledTracks)
+                    {
+                        var progressOffset = 220 - (220 * track.ProgressPercentage / 100);
+                        var gradientId = $"gradient{track.TrackId}";
+
+                        <div class="track-card">
+                            <div class="track-icon" style="@track.IconStyle">
+                                <i class="fas @track.IconClass"></i>
+                            </div>
+                            <div class="track-info">
+                                <h3 class="track-title">@track.Title</h3>
+                                <p class="track-description">
+                                    @track.Description
+                                </p>
+                                <div class="track-meta">
+                                    <span class="meta-item">
+                                        <i class="fas fa-book"></i>
+                                        @track.CoursesCount Courses
+                                    </span>
+                                    <span class="meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        @track.TotalHours Hours
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="track-progress">
+                                <div class="progress-circle" data-progress="@track.ProgressPercentage">
+                                    <svg width="80" height="80">
+                                        <circle cx="40" cy="40" r="35" fill="none" stroke="#10162f" stroke-width="6"></circle>
+                                        <circle cx="40" cy="40" r="35" fill="none" stroke="url(#@gradientId)" stroke-width="6"
+                                                stroke-dasharray="220" stroke-dashoffset="@progressOffset" stroke-linecap="round"></circle>
+                                        <defs>
+                                            <linearGradient id="@gradientId" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" style="stop-color: #7c3aed" />
+                                                <stop offset="100%" style="stop-color: #06b6d4" />
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                    <span class="progress-text">@((int)track.ProgressPercentage)%</span>
+                                </div>
+                            </div>
+                            <a href="/student/track/@track.TrackId" class="track-link">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-route"></i>
+                        <p>No tracks enrolled yet. <a href="/student/browse-tracks">Explore tracks</a> to start learning!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/dashboard.css" />
+}
+
+@section Scripts {
+    <script src="~/js/dashboard.js"></script>
+}

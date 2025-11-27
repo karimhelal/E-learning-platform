@@ -9,18 +9,29 @@ using DAL.Data;
 using DAL.Data.RepositoryServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Web.Interfaces;
+using Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+// ========================================
+// REPOSITORIES (Team's layer)
+// ========================================
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
+// ========================================
+// BLL SERVICES (Team's layer)
+// ========================================
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
 
+// ========================================
+// WEB SERVICES (Your simplified layer)
+// ========================================
+builder.Services.AddScoped<IStudentDashboardService, StudentDashboardService>();
 
 builder.Services.AddScoped<RazorViewToStringRenderer>();
 
@@ -38,22 +49,19 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 ));
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options => {
-    //Add some Restirictions on Password
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
 
-    // Make the Account Block if I enter the password five times wrong
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true; // for new users
+    options.Lockout.AllowedForNewUsers = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// Add Session support
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -61,7 +69,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Add HttpContextAccessor for accessing current user
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
@@ -90,7 +97,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Instructor}/{action=Dashboard}"
 );
-
 
 app.Run();
 
