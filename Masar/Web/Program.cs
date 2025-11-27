@@ -34,6 +34,8 @@ builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>(
 // WEB SERVICES (Your simplified layer)
 // ========================================
 builder.Services.AddScoped<IStudentDashboardService, StudentDashboardService>();
+builder.Services.AddScoped<IStudentCoursesService, StudentCoursesService>();
+
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 
