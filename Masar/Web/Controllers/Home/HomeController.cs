@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using DAL.Data;
+using Web.Interfaces;
 
 
 namespace Web.Controllers.Home
@@ -10,15 +11,19 @@ namespace Web.Controllers.Home
     {
         private readonly ILogger<HomeController> _logger;
         private readonly AppDbContext _context;
+        private readonly ICurrentUserService _currentUserService;
 
-        public HomeController(ILogger<HomeController> logger, AppDbContext context)
+        public HomeController(ILogger<HomeController> logger, AppDbContext context, ICurrentUserService currentUserService)
         {
             _logger = logger;
             _context = context;
+            _currentUserService = currentUserService;
         }
 
         public IActionResult Index()
         {
+            var userId = _currentUserService.GetUserId();
+            ViewBag.UserId = userId;
             return View();
         }
 

@@ -1,4 +1,6 @@
-﻿@{
+﻿@using Web.ViewModels.Account
+@model LoginViewModel
+@{
     Layout = null;
 }
 <!DOCTYPE html>
@@ -106,13 +108,17 @@
                 </div>
 
                 <!-- Login Form -->
-                <form class="auth-form" id="loginForm">
+                <form class="auth-form" id="loginForm" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert" style="color: red; font-weight: bold;"></div>
+
                     <div class="form-group">
                         <label for="email" class="form-label">
                             <i class="fas fa-envelope"></i>
                             Email Address
                         </label>
-                        <input type="email"
+                        <input asp-for="Email" type="email"
                                id="email"
                                name="email"
                                class="form-input"
@@ -127,7 +133,7 @@
                             Password
                         </label>
                         <div class="password-input-wrapper">
-                            <input type="password"
+                            <input asp-for="Password" type="password"
                                    id="password"
                                    name="password"
                                    class="form-input"
@@ -143,7 +149,7 @@
 
                     <div class="form-options">
                         <label class="checkbox-label">
-                            <input type="checkbox" name="remember" id="remember">
+                            <input type="checkbox" asp-for="RememberMe" id="remember">
                             <span class="checkbox-custom"></span>
                             <span class="checkbox-text">Remember me</span>
                         </label>
