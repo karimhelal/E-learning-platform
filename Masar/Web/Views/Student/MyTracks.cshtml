@@ -1,0 +1,155 @@
+﻿@model Web.ViewModels.StudentTracksViewModel
+
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <h1 class="page-title">My Learning Tracks</h1>
+            <p class="page-subtitle">Follow structured paths to master new skills</p>
+        </div>
+        <div class="page-actions">
+            <a href="/student/browse-tracks" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                <span>Explore More Tracks</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Tracks Content -->
+<section class="tracks-content">
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">
+            <span>All Tracks</span>
+            <span class="filter-count">@Model.Data.Tracks.Count</span>
+        </button>
+        <button class="filter-tab" data-filter="in-progress">
+            <span>In Progress</span>
+            <span class="filter-count">@Model.Data.Tracks.Count(t => t.Status == "in-progress")</span>
+        </button>
+        <button class="filter-tab" data-filter="completed">
+            <span>Completed</span>
+            <span class="filter-count">@Model.Data.Tracks.Count(t => t.Status == "completed")</span>
+        </button>
+    </div>
+
+    <!-- Tracks Grid -->
+    <div class="tracks-grid">
+        @if (Model.Data.Tracks.Any())
+        {
+            @foreach (var track in Model.Data.Tracks)
+            {
+                var statusClass = track.Status;
+                var progressPercent = track.Progress;
+                var coursesCompleted = (int)Math.Round(track.Courses.Count * progressPercent / 100.0);
+
+                <div class="track-card-detailed" data-status="@statusClass">
+                    <div class="track-card-header">
+                        <div class="track-icon-large" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">
+                            <i class="@track.IconClass"></i>
+                        </div>
+                        <span class="track-status-badge @statusClass">
+                            <i class="fas @(statusClass == "completed" ? "fa-check-circle" : "fa-spinner")"></i>
+                            <span>@(statusClass == "completed" ? "Completed" : "In Progress")</span>
+                        </span>
+                    </div>
+
+                    <div class="track-card-body">
+                        <h3 class="track-card-title">@track.Title</h3>
+                        <p class="track-card-description">@track.Description</p>
+
+                        <div class="track-stats-grid">
+                            <div class="track-stat-item">
+                                <i class="fas fa-book"></i>
+                                <div class="track-stat-info">
+                                    <span class="track-stat-value">@track.CoursesCount</span>
+                                    <span class="track-stat-label">Courses</span>
+                                </div>
+                            </div>
+                            <div class="track-stat-item">
+                                <i class="fas fa-clock"></i>
+                                <div class="track-stat-info">
+                                    <span class="track-stat-value">@track.Duration</span>
+                                    <span class="track-stat-label">Duration</span>
+                                </div>
+                            </div>
+                            <div class="track-stat-item">
+                                <i class="fas fa-certificate"></i>
+                                <div class="track-stat-info">
+                                    <span class="track-stat-value">Yes</span>
+                                    <span class="track-stat-label">Certificate</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="track-progress-section">
+                            <div class="track-progress-header">
+                                <span class="track-progress-label">Overall Progress</span>
+                                <span class="track-progress-percentage">@progressPercent%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: @progressPercent%"></div>
+                            </div>
+                            <div class="track-progress-details">
+                                <span class="progress-detail">@coursesCompleted of @track.CoursesCount courses completed</span>
+                            </div>
+                        </div>
+
+                        <div class="track-courses-preview">
+                            <h4 class="courses-preview-title">Included Courses</h4>
+                            <div class="courses-preview-list">
+                                @foreach (var course in track.Courses)
+                                {
+                                    var courseClass = course.Status;
+                                    var iconClass = courseClass == "completed" ? "fa-check-circle" :
+                                    courseClass == "in-progress" ? "fa-spinner fa-spin" : "fa-lock";
+                                    <div class="course-preview-item @courseClass">
+                                        <i class="fas @iconClass"></i>
+                                        <span>@course.Title</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="track-card-footer">
+                        @if (statusClass == "completed")
+                        {
+                            <a href="/student/certificates" class="btn btn-primary">
+                                <i class="fas fa-certificate"></i>
+                                <span>View Certificate</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/student/track/@track.TrackId" class="btn btn-primary">
+                                <span>Continue Learning</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-route"></i>
+                <p>No tracks enrolled yet. <a href="/student/browse-tracks">Explore tracks</a> to get started!</p>
+            </div>
+        }
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/my-tracks.css" />
+}
+
+@section Scripts {
+    <script src="~/js/my-tracks.js"></script>
+}

@@ -41,6 +41,7 @@ builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>(
 // ========================================
 builder.Services.AddScoped<IStudentDashboardService, StudentDashboardService>();
 builder.Services.AddScoped<IStudentCoursesService, StudentCoursesService>();
+builder.Services.AddScoped<ITrackService, StudentTracksService>();
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
