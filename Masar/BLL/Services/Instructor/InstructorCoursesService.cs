@@ -22,7 +22,7 @@ public class InstructorCoursesService : IInstructorCoursesService
 
 
 
-    public async Task<PagedResult<InstructorCourseDto>> GetInstructorCoursesPagedAsync(int instructorId, PagingRequest request)
+    public async Task<PagedResultDto<InstructorCourseDto>> GetInstructorCoursesPagedAsync(int instructorId, PagingRequestDto request)
     {
         var query = _courseRepo.GetCoursesByInstructorQueryable(instructorId);
 
@@ -72,12 +72,17 @@ public class InstructorCoursesService : IInstructorCoursesService
 
         var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
 
-        return new PagedResult<InstructorCourseDto>
+        return new PagedResultDto<InstructorCourseDto>
         {
             Items = items,
-            TotalPages = totalPages,
-            CurrentPage = request.CurrentPage,
-            PageSize = request.PageSize
+
+            Settings = new PaginationSettingsDto
+            {
+                TotalPages = totalPages,
+                TotalCount = totalCount,
+                CurrentPage = request.CurrentPage,
+                PageSize = request.PageSize
+            }
         };
     }
 }

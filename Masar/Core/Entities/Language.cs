@@ -3,16 +3,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Entities;
 
-public class Category
+public class Language
 {
     [Key]
-    [Display(Name = "Category ID")]
-    [Column("category_id")]
-    public int CategoryId { get; set; }
+    [Display(Name = "Language ID")]
+    [Column("language_id")]
+    public int LanguageId { get; set; }
 
     [Required(ErrorMessage = "{0} is required")]
-    [Display(Name = "Category Name")]
-    [Column("category_name")]
+    [Display(Name = "Language Name")]
+    [Column("language_name")]
     public string Name { get; set; }
 
     // TODO: Create a custom validator to check is the passed slug is valid
@@ -25,18 +25,10 @@ public class Category
     //      1) /course/python-for-beginners/
     //      2) /course/c-programming-for-absolute-beginners/
     [Required(ErrorMessage = "{0} is required")]
-    [Display(Name = "Category Slug")]
-    [Column("category_slug")]
+    [Display(Name = "Language Slug")]
+    [Column("language_slug")]
     public string Slug { get; set; }
 
-    [Display(Name = "Category's Parent Category ID")]
-    [Column("parent_category_id")]
-    public int? ParentCategoryId { get; set; }
 
-    
-    [ForeignKey(nameof(ParentCategoryId))]
-    public virtual Category? ParentCategory { get; set; }
-
-    public virtual ICollection<Category>? SubCategories { get; set; }
-    public virtual ICollection<LearningEntity_Category>? LearningEntity_Categories { get; set; }
+    public virtual ICollection<LearningEntity_Language>? LearningEntity_Languages { get; set; }
 }

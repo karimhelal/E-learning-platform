@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251121190241_InitialDbCreate")]
-    partial class InitialDbCreate
+    [Migration("20251127204325_InitDbCreate")]
+    partial class InitDbCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -236,6 +236,34 @@ namespace DAL.Migrations
                     b.ToTable("InstructorProfiles", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Entities.Language", b =>
+                {
+                    b.Property<int>("LanguageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("language_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LanguageId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("language_name");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("language_slug");
+
+                    b.HasKey("LanguageId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Language_Slug");
+
+                    b.ToTable("Languages", (string)null);
+                });
+
             modelBuilder.Entity("Core.Entities.LearningEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -273,6 +301,25 @@ namespace DAL.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("LearningEntity_Category", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.LearningEntity_Language", b =>
+                {
+                    b.Property<int>("LearningEntityId")
+                        .HasColumnType("int")
+                        .HasColumnName("learning_entity_id")
+                        .HasColumnOrder(0);
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("int")
+                        .HasColumnName("language_id")
+                        .HasColumnOrder(1);
+
+                    b.HasKey("LearningEntityId", "LanguageId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.ToTable("LearningEntity_Language", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Lesson", b =>
@@ -620,11 +667,6 @@ namespace DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("instructor_id");
 
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("language");
-
                     b.Property<string>("Level")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -812,6 +854,25 @@ namespace DAL.Migrations
                     b.Navigation("LearningEntity");
                 });
 
+            modelBuilder.Entity("Core.Entities.LearningEntity_Language", b =>
+                {
+                    b.HasOne("Core.Entities.Language", "Language")
+                        .WithMany("LearningEntity_Languages")
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.LearningEntity", "LearningEntity")
+                        .WithMany("LearningEntity_Languages")
+                        .HasForeignKey("LearningEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("LearningEntity");
+                });
+
             modelBuilder.Entity("Core.Entities.Lesson", b =>
                 {
                     b.HasOne("Core.Entities.Module", "Module")
@@ -987,9 +1048,16 @@ namespace DAL.Migrations
                     b.Navigation("OwnedCourses");
                 });
 
+            modelBuilder.Entity("Core.Entities.Language", b =>
+                {
+                    b.Navigation("LearningEntity_Languages");
+                });
+
             modelBuilder.Entity("Core.Entities.LearningEntity", b =>
                 {
                     b.Navigation("LearningEntity_Categories");
+
+                    b.Navigation("LearningEntity_Languages");
                 });
 
             modelBuilder.Entity("Core.Entities.Lesson", b =>

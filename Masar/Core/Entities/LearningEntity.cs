@@ -20,5 +20,7 @@ public abstract class LearningEntity
 
 
     public virtual ICollection<LearningEntity_Category>? LearningEntity_Categories { get; set; }
+    public virtual ICollection<LearningEntity_Language>? LearningEntity_Languages { get; set; }
     public virtual ICollection<Category>? Categories { get; set; }
+    public virtual ICollection<Language>? Languages { get; set; }
 }

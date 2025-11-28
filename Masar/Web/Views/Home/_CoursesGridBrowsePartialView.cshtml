@@ -1,0 +1,58 @@
+﻿@model IEnumerable<CourseBrowseCardViewModel>
+
+@foreach (var courseCard in Model)
+{
+    <div class="catalog-course-card">
+        <div class="course-thumbnail">
+            <div class="course-thumbnail-placeholder"
+            style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));">
+                <img src="@courseCard.ThumbnailImageUrl" />
+            </div>
+            <div class="course-overlay">
+                <a href="#"
+                class="btn btn-primary btn-small view-details">
+                    <span>View Details</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <span class="course-level-badge @courseCard.Level.ToLower()">@courseCard.Level</span>
+            <span class="course-tag bestseller">Bestseller</span>
+        </div>
+        <div class="course-card-content">
+            <span class="course-category">
+                <i class="fas fa-paint-brush"></i>
+                @courseCard.MainCategory
+            </span> 
+            <h3 class="course-card-title">
+                @courseCard.Title
+            </h3>
+            <p class="course-card-description">
+                @courseCard.Description
+            </p>
+            <div class="course-instructor">
+                <div class="avatar avatar-sm">@courseCard.InstructorName[0]@courseCard.InstructorName.Substring(1).First(c => char.IsUpper(c))</div>
+                <span class="instructor-name">@courseCard.InstructorName</span>
+            </div>
+            <div class="course-stats-row">
+                <div class="course-stat">
+                    <i class="fas fa-star"></i>
+                    <span>@courseCard.AverageRating (@courseCard.NumberOfRatings)</span>
+                </div>
+                <div class="course-stat">
+                    <i class="fas fa-users"></i>
+                    <span>@courseCard.NumberOfStudents students</span>
+                </div>
+                <div class="course-stat">
+                    <i class="fas fa-clock"></i>
+                    <span>@courseCard.NumberOfHours<span>h</span></span>
+                </div>
+            </div>
+            <div class="course-card-footer">
+                <button class="btn btn-primary btn-block enroll-btn">
+                    <i class="fas fa-plus"></i>
+                    <span>Enroll Now</span>
+                </button>
+            </div>
+        </div>
+    </div>
+}

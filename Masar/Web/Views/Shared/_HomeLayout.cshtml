@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <title>@ViewBag.Title</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="~/css/masar-core.css" />
+    <link rel="stylesheet" href="~/css/components.css" />
+    <link rel="stylesheet" href="~/css/pages/Home/home.css" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="grid-background"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+
+    <!-- Code Particles -->
+    <div class="code-particles">
+        <div class="code-particle" style="left: 8%; animation-delay: 0s">
+            const learn = () => {
+        </div>
+        <div class="code-particle" style="left: 25%; animation-delay: 4s">
+            function master() {
+        </div>
+        <div class="code-particle" style="left: 45%; animation-delay: 8s">
+            if (practice) {
+        </div>
+        <div class="code-particle" style="left: 65%; animation-delay: 12s">
+            return success;
+        </div>
+        <div class="code-particle" style="left: 82%; animation-delay: 16s">
+            }
+        </div>
+        <div class="code-particle" style="left: 15%; animation-delay: 20s">
+            console.log('Masar');
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">Masar</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#tracks">Tracks</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li>
+                    <a href="/Account/Login" class="nav-btn">Get Started</a>
+                </li>
+            </ul>
+            <!-- Mobile Toggle -->
+            <button class="mobile-toggle" id="mobileToggle" type="button">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    @RenderBody()
+
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <div class="footer-logo-icon"></div>
+                        <span class="logo-text">Masar</span>
+                    </div>
+                    <p class="footer-description">
+                        Empowering the next generation of developers through
+                        structured learning paths and real-world projects.
+                        Every code is a step forward.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Learning Paths</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i> Web
+                                Development
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i> Data
+                                Science & AI
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i> Mobile
+                                Development
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i>
+                                Backend Development
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i>
+                                Cybersecurity
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i> Cloud
+                                Computing
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Company</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i> About
+                                Us
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i> Become
+                                Instructor
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i>
+                                Blog
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i>
+                                Careers
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i> Press
+                                Kit
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i>
+                                Partnerships
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i> Help
+                                Center
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i>
+                                Contact Us
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i>
+                                FAQs
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i>
+                                Community
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i> System
+                                Status
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-chevron-right"></i>
+                                Feedback
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div>
+                    &copy; 2024 Masar. All rights reserved. | Every Code is
+                    a Step Forward
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

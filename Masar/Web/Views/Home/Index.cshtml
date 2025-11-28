@@ -1,8 +1,518 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewBag.Title = "Masar | Every Code is a Step Forward";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@section Scripts{
+    <script src="~/js/Home/home.js"></script>
+}
+
+@section Styles{
+    <link rel="stylesheet" href="~/css/pages/Home/index.css" />
+}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1>
+                Every <span class="code-accent">&lt;Code/&gt;</span><br />
+                is a Step Forward
+            </h1>
+            <p class="hero-description">
+                Master programming through structured learning paths.
+                Build real projects, earn certificates, and accelerate
+                your tech career with industry-focused courses.
+            </p>
+            <a href="~/browse-courses" class="cta-button">
+                <span>Start Your Journey Now</span>
+                <i class="fas fa-rocket"></i>
+            </a>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">50K+</span>
+                    <span class="stat-label">Active Students</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">100+</span>
+                    <span class="stat-label">Courses</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">4.9★</span>
+                    <span class="stat-label">Rating</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="code-window">
+                <div class="window-header">
+                    <div class="window-dot dot-red"></div>
+                    <div class="window-dot dot-yellow"></div>
+                    <div class="window-dot dot-green"></div>
+                    <div class="window-title">learning_journey.js</div>
+                </div>
+                <div class="code-content">
+                    <div class="code-line">
+                        <div class="line-number">1</div>
+                        <div class="line-content">
+                            <span class="keyword">const</span>
+                            <span class="variable">student</span> = {
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">2</div>
+                        <div class="line-content">
+                            name: <span class="string">'You'</span>,
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">3</div>
+                        <div class="line-content">
+                            passion:
+                            <span class="string">'Coding'</span>,
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">4</div>
+                        <div class="line-content">
+                            goal:
+                            <span class="string">'Master Tech'</span>
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">5</div>
+                        <div class="line-content">};</div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">6</div>
+                        <div class="line-content">&nbsp;</div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">7</div>
+                        <div class="line-content">
+                            <span class="keyword">function</span>
+                            <span class="function">startJourney</span>()
+                            {
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">8</div>
+                        <div class="line-content">
+                            <span class="keyword">return</span>
+                            <span class="variable">student</span>.<span class="function">learn</span>()
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">9</div>
+                        <div class="line-content">
+                            .<span class="function">practice</span>()
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">10</div>
+                        <div class="line-content">
+                            .<span class="function">master</span>()
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">11</div>
+                        <div class="line-content">
+                            .<span class="function">getCertified</span>();
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">12</div>
+                        <div class="line-content">}</div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">13</div>
+                        <div class="line-content">&nbsp;</div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">14</div>
+                        <div class="line-content">
+                            <span class="comment">// Your success starts here</span>
+                        </div>
+                    </div>
+                    <div class="code-line">
+                        <div class="line-number">15</div>
+                        <div class="line-content">
+                            <span class="function">startJourney</span>();<span class="typing-cursor"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Tracks -->
+<section id="tracks">
+    <div class="section-header fade-in-up">
+        <div class="section-badge">
+            <i class="fas fa-route"></i>
+            <span>Learning Paths</span>
+        </div>
+        <h2 class="section-title">Featured Tracks</h2>
+        <p class="section-description">
+            Choose your path and start building real-world projects with
+            our structured learning tracks
+        </p>
+    </div>
+
+    <div class="tracks-grid">
+        <!-- Web Development -->
+        <div class="track-card fade-in-up">
+            <div class="track-header">
+                <div class="track-icon">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+                <h3 class="track-title">Web Development</h3>
+                <div class="track-subtitle">frontend + backend</div>
+            </div>
+            <div class="track-content">
+                <div class="track-meta">
+                    <div class="meta-item">
+                        <div class="meta-value">12</div>
+                        <div class="meta-label">Courses</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">120h</div>
+                        <div class="meta-label">Duration</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">8.2K</div>
+                        <div class="meta-label">Students</div>
+                    </div>
+                </div>
+                <button class="track-cta">
+                    Explore Track <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Science & AI -->
+        <div class="track-card fade-in-up">
+            <div class="track-header">
+                <div class="track-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="track-title">Data Science & AI</h3>
+                <div class="track-subtitle">
+                    machine learning + deep learning
+                </div>
+            </div>
+            <div class="track-content">
+                <div class="track-meta">
+                    <div class="meta-item">
+                        <div class="meta-value">15</div>
+                        <div class="meta-label">Courses</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">150h</div>
+                        <div class="meta-label">Duration</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">6.5K</div>
+                        <div class="meta-label">Students</div>
+                    </div>
+                </div>
+                <button class="track-cta">
+                    Explore Track <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Development -->
+        <div class="track-card fade-in-up">
+            <div class="track-header">
+                <div class="track-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="track-title">Mobile Development</h3>
+                <div class="track-subtitle">iOS + Android</div>
+            </div>
+            <div class="track-content">
+                <div class="track-meta">
+                    <div class="meta-item">
+                        <div class="meta-value">10</div>
+                        <div class="meta-label">Courses</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">100h</div>
+                        <div class="meta-label">Duration</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">5.3K</div>
+                        <div class="meta-label">Students</div>
+                    </div>
+                </div>
+                <button class="track-cta">
+                    Explore Track <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Backend Development -->
+        <div class="track-card fade-in-up">
+            <div class="track-header">
+                <div class="track-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <h3 class="track-title">Backend Development</h3>
+                <div class="track-subtitle">
+                    server-side + databases
+                </div>
+            </div>
+            <div class="track-content">
+                <div class="track-meta">
+                    <div class="meta-item">
+                        <div class="meta-value">14</div>
+                        <div class="meta-label">Courses</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">130h</div>
+                        <div class="meta-label">Duration</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">7.8K</div>
+                        <div class="meta-label">Students</div>
+                    </div>
+                </div>
+                <button class="track-cta">
+                    Explore Track <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Cybersecurity -->
+        <div class="track-card fade-in-up">
+            <div class="track-header">
+                <div class="track-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="track-title">Cybersecurity</h3>
+                <div class="track-subtitle">
+                    ethical hacking + security
+                </div>
+            </div>
+            <div class="track-content">
+                <div class="track-meta">
+                    <div class="meta-item">
+                        <div class="meta-value">11</div>
+                        <div class="meta-label">Courses</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">110h</div>
+                        <div class="meta-label">Duration</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">4.2K</div>
+                        <div class="meta-label">Students</div>
+                    </div>
+                </div>
+                <button class="track-cta">
+                    Explore Track <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Cloud Computing -->
+        <div class="track-card fade-in-up">
+            <div class="track-header">
+                <div class="track-icon">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <h3 class="track-title">Cloud Computing</h3>
+                <div class="track-subtitle">AWS + Azure + DevOps</div>
+            </div>
+            <div class="track-content">
+                <div class="track-meta">
+                    <div class="meta-item">
+                        <div class="meta-value">13</div>
+                        <div class="meta-label">Courses</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">125h</div>
+                        <div class="meta-label">Duration</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">6.1K</div>
+                        <div class="meta-label">Students</div>
+                    </div>
+                </div>
+                <button class="track-cta">
+                    Explore Track <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section id="how-it-works">
+    <div class="section-header fade-in-up">
+        <div class="section-badge">
+            <i class="fas fa-rocket"></i>
+            <span>Your Journey</span>
+        </div>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-description">
+            A simple, proven process to transform you from beginner to
+            professional developer
+        </p>
+    </div>
+
+    <div class="process-container">
+        <div class="process-step fade-in-up">
+            <div class="step-number">1</div>
+            <div class="step-icon">
+                <i class="fas fa-book-reader"></i>
+            </div>
+            <h3 class="step-title">Learn</h3>
+            <p class="step-description">
+                Follow expertly crafted courses with hands-on tutorials,
+                video lessons, and interactive coding exercises designed
+                by industry professionals.
+            </p>
+        </div>
+
+        <div class="process-step fade-in-up">
+            <div class="step-number">2</div>
+            <div class="step-icon">
+                <i class="fas fa-code"></i>
+            </div>
+            <h3 class="step-title">Practice</h3>
+            <p class="step-description">
+                Build real-world projects and complete practical
+                assignments to solidify your skills and create an
+                impressive portfolio.
+            </p>
+        </div>
+
+        <div class="process-step fade-in-up">
+            <div class="step-number">3</div>
+            <div class="step-icon">
+                <i class="fas fa-award"></i>
+            </div>
+            <h3 class="step-title">Get Certified</h3>
+            <p class="step-description">
+                Earn industry-recognized certificates and showcase your
+                achievements to employers worldwide with verified
+                credentials.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section id="testimonials">
+    <div class="section-header fade-in-up">
+        <div class="section-badge">
+            <i class="fas fa-star"></i>
+            <span>Success Stories</span>
+        </div>
+        <h2 class="section-title">What Our Students Say</h2>
+        <p class="section-description">
+            Join thousands of developers who transformed their careers
+            with Masar
+        </p>
+    </div>
+
+    <div class="testimonials-container fade-in-up">
+        <div class="testimonial active">
+            <div class="testimonial-content">
+                <div class="testimonial-avatar">AK</div>
+                <div class="testimonial-text-content">
+                    <p class="testimonial-text">
+                        "Masar completely changed my career trajectory.
+                        The structured learning paths and hands-on
+                        projects helped me land a developer job at a top
+                        tech company in just 6 months. The instructors
+                        are world-class!"
+                    </p>
+                    <div class="testimonial-author">Ahmed Khalil</div>
+                    <div class="testimonial-role">
+                        Full-Stack Developer @@ TechCorp
+                    </div>
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial">
+            <div class="testimonial-content">
+                <div class="testimonial-avatar">SM</div>
+                <div class="testimonial-text-content">
+                    <p class="testimonial-text">
+                        "The quality of content is outstanding! Every
+                        course is packed with real-world examples and
+                        best practices. The community support is amazing
+                        too. I built 10+ portfolio projects that
+                        impressed my employers."
+                    </p>
+                    <div class="testimonial-author">Sara Mohammed</div>
+                    <div class="testimonial-role">
+                        Frontend Developer @@ StartupHub
+                    </div>
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial">
+            <div class="testimonial-content">
+                <div class="testimonial-avatar">YA</div>
+                <div class="testimonial-text-content">
+                    <p class="testimonial-text">
+                        "Best investment in my education! The Data
+                        Science track gave me the skills to transition
+                        from marketing to AI. The certificates are
+                        recognized globally and opened so many doors for
+                        me."
+                    </p>
+                    <div class="testimonial-author">Youssef Ali</div>
+                    <div class="testimonial-role">
+                        Data Scientist @@ AI Solutions
+                    </div>
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="carousel-controls">
+        <button class="carousel-arrow" onclick="changeTestimonial(-1)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="carousel-dots">
+            <span
+                class="dot active"
+                onclick="showTestimonial(0)"
+            ></span>
+            <span class="dot" onclick="showTestimonial(1)"></span>
+            <span class="dot" onclick="showTestimonial(2)"></span>
+        </div>
+        <button class="carousel-arrow" onclick="changeTestimonial(1)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+</section>

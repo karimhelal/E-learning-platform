@@ -1,0 +1,387 @@
+﻿/* ========================================
+   EXPLORE PAGE LAYOUT (Grid System)
+   ======================================== */
+.explore-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    gap: 2rem;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* ========================================
+   1. FILTER SIDEBAR
+   ======================================== */
+.filter-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-right: 10px;
+
+    /* ANIMATION MAGIC */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* HIDDEN STATE (Desktop) */
+.filter-sidebar.hidden {
+    width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 0;
+    opacity: 0;
+    overflow: hidden;
+    border-right: none; /* Hide border so no line remains */
+}
+
+    /* SCROLLBAR STYLING */
+    .filter-sidebar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .filter-sidebar::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+/* Ensure Button is Visible on Desktop */
+@media (min-width: 1025px) {
+    .desktop-filter-toggle {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    /* Hide the mobile trigger on desktop */
+    .mobile-filter-trigger {
+        display: none !important;
+    }
+}
+
+/* Hide Desktop Toggle on Mobile */
+@media (max-width: 1024px) {
+    .desktop-filter-toggle {
+        display: none !important;
+    }
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filter-group {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+    padding-bottom: 1.5rem;
+}
+
+.filter-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-primary);
+}
+
+.filter-group.collapsed .filter-options {
+    display: none;
+}
+
+.filter-group.collapsed .filter-title i {
+    transform: rotate(-90deg);
+}
+
+.filter-option-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.filter-option-row:hover {
+    color: var(--text-primary);
+}
+
+.filter-option-row input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--text-muted);
+    border-radius: 4px;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.filter-option-row input:checked + .checkbox-custom {
+    background: var(--accent-purple);
+    border-color: var(--accent-purple);
+}
+
+    .filter-option-row input:checked + .checkbox-custom::after {
+        content: "\f00c";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        color: white;
+        font-size: 10px;
+    }
+
+.option-count {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ========================================
+   2. MAIN CONTENT & TOOLBAR
+   ======================================== */
+.results-area {
+    flex: 1;
+    min-width: 0;
+}
+
+.results-toolbar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    align-items: center;
+    flex-wrap: wrap; /* Safety for small screens */
+}
+
+.toolbar-search {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Filter Buttons */
+.mobile-filter-trigger {
+    display: none; /* Default hidden on desktop */
+    padding: 0.8rem 1.2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.desktop-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* View Toggles */
+.view-toggle-group {
+    display: flex;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 4px;
+}
+
+.view-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+    .view-btn.active {
+        background: var(--accent-purple);
+        color: white;
+    }
+
+/* ========================================
+   3. LIST VIEW (The Fix)
+   ======================================== */
+/* Force Grid by default */
+.courses-catalog {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+    /* LIST VIEW MODE overrides */
+    .courses-catalog.list-view {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+        .courses-catalog.list-view .catalog-course-card {
+            display: flex;
+            flex-direction: row; /* Side by side */
+            min-height: 220px;
+            height: auto; /* Allow growth */
+            max-height: none !important; /* OVERRIDE ANY BAD CSS */
+            width: 100%;
+        }
+
+        .courses-catalog.list-view .course-thumbnail {
+            width: 300px;
+            min-width: 300px; /* Prevent shrinking */
+            padding-top: 0; /* Remove aspect ratio hack */
+            position: relative;
+            border-right: 1px solid var(--border-color);
+        }
+
+            .courses-catalog.list-view .course-thumbnail img,
+            .courses-catalog.list-view .course-thumbnail-placeholder {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .courses-catalog.list-view .course-card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 2rem;
+            justify-content: center;
+        }
+
+        .courses-catalog.list-view .course-card-description {
+            display: block;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+            -webkit-line-clamp: 2; /* Limit to 2 lines */
+            -webkit-box-orient: vertical;
+            display: -webkit-box;
+            overflow: hidden;
+        }
+
+        .courses-catalog.list-view .course-card-footer {
+            margin-top: auto;
+            border-top: none;
+            padding-top: 0;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .courses-catalog.list-view .enroll-btn {
+            width: auto;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+/* ========================================
+   4. RESPONSIVE (Mobile/Tablet)
+   ======================================== */
+@media (max-width: 1024px) {
+    .explore-container {
+        display: block;
+        padding: 1rem;
+    }
+
+    /* Show Mobile Filter Button */
+    .mobile-filter-trigger {
+        display: flex !important;
+    }
+
+    .desktop-filter-toggle {
+        display: none !important;
+    }
+
+    /* Mobile Sidebar Drawer */
+    .filter-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 300px;
+        background: var(--card-bg);
+        z-index: 2000;
+        transform: translateX(-100%);
+        margin-left: 0; /* Reset desktop margin */
+        padding: 1.5rem;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+        .filter-sidebar.active {
+            transform: translateX(0);
+        }
+
+    .filter-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        z-index: 1999;
+        display: none;
+    }
+
+        .filter-overlay.active {
+            display: block;
+        }
+
+    /* Fix List View on Mobile (Revert to Stack) */
+    .courses-catalog.list-view .catalog-course-card {
+        flex-direction: column;
+    }
+
+    .courses-catalog.list-view .course-thumbnail {
+        width: 100%;
+        min-width: 0;
+        padding-top: 56.25%; /* Restore aspect ratio */
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .courses-catalog.list-view .course-card-footer {
+        width: 100%;
+    }
+
+    .courses-catalog.list-view .enroll-btn {
+        width: 100%;
+    }
+}
+
+.filter-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: none; /* Only show inside mobile sidebar */
+}
+
+@media (max-width: 1024px) {
+    .filter-close-btn {
+        display: block;
+    }
+}

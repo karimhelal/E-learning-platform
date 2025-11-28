@@ -1,0 +1,6 @@
+﻿@model IEnumerable<FilterGroupViewModel>
+
+@foreach (var filterGroup in Model)
+{
+	@Html.DisplayFor(m => filterGroup, filterGroup.GetType().Name)
+}

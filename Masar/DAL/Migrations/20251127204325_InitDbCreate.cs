@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDbCreate : Migration
+    public partial class InitDbCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -29,6 +29,20 @@ namespace DAL.Migrations
                         column: x => x.parent_category_id,
                         principalTable: "Categories",
                         principalColumn: "category_id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Languages",
+                columns: table => new
+                {
+                    language_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    language_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    language_slug = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Languages", x => x.language_id);
                 });
 
             migrationBuilder.CreateTable(
@@ -80,6 +94,30 @@ namespace DAL.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_LearningEntity_Category_LearningEntities_learning_entity_id",
+                        column: x => x.learning_entity_id,
+                        principalTable: "LearningEntities",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LearningEntity_Language",
+                columns: table => new
+                {
+                    learning_entity_id = table.Column<int>(type: "int", nullable: false),
+                    language_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LearningEntity_Language", x => new { x.learning_entity_id, x.language_id });
+                    table.ForeignKey(
+                        name: "FK_LearningEntity_Language_Languages_language_id",
+                        column: x => x.language_id,
+                        principalTable: "Languages",
+                        principalColumn: "language_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LearningEntity_Language_LearningEntities_learning_entity_id",
                         column: x => x.learning_entity_id,
                         principalTable: "LearningEntities",
                         principalColumn: "id",
@@ -155,7 +193,6 @@ namespace DAL.Migrations
                     title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                     thumbnail_image_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    language = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     difficulty_level = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -497,9 +534,20 @@ namespace DAL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Language_Slug",
+                table: "Languages",
+                column: "language_slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LearningEntity_Category_category_id",
                 table: "LearningEntity_Category",
                 column: "category_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LearningEntity_Language_language_id",
+                table: "LearningEntity_Language",
+                column: "language_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LessonContents_lesson_id",
@@ -572,6 +620,9 @@ namespace DAL.Migrations
                 name: "LearningEntity_Category");
 
             migrationBuilder.DropTable(
+                name: "LearningEntity_Language");
+
+            migrationBuilder.DropTable(
                 name: "LessonContents");
 
             migrationBuilder.DropTable(
@@ -585,6 +636,9 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Categories");
+
+            migrationBuilder.DropTable(
+                name: "Languages");
 
             migrationBuilder.DropTable(
                 name: "StudentProfiles");

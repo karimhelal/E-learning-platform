@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Core.Entities;
-using Core.Entities.Enums;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace DAL.Data
 {
@@ -20,6 +17,8 @@ namespace DAL.Data
         public DbSet<User> Users { get; set; }
         public DbSet<StudentProfile> StudentProfiles { get; set; }
         public DbSet<InstructorProfile> InstructorProfiles { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Language> Languages { get; set; }
         public DbSet<Track> Tracks { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Module> Modules { get; set; }
@@ -121,6 +120,21 @@ namespace DAL.Data
                     .IsUnique();
             });
 
+            modelBuilder.Entity<Language>(entity =>
+            {
+                // Language - Table Name
+                entity.ToTable("Languages");
+
+                // Language - Primary Key
+                entity.HasKey(l => l.LanguageId);
+
+                // Language - no two languages should have the same slug
+                entity
+                    .HasIndex(c => c.Slug)
+                    .HasDatabaseName("IX_Language_Slug")
+                    .IsUnique();
+            });
+
             modelBuilder.Entity<LearningEntity_Category>(entity =>
             {
                 // LearningEntity_Category - Table Name
@@ -144,6 +158,29 @@ namespace DAL.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<LearningEntity_Language>(entity =>
+            {
+                // LearningEntity_Language - Table Name
+                entity.ToTable("LearningEntity_Language");
+
+                // LearningEntity_Language - Composite Primary Key
+                entity.HasKey(el => new { el.LearningEntityId, el.LanguageId });
+
+                // LearningEntity_Language - LearningEntity (One-to-Many)
+                entity
+                    .HasOne(el => el.LearningEntity)
+                    .WithMany(e => e.LearningEntity_Languages)
+                    .HasForeignKey(el => el.LearningEntityId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // LearningEntity_Language - Language (One-to-Many)
+                entity
+                    .HasOne(el => el.Language)
+                    .WithMany(l => l.LearningEntity_Languages)
+                    .HasForeignKey(el => el.LanguageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<LearningEntity>(entity =>
             {
                 // LearningEntity - Table Name
@@ -157,6 +194,12 @@ namespace DAL.Data
                     .HasMany(l => l.Categories)
                     .WithMany()
                     .UsingEntity<LearningEntity_Category>();
+
+                // LearningEntity - Language (Many-to-Many)
+                entity
+                    .HasMany(l => l.Languages)
+                    .WithMany()
+                    .UsingEntity<LearningEntity_Language>();
 
                 //entity
                 //    .HasDiscriminator<string>("learning_entity_type")
