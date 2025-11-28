@@ -4,6 +4,9 @@ using BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Web.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using DAL.Data;
+using Web.Interfaces;
 using Web.ViewModels.Home;
 using Web.ViewModels.Misc;
 using Web.ViewModels.Misc.FilterRequestVMs;
@@ -14,6 +17,8 @@ namespace Web.Controllers.Home
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly AppDbContext _context;
+        private readonly ICurrentUserService _currentUserService;
         private readonly ICourseService _courseService;
         private readonly RazorViewToStringRenderer _razorRenderer;
 
@@ -25,12 +30,16 @@ namespace Web.Controllers.Home
             _logger = logger;
             _courseService = courseService;
             _razorRenderer = razorRenderer;
+            _context = context;
+            _currentUserService = currentUserService;
         }
 
 
         [HttpGet("~/")]
         public IActionResult Index()
         {
+            var userId = _currentUserService.GetUserId();
+            ViewBag.UserId = userId;
             return View();
         }
 

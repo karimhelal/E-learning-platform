@@ -76,4 +76,5 @@ public class CourseRepository : ICourseRepository
             .Where(c => c.Id == courseId)
             .AsNoTracking();
     }
+
 }

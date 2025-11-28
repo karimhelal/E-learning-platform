@@ -3,7 +3,7 @@
 /// <summary>
 /// Defines user roles in the e-learning platform
 /// </summary>
-public enum UserRoles
+public enum UserRolesEnum
 {
     Student = 1,
     Instructor = 2,

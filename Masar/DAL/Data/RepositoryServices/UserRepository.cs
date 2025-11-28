@@ -71,17 +71,20 @@ public class UserRepository : IUserRepository
 
     public bool IsAdmin(int userId)
     {
-        return _context.Users.Any(u => u.UserId == userId && u.Role == UserRoles.Admin);
+        return _context.UserRoles.Any(UserRoles => UserRoles.UserId == userId && UserRoles.RoleId == (int)UserRolesEnum.Admin);
+        //return _context.Users.Any(u => u.Id == userId);
     }
 
     public bool IsInstructor(int userId)
     {
-        return _context.Users.Any(u => u.UserId == userId && u.Role == UserRoles.Instructor);
+        return _context.UserRoles.Any(UserRoles => UserRoles.UserId == userId && UserRoles.RoleId == (int)UserRolesEnum.Instructor);
+        //return _context.Users.Any(u => u.Id == userId);
     }
 
     public bool IsStudent(int userId)
     {
-        return _context.Users.Any(u => u.UserId == userId && u.Role == UserRoles.Student);
+        return _context.UserRoles.Any(UserRoles => UserRoles.UserId == userId && UserRoles.RoleId == (int)UserRolesEnum.Student);
+        //return _context.Users.Any(u => u.Id == userId);
     }
 
     public Task<InstructorProfile?> GetInstructorProfileAsync(int instructorId, bool includeUserBase)
@@ -96,12 +99,33 @@ public class UserRepository : IUserRepository
 
     public Task<StudentProfile?> GetStudentProfileAsync(int studentId, bool includeUserBase)
     {
-        var query = _context.StudentProfiles.AsQueryable();
+        var query = _context.StudentProfiles
+            .AsSplitQuery() // Use split queries for better performance
+            .AsQueryable();
 
         if (includeUserBase)
             query = query.Include(sp => sp.User);
 
-        return query.FirstOrDefaultAsync(sp => sp.StudentId == studentId);
+        // Include enrollments with their related entities
+        query = query
+            .Include(sp => sp.Enrollments)
+                .ThenInclude(e => (e as CourseEnrollment)!.Course)
+                    .ThenInclude(c => c!.Categories)
+            .Include(sp => sp.Enrollments)
+                .ThenInclude(e => (e as CourseEnrollment)!.Course)
+                    .ThenInclude(c => c!.Instructor!)
+                    .ThenInclude(i => i.User)
+            .Include(sp => sp.Enrollments)
+                .ThenInclude(e => (e as CourseEnrollment)!.Course!)
+                    .ThenInclude(c => c.Modules!)
+                    .ThenInclude(m => m.Lessons!)
+                        .ThenInclude(l => l.LessonContent)
+            .Include(sp => sp.Enrollments)
+                .ThenInclude(e => (e as TrackEnrollment)!.Track!)
+                    .ThenInclude(t => t.TrackCourses!)
+                        .ThenInclude(tc => tc.Course)
+            .Include(sp => sp.Certificates);
 
+        return query.FirstOrDefaultAsync(sp => sp.StudentId == studentId);
     }
 }

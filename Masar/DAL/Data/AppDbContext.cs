@@ -7,14 +7,14 @@ namespace DAL.Data
     /// Database context for E-Learning Platform
     /// Configures all entities and their relationships
     /// </summary>
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public AppDbContext() { }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
 
         // DbSets - Entity Collections
-        public DbSet<User> Users { get; set; }
+        //public DbSet<User> Users { get; set; }
         public DbSet<StudentProfile> StudentProfiles { get; set; }
         public DbSet<InstructorProfile> InstructorProfiles { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -40,20 +40,34 @@ namespace DAL.Data
         {
             base.OnModelCreating(modelBuilder);
 
+           
+            modelBuilder.Entity<IdentityRole<int>>().ToTable("Roles");
+            modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
+            modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
+            modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
+            modelBuilder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
+            modelBuilder.Entity<IdentityUserRole<int>>(entity =>
+            {
+                entity.ToTable("UserRoles");
+                entity.Property(e => e.RoleId).HasColumnName("role_id");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+            });
 
             modelBuilder.Entity<User>(entity =>
             {
                 // User - Table Name
                 entity.ToTable("Users");
 
+                entity.Property(u => u.Id).HasColumnName("user_id");
                 // User - Primary Key
-                entity.HasKey(u => u.UserId);
+                entity.HasKey(u => u.Id);
 
                 // User - Unique Constraint on Email - Unique constraint: Email must be unique across all users
                 entity
                     .HasIndex(u => u.Email)
                     .IsUnique()
                     .HasDatabaseName("IX_User_Email");
+                entity.Property(u => u.Email).IsRequired().HasColumnName("email");
 
                 // User - StudentProfile (One-to-One)
                 entity
@@ -66,6 +80,7 @@ namespace DAL.Data
                     .HasOne(u => u.InstructorProfile)
                     .WithOne(ip => ip.User)
                     .HasForeignKey<InstructorProfile>(ip => ip.UserId);
+                entity.Property(u => u.PasswordHash).HasColumnName("password_hash");
             });
 
             modelBuilder.Entity<StudentProfile>(entity =>
@@ -852,10 +867,10 @@ namespace DAL.Data
 
             #region Enums
 
-            // Store enums as strings in database
-            modelBuilder.Entity<User>()
-                .Property(u => u.Role)
-                .HasConversion<string>();
+            // Store enums as strings in database =====================================>
+            //modelBuilder.Entity<User>()
+            //    .Property(u => u.Role)
+            //    .HasConversion<string>();
 
             modelBuilder.Entity<CourseEnrollment>()
                 .Property(uc => uc.Status)

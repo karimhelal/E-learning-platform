@@ -1,0 +1,152 @@
+@model Web.ViewModels.Student.StudentCoursesViewModel
+
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <h1 class="page-title">My Courses</h1>
+            <p class="page-subtitle">Track your learning progress across all enrolled courses</p>
+        </div>
+        <div class="page-actions">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search courses..." id="courseSearchInput">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Courses Content -->
+<section class="courses-content">
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">
+            <span>All Courses</span>
+            <span class="filter-count">@Model.Data.AllCoursesCount</span>
+        </button>
+        <button class="filter-tab" data-filter="in-progress">
+            <span>In Progress</span>
+            <span class="filter-count">@Model.Data.InProgressCount</span>
+        </button>
+        <button class="filter-tab" data-filter="completed">
+            <span>Completed</span>
+            <span class="filter-count">@Model.Data.CompletedCount</span>
+        </button>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="courses-grid-full">
+        @if (Model.Data.AllCourses.Any())
+        {
+            @foreach (var course in Model.Data.AllCourses)
+            {
+                <div class="course-card-full" data-status="@course.Status.ToLower()">
+                    <div class="course-card-header">
+                        <span class="badge @course.CategoryBadgeClass">
+                            <i class="fas @course.CategoryIcon"></i>
+                            @course.CategoryName
+                        </span>
+                        @if (course.Status == "Completed")
+                        {
+                            <span class="course-status-badge completed">
+                                <i class="fas fa-check-circle"></i>
+                                Completed
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="course-status-badge in-progress">In Progress</span>
+                        }
+                    </div>
+                    <div class="course-card-body">
+                        <h3 class="course-card-title">@course.Title</h3>
+                        <p class="course-card-description">
+                            @course.Description
+                        </p>
+                        <div class="course-card-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>@course.InstructorName</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-book-open"></i>
+                                <span>@course.ModulesCount Modules</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>@course.DurationHours Hours</span>
+                            </div>
+                        </div>
+                        
+                        @if (course.Status == "InProgress")
+                        {
+                            <div class="course-card-progress">
+                                <div class="progress-header">
+                                    <span class="progress-label">Progress</span>
+                                    <span class="progress-percentage">@((int)course.ProgressPercentage)%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: @course.ProgressPercentage%"></div>
+                                </div>
+                                <div class="progress-details">
+                                    <span>@course.CompletedLessons of @course.TotalLessons lessons completed</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="course-completion-info">
+                                <i class="fas fa-trophy"></i>
+                                <div>
+                                    <div class="completion-text">Course Completed!</div>
+                                    <div class="completion-date">Completed on @course.CompletionDate?.ToString("MMM dd, yyyy")</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="course-card-footer">
+                        @if (course.Status == "InProgress")
+                        {
+                            <a href="/student/course/@course.CourseId" class="btn btn-primary">
+                                <span>Continue Learning</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <a href="/student/course/@course.CourseId/details" class="btn btn-outline">
+                                <span>View Details</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/student/certificates" class="btn btn-primary">
+                                <i class="fas fa-certificate"></i>
+                                <span>View Certificate</span>
+                            </a>
+                            <a href="/student/course/@course.CourseId" class="btn btn-outline">
+                                <span>Review Course</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-book-open"></i>
+                <p>No courses enrolled yet. <a href="/student/browse-courses">Browse courses</a> to get started!</p>
+            </div>
+        }
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/my-courses.css" />
+}
+
+@section Scripts {
+    <script src="~/js/my-courses.js"></script>
+}
