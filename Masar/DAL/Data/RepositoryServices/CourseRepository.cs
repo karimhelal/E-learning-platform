@@ -77,14 +77,4 @@ public class CourseRepository : ICourseRepository
             .AsNoTracking();
     }
 
-    public async Task<Course?> GetCourseWithDetailsAsync(int courseId)
-    {
-        return await _context.Courses
-            .Include(c => c.Category)
-            .Include(c => c.Instructor)
-            .Include(c => c.Modules)
-                .ThenInclude(m => m.Lessons)
-            .FirstOrDefaultAsync(c => c.CourseId == courseId && !c.IsDeleted);
-    }
-
 }

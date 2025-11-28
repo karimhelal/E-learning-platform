@@ -2,6 +2,7 @@
 using Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.AccessControl;
 using Web.ViewModels.Account;
 using BLL.DTOs.Account;
 
@@ -24,37 +25,12 @@ namespace Web.Controllers.Account
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel loginViewModel)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(loginViewModel);
-            }
-
-            var signInResult = await _signInManager.PasswordSignInAsync(
-                loginViewModel.Email,
-                loginViewModel.Password,
-                loginViewModel.RememberMe,
-                lockoutOnFailure: true);
-
-            if (signInResult.Succeeded)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            if (signInResult.IsLockedOut)
-            {
-                ModelState.AddModelError(string.Empty, "Account is locked. Please try again later.");
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Invalid email or password.");
-            }
-
-            return View(loginViewModel);
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult Login(LoginViewModel loginViewModel)
+        //{
+        //    return View();
+        //}
 
         [HttpGet]
         [Route("/Account/Register")]
@@ -72,6 +48,13 @@ namespace Web.Controllers.Account
                 return View(registerViewModel);
             }
 
+            //check if this email register before
+            ///
+            ///
+            //
+
+
+
             var RegisterDto = new RegisterDto
             {
                 FirstName = registerViewModel.FirstName,
@@ -83,16 +66,11 @@ namespace Web.Controllers.Account
             var (result,user) = await _authService.RegisterUserAsync(RegisterDto);
             if(result.Succeeded)
             {
-                if(user==null)
-                {
-                    ModelState.AddModelError(string.Empty, "Registration succeeded but user data is missing.");
-                    return View(registerViewModel);
-                }
                 await _signInManager.SignInAsync(user,registerViewModel.RememberMe);
                 return RedirectToAction("Index", "Home");
             }
 
-            //var isEmailTaken = result.Errors.Any(e => e.Code == "DuplicateEmail" || e.Code == "DuplicateUserName");
+            var isEmailTaken = result.Errors.Any(e => e.Code == "DuplicateEmail" || e.Code == "DuplicateUserName");
 
             if (result.Errors.Any(e => e.Code == "DuplicateEmail" || e.Code == "DuplicateUserName"))
             {

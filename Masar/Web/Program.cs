@@ -22,12 +22,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
-
-// Current User Service
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-
 // ========================================
 // BLL SERVICES (Team's layer)
 // ========================================
@@ -35,7 +29,7 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
 // ========================================
 // WEB SERVICES (Your simplified layer)
 // ========================================
