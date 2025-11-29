@@ -15,6 +15,10 @@ namespace BLL.Services.Account
             _userManager = userManager;
         }
 
+        public Task<string> GeneratePasswordResetTokenAsync(string email)
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<(IdentityResult Result,User user)> RegisterUserAsync(RegisterDto registerDto)
         {
@@ -46,5 +50,9 @@ namespace BLL.Services.Account
             return (result, user);
         }
 
+        public Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto model)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
