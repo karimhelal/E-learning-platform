@@ -3,6 +3,7 @@
     var userInitials = Model?.Data?.UserInitials ?? "JD";
 }
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +22,7 @@
     <!-- Core Stylesheets - ALWAYS LOADED -->
     <link rel="stylesheet" href="~/css/masar-core.css" />
     <link rel="stylesheet" href="~/css/components.css" />
+    <link rel="stylesheet" href="~/css/pages/Student/student.css" />
     
     <!-- Page-specific Styles -->
     @await RenderSectionAsync("Styles", required: false)
@@ -45,31 +47,25 @@
                     <h3 class="nav-section-title">Main Menu</h3>
                     <ul class="nav-links">
                         <li>
-                            <a href="/student/dashboard" class="nav-link">
+                            <a href="~/student/dashboard" class="nav-link">
                                 <i class="fas fa-th-large"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/student/browse-courses" class="nav-link">
-                                <i class="fas fa-compass"></i>
-                                <span>Browse Courses</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/student/my-tracks" class="nav-link">
-                                <i class="fas fa-route"></i>
-                                <span>My Tracks</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/student/my-courses" class="nav-link">
+                            <a href="~/student/my-courses" class="nav-link">
                                 <i class="fas fa-book"></i>
                                 <span>My Courses</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/student/certificates" class="nav-link">
+                            <a href="~/student/my-tracks" class="nav-link">
+                                <i class="fas fa-route"></i>
+                                <span>My Tracks</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="~/student/certificates" class="nav-link">
                                 <i class="fas fa-certificate"></i>
                                 <span>Certificates</span>
                             </a>
@@ -81,19 +77,19 @@
                     <h3 class="nav-section-title">Account</h3>
                     <ul class="nav-links">
                         <li>
-                            <a href="/student/profile" class="nav-link">
+                            <a href="~/student/profile" class="nav-link">
                                 <i class="fas fa-user"></i>
                                 <span>Profile</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/student/settings" class="nav-link">
+                            <a href="~/student/settings" class="nav-link">
                                 <i class="fas fa-cog"></i>
                                 <span>Settings</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/account/logout" class="nav-link">
+                            <a href="~/account/logout" class="nav-link">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span>Logout</span>
                             </a>
@@ -103,7 +99,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <a href="/student/profile" class="user-profile">
+                <a href="~/student/profile" class="user-profile">
                     <div class="avatar avatar-md">@userInitials</div>
                     <div class="user-info">
                         <div class="user-name">@studentName</div>
@@ -128,10 +124,12 @@
         </button>
     </div>
 
+    <!-- Scripts -->
     <!-- Core Scripts - ALWAYS LOADED -->
     <script src="~/js/masar-core.js"></script>
     <script src="~/js/sidebar.js"></script>
-    
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
     <!-- Page-specific Scripts -->
     @await RenderSectionAsync("Scripts", required: false)
 </body>

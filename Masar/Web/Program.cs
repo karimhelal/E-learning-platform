@@ -22,6 +22,8 @@ var builder = WebApplication.CreateBuilder(args);
 // ========================================
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 
 
 // Current User Service
@@ -115,6 +117,23 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Instructor}/{action=Dashboard}"
 );
+
+
+// --- Seed roles and admin user ---
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+    string[] roles = { "Student", "Instructor", "Admin" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole<int>(role));
+    }
+}
+
 
 app.Run();
 

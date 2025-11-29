@@ -1,0 +1,30 @@
+﻿@model NumberRangeFilter
+
+
+<div class="filter-group number-range-filter">
+    <div class="filter-title text-capitalize">
+        @Model.Title <i class="fas fa-chevron-down"></i>
+    </div>
+
+    <div class="filter-content p-lr-1 p-t-1">
+        <div class="range-slider-container">
+            <div class="range-track-bg"></div>
+            <div class="range-track-progress"></div>
+
+            <input type="range" class="range-input min-range"
+                   min="@Model.MinValue" max="@Model.MaxValue" value="@Model.MinValue" step="@Model.Step">
+            <input type="range" class="range-input max-range"
+                   min="@Model.MinValue" max="@Model.MaxValue" value="@Model.MaxValue" step="@Model.Step">
+        </div>
+
+        <div class="range-values">
+            <span class="range-value-display min-value">@Model.MinValue @Model.Unit</span>
+            <span class="range-value-display max-value">@Model.MaxValue @Model.Unit</span>
+        </div>
+
+        <input type="hidden" class="filter-range-number min-input"
+               data-key="@Model.MinRequestKey" value="@Model.MinValue">
+        <input type="hidden" class="filter-range-number max-input"
+               data-key="@Model.MaxRequestKey" value="@Model.MaxValue">
+    </div>
+</div>

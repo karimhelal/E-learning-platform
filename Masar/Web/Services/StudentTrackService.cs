@@ -20,17 +20,17 @@ public class StudentTracksService : IStudentTrackService
         _logger = logger;
     }
 
-    public async Task<StudentTracksData?> GetStudentTracksAsync(int studentId)
+    public async Task<StudentTracksData?> GetStudentTracksAsync(int userId)
     {
         try
         {
-            _logger.LogInformation("Fetching Tracks for student ID: {StudentId}", studentId);
+            _logger.LogInformation("Fetching Tracks for student ID: {StudentId}", userId);
 
-            var studentProfile = await _userRepo.GetStudentProfileAsync(studentId, includeUserBase: true);
+            var studentProfile = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
 
             if (studentProfile == null || studentProfile.User == null)
             {
-                _logger.LogWarning("Student profile not found for ID: {StudentId}", studentId);
+                _logger.LogWarning("Student profile not found for ID: {StudentId}", userId);
                 return null;
             }
 
@@ -41,7 +41,7 @@ public class StudentTracksService : IStudentTrackService
 
             _logger.LogInformation("Found {Count} track enrollments", trackEnrollments.Count);
 
-            var mappedTracks = MapTracks(trackEnrollments, studentId);
+            var mappedTracks = MapTracks(trackEnrollments, userId);
 
             return new StudentTracksData
             {
@@ -59,7 +59,7 @@ public class StudentTracksService : IStudentTrackService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting tracks for student {StudentId}", studentId);
+            _logger.LogError(ex, "Error getting tracks for student {StudentId}", userId);
             return null;
         }
     }

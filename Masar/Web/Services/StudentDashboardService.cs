@@ -1,6 +1,5 @@
 using Core.Entities;
 using Core.RepositoryInterfaces;
-using Microsoft.EntityFrameworkCore;
 using Web.Interfaces;
 
 namespace Web.Services;
@@ -22,23 +21,23 @@ public class StudentDashboardService : IStudentDashboardService
         _logger = logger;
     }
 
-    public async Task<StudentDashboardData?> GetDashboardDataAsync(int studentId)
+    public async Task<StudentDashboardData?> GetDashboardDataAsync(int userId)
     {
         try
         {
-            _logger.LogInformation("Fetching dashboard data for student ID: {StudentId}", studentId);
+            _logger.LogInformation("Fetching dashboard data for user ID: {UserId}", userId);
             
-            var studentProfile = await _userRepo.GetStudentProfileAsync(studentId, includeUserBase: true);
+            var studentProfile = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
 
             if (studentProfile == null)
             {
-                _logger.LogWarning("Student profile is NULL for ID: {StudentId}", studentId);
+                _logger.LogWarning("Student profile is NULL for ID: {StudentId}", userId);
                 return null;
             }
 
             if (studentProfile.User == null)
             {
-                _logger.LogWarning("Student profile found but User is NULL for ID: {StudentId}", studentId);
+                _logger.LogWarning("Student profile found but User is NULL for ID: {StudentId}", userId);
                 return null;
             }
 
@@ -89,7 +88,7 @@ public class StudentDashboardService : IStudentDashboardService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting dashboard data for student {StudentId}", studentId);
+            _logger.LogError(ex, "Error getting dashboard data for student {StudentId}", userId);
             return null;
         }
     }

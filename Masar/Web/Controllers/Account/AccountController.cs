@@ -14,11 +14,12 @@ namespace Web.Controllers.Account
 
         public AccountController(IAuthService authService, SignInManager<User> signInManager)
         {
-            this._authService = authService;
-            this._signInManager = signInManager;
+            _authService = authService;
+            _signInManager = signInManager;
         }
+
         [HttpGet]
-        [Route("/Account/Login")]
+        [Route("~/Account/Login")]
         public IActionResult Login()
         {
             return View();
@@ -83,12 +84,14 @@ namespace Web.Controllers.Account
             var (result,user) = await _authService.RegisterUserAsync(RegisterDto);
             if(result.Succeeded)
             {
-                if(user==null)
+                if(user == null)
                 {
                     ModelState.AddModelError(string.Empty, "Registration succeeded but user data is missing.");
                     return View(registerViewModel);
                 }
-                await _signInManager.SignInAsync(user,registerViewModel.RememberMe);
+
+                await _signInManager.SignInAsync(user, registerViewModel.RememberMe);
+
                 return RedirectToAction("Index", "Home");
             }
 
@@ -108,6 +111,7 @@ namespace Web.Controllers.Account
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+
             return View(registerViewModel);
         }
 

@@ -8,7 +8,7 @@ namespace Web.Interfaces
     /// </summary>
     public interface IStudentTrackDetailsService
     {
-        Task<StudentTrackDetailsData?> GetTrackDetailsAsync(int studentId, int trackId);
+        Task<StudentTrackDetailsData?> GetTrackDetailsAsync(int userId, int trackId);
     }
 }
 

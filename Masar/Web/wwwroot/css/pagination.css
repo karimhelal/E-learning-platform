@@ -1,0 +1,76 @@
+﻿/* ========================================
+   PAGINATION STYLES
+   ======================================== */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.pagination-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--ui-font);
+}
+
+    /* Hover State */
+    .pagination-btn:hover:not(.disabled):not(.active) {
+        border-color: var(--accent-purple);
+        color: var(--text-primary);
+        background: rgba(124, 58, 237, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Active State (Current Page) */
+    .pagination-btn.active {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+
+    /* Disabled State */
+    .pagination-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: var(--secondary-bg);
+        border-color: transparent;
+    }
+
+/* Dots Separator */
+.pagination-dots {
+    color: var(--text-muted);
+    padding: 0 0.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .pagination-container {
+        gap: 0.25rem;
+        margin-top: 2rem;
+    }
+
+    .pagination-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+}

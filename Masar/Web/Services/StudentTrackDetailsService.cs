@@ -19,12 +19,12 @@ namespace Web.Services
             _logger = logger;
         }
 
-        public async Task<StudentTrackDetailsData?> GetTrackDetailsAsync(int studentId, int trackId)
+        public async Task<StudentTrackDetailsData?> GetTrackDetailsAsync(int userId, int trackId)
         {
             try
             {
                 // Fetch student with base info
-                var student = await _userRepo.GetStudentProfileAsync(studentId, includeUserBase: true);
+                var student = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
 
                 if (student == null)
                     return null;

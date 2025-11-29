@@ -11,17 +11,21 @@ public class StudentController : Controller
     private readonly IStudentCoursesService _coursesService;
     private readonly IStudentTrackService _tracksService;
     private readonly IStudentTrackDetailsService _trackDetailsService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly int userId = 2;
 
     public StudentController(
         IStudentDashboardService dashboardService,
         IStudentCoursesService coursesService,
         IStudentTrackService tracksService,
-        IStudentTrackDetailsService trackDetailsService)
+        IStudentTrackDetailsService trackDetailsService,
+        ICurrentUserService currentUserService)
     {
         _dashboardService = dashboardService;
         _coursesService = coursesService;
         _tracksService = tracksService;
         _trackDetailsService = trackDetailsService;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet("/student/dashboard")]
@@ -29,8 +33,8 @@ public class StudentController : Controller
     {
         ViewBag.Title = "Student Dashboard | Masar";
 
-        var studentId = 1001; // TODO : Replace with actual logged-in student ID retrieval
-        var dashboardData = await _dashboardService.GetDashboardDataAsync(studentId);
+        //var userId = 2; // TODO : Replace with actual logged-in student ID retrieval
+        var dashboardData = await _dashboardService.GetDashboardDataAsync(userId);
 
         if (dashboardData == null)
         {
@@ -53,8 +57,8 @@ public class StudentController : Controller
     {
         ViewBag.Title = "My Courses | Masar";
 
-        var studentId = 1001; // TODO: Replace with actual logged-in student ID retrieval
-        var coursesData = await _coursesService.GetMyCoursesAsync(studentId);
+        //var userId = 2; // TODO: Replace with actual logged-in student ID retrieval
+        var coursesData = await _coursesService.GetMyCoursesAsync(userId);
 
         if (coursesData == null)
         {
@@ -75,8 +79,8 @@ public class StudentController : Controller
     {
         ViewBag.Title = "My Tracks | Masar";
 
-        var studentId = 1001; // TODO: Replace with actual logged-in student ID
-        var tracksData = await _tracksService.GetStudentTracksAsync(studentId);
+        //var userId = 2; // TODO: Replace with actual logged-in student ID
+        var tracksData = await _tracksService.GetStudentTracksAsync(userId);
 
         if (tracksData == null)
         {
@@ -123,9 +127,9 @@ public class StudentController : Controller
     public async Task<IActionResult> TrackDetails(int trackId)
     {
         ViewBag.Title = "Track Details | Masar";
-        int studentId = 1001; // TODO: replace with actual logged-in student ID
 
-        var data = await _trackDetailsService.GetTrackDetailsAsync(studentId, trackId);
+        //int userId = 2; // TODO: replace with actual logged-in student ID
+        var data = await _trackDetailsService.GetTrackDetailsAsync(userId, trackId);
         if (data == null)
             return NotFound("Track not found or not enrolled");
 
