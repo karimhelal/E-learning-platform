@@ -12,7 +12,9 @@ public class StudentController : Controller
     private readonly IStudentTrackService _tracksService;
     private readonly IStudentTrackDetailsService _trackDetailsService;
     private readonly ICurrentUserService _currentUserService;
-    private readonly int userId = 2;
+    private readonly IStudentCourseDetailsService _courseDetailsService;
+
+    private readonly int userId = 1004;
 
     public StudentController(
         IStudentDashboardService dashboardService,
@@ -52,27 +54,27 @@ public class StudentController : Controller
     }
 
 
-    [HttpGet("/student/my-courses")]
-    public async Task<IActionResult> MyCourses()
-    {
-        ViewBag.Title = "My Courses | Masar";
+    //[HttpGet("/student/my-courses")]
+    //public async Task<IActionResult> MyCourses()
+    //{
+    //    ViewBag.Title = "My Courses | Masar";
 
-        //var userId = 2; // TODO: Replace with actual logged-in student ID retrieval
-        var coursesData = await _coursesService.GetMyCoursesAsync(userId);
+    //    //var userId = 2; // TODO: Replace with actual logged-in student ID retrieval
+    //    var coursesData = await _coursesService.GetMyCoursesAsync(userId);
 
-        if (coursesData == null)
-        {
-            return NotFound("Student profile not found");
-        }
+    //    if (coursesData == null)
+    //    {
+    //        return NotFound("Student profile not found");
+    //    }
 
-        var viewModel = new StudentCoursesViewModel
-        {
-            Data = coursesData,
-            PageTitle = "My Courses"
-        };
+    //    var viewModel = new StudentCoursesViewModel
+    //    {
+    //        Data = coursesData,
+    //        PageTitle = "My Courses"
+    //    };
 
-        return View(viewModel);
-    }
+    //    return View(viewModel);
+    //}
 
     [HttpGet("/student/my-tracks")]
     public async Task<IActionResult> MyTracks()
@@ -142,9 +144,86 @@ public class StudentController : Controller
         return View(vm);
     }
 
+   
+
+
+
+    [HttpGet("/student/my-courses")]
+    public async Task<IActionResult> MyCourses()
+    {
+        ViewBag.Title = "My Courses | Masar";
+
+       // var studentId = 1001; // TODO: Replace with actual logged-in student ID retrieval
+        var coursesData = await _coursesService.GetMyCoursesAsync(userId);
+
+        if (coursesData == null)
+        {
+            return NotFound("Student profile not found");
+        }
+
+        var viewModel = new StudentCoursesViewModel
+        {
+            Data = coursesData,
+            PageTitle = "My Courses"
+        };
+
+        return View(viewModel);
+    }
+
+    [HttpGet("/student/course/{courseId}/details")]
+    public async Task<IActionResult> CourseDetails(int courseId)
+    {
+        ViewBag.Title = "Course Details | Masar";
+
+        var studentId = 1001; // TODO: Get from authenticated user
+        var courseData = await _courseDetailsService.GetCourseDetailsAsync(userId, courseId);
+
+        if (courseData == null)
+        {
+            return NotFound();
+        }
+
+        var viewModel = new StudentCourseDetailsViewModel
+        {
+            Data = courseData,
+            PageTitle = courseData.Title
+        };
+
+        return View(viewModel);
+    }
+
+    [HttpPost("/student/lesson/{lessonId}/toggle")]
+    public async Task<IActionResult> ToggleLessonCompletion(int lessonId, [FromBody] ToggleRequest request)
+    {
+       // var studentId = 1001; // TODO: Get from authenticated user
+
+        var result = await _courseDetailsService.ToggleLessonCompletionAsync(
+            userId,
+            lessonId,
+            request.IsCompleted
+        );
+
+        return Json(new { success = result });
+    }
+
     private string GetGreeting()
     {
         var hour = DateTime.Now.Hour;
         return hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
     }
+
+    public class ToggleRequest
+    {
+        public bool IsCompleted { get; set; }
+    }
+
+
+
 }
+
+
+
+
+
+
+

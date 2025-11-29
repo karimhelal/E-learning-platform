@@ -157,6 +157,44 @@ namespace Web.Controllers.Home
 
 
 
+        [HttpGet("~/course/{courseId:int}")]
+        public async Task<IActionResult> CourseDetails(int courseId)
+        {
+            var courseDetails = await _courseService.GetCourseDetailsByIdAsync(courseId);
+            
+            if (courseDetails == null)
+            {
+                return NotFound("Course not found");
+            }
+
+            var userId = _currentUserService.GetUserId();
+            
+            // TODO: Check if student is enrolled
+            bool isEnrolled = false;
+            int? enrollmentId = null;
+            decimal? progress = null;
+            
+            if (userId > 0)
+            {
+                // Check enrollment status
+                // var enrollment = await _enrollmentService.GetStudentEnrollmentAsync(userId, courseId);
+                // isEnrolled = enrollment != null;
+                // enrollmentId = enrollment?.EnrollmentId;
+                // progress = enrollment?.ProgressPercentage;
+            }
+
+            var viewModel = new CourseDetailsViewModel
+            {
+                Course = courseDetails,
+                PageTitle = courseDetails.Title,
+                IsEnrolled = isEnrolled,
+                StudentEnrollmentId = enrollmentId,
+                ProgressPercentage = progress
+            };
+
+            return View(viewModel);
+        }
+
         public IActionResult Privacy()
         {
             return View();

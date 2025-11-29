@@ -1,0 +1,320 @@
+@model Web.ViewModels.Student.StudentCourseDetailsViewModel
+
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    ViewBag.Title = Model.PageTitle + " | Masar";
+}
+
+<!-- Course Hero -->
+<section class="course-hero">
+    <div class="course-hero-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="/student/dashboard">Dashboard</a>
+            <i class="fas fa-chevron-right"></i>
+            @if (!string.IsNullOrEmpty(Model.Data.TrackName))
+            {
+                <a href="/student/track/@Model.Data.TrackId">@Model.Data.TrackName</a>
+                <i class="fas fa-chevron-right"></i>
+            }
+            <span>@Model.Data.Title</span>
+        </nav>
+
+        <!-- Course Header -->
+        <div class="course-header">
+            <div class="course-info">
+                @if (!string.IsNullOrEmpty(Model.Data.TrackName))
+                {
+                    <span class="course-badge">
+                        <i class="fas fa-route"></i>
+                        <span>@Model.Data.TrackName</span>
+                    </span>
+                }
+                else
+                {
+                    <span class="course-badge">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>@Model.Data.CategoryName</span>
+                    </span>
+                }
+                
+                <h1 class="course-title">@Model.Data.Title</h1>
+                
+                <p class="course-description">
+                    @Model.Data.Description
+                </p>
+
+                <!-- Instructor Info -->
+                <div class="instructor-info">
+                    <div class="avatar avatar-lg instructor-avatar">@Model.Data.InstructorInitials</div>
+                    <div class="instructor-details">
+                        <div class="instructor-label">Instructor</div>
+                        <div class="instructor-name">@Model.Data.InstructorName</div>
+                    </div>
+                </div>
+
+                <!-- Course Meta -->
+                <div class="course-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-book-open"></i>
+                        <span>@Model.Data.TotalModules Modules</span>
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>@Model.Data.TotalLessons Lessons</span>
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>@(Model.Data.TotalDurationMinutes / 60)h @(Model.Data.TotalDurationMinutes % 60)m</span>
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-signal"></i>
+                        <span>@Model.Data.Level.ToString()</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Progress Card -->
+            <div class="course-stats">
+                <div class="progress-card">
+                    <div class="progress-header">
+                        <span class="progress-label">Your Progress</span>
+                        <span class="progress-percentage" id="courseProgressPercent">@((int)Model.Data.ProgressPercentage)%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="courseProgressBar" style="width: @Model.Data.ProgressPercentage%"></div>
+                    </div>
+                    @if (Model.Data.ProgressPercentage < 100)
+                    {
+                        <a href="/student/course/@Model.Data.CourseId/lesson/next" class="btn btn-primary">
+                            <span>Continue Learning</span>
+                            <i class="fas fa-play"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/student/certificates" class="btn btn-success">
+                            <i class="fas fa-certificate"></i>
+                            <span>View Certificate</span>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Content Section -->
+<section class="content-section">
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-tab="overview">
+                <i class="fas fa-info-circle"></i>
+                <span>Overview</span>
+            </button>
+            <button class="tab-btn" data-tab="modules">
+                <i class="fas fa-list"></i>
+                <span>Modules</span>
+            </button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="overview">
+            <div class="overview-grid">
+                <div class="overview-content">
+                    <!-- About Section -->
+                    <div class="overview-section">
+                        <h3 class="section-title">About This Course</h3>
+                        <p class="section-text">
+                            @Model.Data.Description
+                        </p>
+                    </div>
+
+                    <!-- Learning Objectives -->
+                    @if (Model.Data.LearningOutcomes.Any())
+                    {
+                        <div class="overview-section">
+                            <h3 class="section-title">What You'll Learn</h3>
+                            <ul class="objectives-list">
+                                @foreach (var outcome in Model.Data.LearningOutcomes)
+                                {
+                                    <li>
+                                        <i class="fas fa-check-circle"></i>
+                                        <span><strong>@outcome.Title:</strong> @outcome.Description</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+
+                <!-- Overview Sidebar -->
+                <div class="overview-sidebar">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="icon-box icon-box-cyan">
+                                <i class="fas fa-signal"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">@Model.Data.Level.ToString()</div>
+                                <div class="stat-label">Course Level</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="icon-box icon-box-cyan">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">@Model.Data.Language</div>
+                                <div class="stat-label">Course Language</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="icon-box icon-box-green">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div>
+                                <div class="stat-value">@(Model.Data.EnrollmentStatus == "Completed" ? "Yes" : "Upon Completion")</div>
+                                <div class="stat-label">Certificate Included</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modules Tab -->
+        <div class="tab-content" id="modules">
+            <div class="modules-list">
+                @foreach (var module in Model.Data.Modules)
+                {
+                    var isOpen = module.ProgressPercentage > 0 && module.ProgressPercentage < 100;
+                    <div class="module-item @(isOpen ? "open" : "")" data-module-id="@module.ModuleId">
+                        <div class="module-header">
+                            <div class="module-number">@module.ModuleOrder</div>
+                            <div class="module-info">
+                                <h3 class="module-title">@module.ModuleName</h3>
+                                <div class="module-meta">
+                                    <span class="module-meta-item">
+                                        <i class="fas fa-play-circle"></i>
+                                        <span>@module.TotalLessons Lessons</span>
+                                    </span>
+                                    @if (module.AssignmentsCount > 0)
+                                    {
+                                        <span class="module-meta-item">
+                                            <i class="fas fa-tasks"></i>
+                                            <span>@module.AssignmentsCount Assignment@(module.AssignmentsCount > 1 ? "s" : "")</span>
+                                        </span>
+                                    }
+                                    <span class="module-meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>@(module.DurationMinutes / 60)h @(module.DurationMinutes % 60)m</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="module-progress">
+                                <div class="module-progress-bar">
+                                    <div class="module-progress-fill @(module.ProgressPercentage == 100 ? "completed" : "")" 
+                                         style="width: @module.ProgressPercentage%"></div>
+                                </div>
+                                <div class="module-progress-text">@module.CompletedLessons/@module.TotalLessons Completed</div>
+                            </div>
+                            <div class="module-toggle">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="lessons-list">
+                            @foreach (var lesson in module.Lessons)
+                            {
+                                var iconClass = lesson.ContentType == Core.Entities.Enums.LessonContentType.Video ? "video" : "article";
+                                var iconName = lesson.ContentType == Core.Entities.Enums.LessonContentType.Video ? "fa-play" : "fa-file-alt";
+                                var durationText = lesson.ContentType == Core.Entities.Enums.LessonContentType.Video 
+                                    ? $"{lesson.DurationMinutes} minutes" 
+                                    : $"{lesson.DurationMinutes} minutes read";
+                                
+                                <div class="lesson-item" data-lesson-id="@lesson.LessonId">
+                                    <div class="lesson-icon @iconClass">
+                                        <i class="fas @iconName"></i>
+                                    </div>
+                                    <div class="lesson-info" onclick="window.location.href='/student/course/@Model.Data.CourseId/lesson/@lesson.LessonId'">
+                                        <div class="lesson-title">@lesson.LessonName</div>
+                                        <div class="lesson-duration">@durationText</div>
+                                    </div>
+                                    <button class="lesson-status @(lesson.IsCompleted ? "completed" : "")" 
+                                            type="button"
+                                            onclick="toggleLessonCompletion(@lesson.LessonId, this, event)">
+                                        @if (lesson.IsCompleted)
+                                        {
+                                            <i class="fas fa-check"></i>
+                                        }
+                                    </button>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="module-actions">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/course-details.css" />
+}
+
+@section Scripts {
+    <script src="~/js/course-details.js"></script>
+    <script>
+        // Toggle lesson completion
+        async function toggleLessonCompletion(lessonId, button, event) {
+            event.stopPropagation(); // Prevent navigation
+            
+            const isCompleted = button.classList.contains('completed');
+            
+            try {
+                const response = await fetch(`/student/lesson/${lessonId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        isCompleted: !isCompleted
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Toggle button state
+                    if (isCompleted) {
+                        button.classList.remove('completed');
+                        button.innerHTML = '';
+                    } else {
+                        button.classList.add('completed');
+                        button.innerHTML = '<i class="fas fa-check"></i>';
+                    }
+                    
+                    // Update all progress indicators
+                    location.reload();
+                } else {
+                    alert('Failed to update lesson status');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to update lesson status');
+            }
+        }
+    </script>
+}
