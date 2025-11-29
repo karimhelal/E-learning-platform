@@ -6,5 +6,5 @@ namespace BLL.Interfaces.Instructor;
 
 public interface IInstructorCoursesService
 {
-    Task<PagedResult<InstructorCourseDto>> GetInstructorCoursesPagedAsync(int instructorId, PagingRequest request);
+    Task<PagedResultDto<InstructorCourseDto>> GetInstructorCoursesPagedAsync(int instructorId, PagingRequestDto request);
 }

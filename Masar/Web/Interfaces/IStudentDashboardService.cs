@@ -5,7 +5,7 @@ namespace Web.Interfaces;
 /// </summary>
 public interface IStudentDashboardService
 {
-    Task<StudentDashboardData?> GetDashboardDataAsync(int studentId);
+    Task<StudentDashboardData?> GetDashboardDataAsync(int userId);
 }
 
 public class StudentDashboardData

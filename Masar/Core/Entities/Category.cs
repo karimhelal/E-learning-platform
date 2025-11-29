@@ -6,7 +6,7 @@ namespace Core.Entities;
 public class Category
 {
     [Key]
-    [Display(Name = "Learning Entity Category ID")]
+    [Display(Name = "Category ID")]
     [Column("category_id")]
     public int CategoryId { get; set; }
 

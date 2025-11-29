@@ -1,4 +1,6 @@
-﻿namespace Web.ViewModels.Instructor;
+﻿using Web.ViewModels.Misc;
+
+namespace Web.ViewModels.Instructor;
 
 public class PagedResultViewModel<T>
 {

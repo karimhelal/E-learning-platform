@@ -4,6 +4,7 @@ using BLL.Interfaces.Instructor;
 using Microsoft.AspNetCore.Mvc;
 using Web.ViewModels.Instructor;
 using Web.ViewModels.Instructor.Dashboard;
+using Web.ViewModels.Misc;
 
 namespace Web.Controllers.Instructor;
 
@@ -13,6 +14,7 @@ public class InstructorController : Controller
     private readonly IInstructorCoursesService _coursesService;
     private readonly IInstructorProfileService _profileService;
     private readonly RazorViewToStringRenderer _razorRenderer;
+    private readonly int instructorId = 1001;     // TODO: Get from logged in user context
 
     public InstructorController(
         IInstructorDashboardService dashboardService, 
@@ -28,12 +30,11 @@ public class InstructorController : Controller
 
 
     [HttpGet("/instructor/dashboard")]
-    [HttpGet("/")]
     public async Task<IActionResult> Dashboard()
     {
         ViewBag.Title = "Instructor Dashboard | Masar";
 
-        var instructorId = 3;     // TODO: Get from logged in user context
+        //var instructorId = 1001;     // TODO: Get from logged in user context
         var dashboardData = await _dashboardService.GetInstructorDashboardAsync(instructorId);
 
         var viewModel = new InstructorDashboardViewModel
@@ -103,9 +104,9 @@ public class InstructorController : Controller
     {
         ViewBag.Title = "My Courses | Masar";
         
-        var userId = 1;     // TODO: Get from logged in user context
-        var initialRequest = new PagingRequest() { CurrentPage = 1, PageSize = 4 }; // Default paging request
-        var coursesData = await _coursesService.GetInstructorCoursesPagedAsync(userId, initialRequest);
+        //var instructorId = 1001;     // TODO: Get from logged in user context
+        var initialRequest = new PagingRequestDto() { CurrentPage = 1, PageSize = 3 }; // Default paging request
+        var coursesData = await _coursesService.GetInstructorCoursesPagedAsync(instructorId, initialRequest);
         
         var viewModel = new InstructorCoursesViewModel
         {
@@ -113,9 +114,10 @@ public class InstructorController : Controller
             {
                 Settings = new PaginationSettingsViewModel
                 {
-                    CurrentPage = coursesData.CurrentPage,
-                    PageSize = coursesData.PageSize,
-                    TotalPages = coursesData.TotalPages
+                    CurrentPage = coursesData.Settings.CurrentPage,
+                    PageSize = coursesData.Settings.PageSize,
+                    TotalPages = coursesData.Settings.TotalPages,
+                    TotalCount = coursesData.Settings.TotalCount,
                 },
 
                 Items = coursesData.Items.Select(c => new InstructorCourseViewModel
@@ -126,15 +128,16 @@ public class InstructorController : Controller
                     ThumbnailImageUrl = c.ThumbnailImageUrl,
                     Status = c.Status,
 
-                    CreatedDate = c.CreatedDate.ToString("MM-dd-yyyy"),
-                    LastUpdatedDate = c.LastUpdatedDate.ToString("MM-dd-yyyy"),
+                    CreatedDate = c.CreatedDate.ToString("dd-MM-yyyy"),
+                    LastUpdatedDate = c.LastUpdatedDate.ToString("dd-MM-yyyy"),
 
                     Level = c.Level.ToString(),
                     MainCategory = c.MainCategory.Name ?? "Undefined",
 
                     NumberOfStudents = c.NumberOfStudents,
                     NumberOfModules = c.NumberOfModules,
-                    NumberOfMinutes = c.NumberOfMinutes,
+                    NumberOfHours = c.NumberOfMinutes / 60,
+                    NumberOfMinutes = c.NumberOfMinutes % 60,
                     AverageRating = c.AverageRating
                 })
             },
@@ -146,19 +149,21 @@ public class InstructorController : Controller
         return View(viewModel);
     }
 
+
     [HttpPost("/instructor/my-courses")]
-    public async Task<IActionResult> GetCoursesPartial([FromBody] PagingRequest request)
+    public async Task<IActionResult> GetCoursesPartial([FromBody] PagingRequestDto request)
     {
-        var userId = 1;     // TODO: Get from logged in user context
-        var coursesData = await _coursesService.GetInstructorCoursesPagedAsync(userId, request);
+        //var instructorId = 1001;     // TODO: Get from logged in user context
+        var coursesData = await _coursesService.GetInstructorCoursesPagedAsync(instructorId, request);
         
         var pagedResult = new PagedResultViewModel<InstructorCourseViewModel>
         {
             Settings = new PaginationSettingsViewModel
             {
-                CurrentPage = coursesData.CurrentPage,
-                PageSize = coursesData.PageSize,
-                TotalPages = coursesData.TotalPages
+                CurrentPage = coursesData.Settings.CurrentPage,
+                PageSize = coursesData.Settings.PageSize,
+                TotalPages = coursesData.Settings.TotalPages,
+                TotalCount = coursesData.Settings.TotalCount,
             },
 
             Items = coursesData.Items.Select(c => new InstructorCourseViewModel
@@ -177,7 +182,8 @@ public class InstructorController : Controller
 
                 NumberOfStudents = c.NumberOfStudents,
                 NumberOfModules = c.NumberOfModules,
-                NumberOfMinutes = c.NumberOfMinutes,
+                NumberOfHours = c.NumberOfMinutes / 60,
+                NumberOfMinutes = c.NumberOfMinutes % 60,
                 AverageRating = c.AverageRating
             })
         };
@@ -197,7 +203,7 @@ public class InstructorController : Controller
     {
         ViewBag.Title = "Instructor Profile | Masar";
 
-        var instructorId = 3; // TODO: Get from logged in user context
+        //var instructorId = 1001; // TODO: Get from logged in user context
         var profileData = await _profileService.GetInstructorProfileAsync(instructorId);
 
         if (profileData == null)

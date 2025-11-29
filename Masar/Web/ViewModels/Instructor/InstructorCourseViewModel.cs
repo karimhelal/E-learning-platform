@@ -19,7 +19,7 @@ public class InstructorCourseViewModel
     public int NumberOfStudents { get; set; }
     public int NumberOfModules { get; set; }
     public int NumberOfMinutes { get; set; }
-    public int NumberOfHours => Math.Max(1, NumberOfMinutes / 60);
+    public int NumberOfHours { get; set; }
     public float AverageRating { get; set; }
 
 }

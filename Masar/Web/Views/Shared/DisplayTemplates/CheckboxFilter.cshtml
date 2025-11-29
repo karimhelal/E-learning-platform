@@ -1,0 +1,29 @@
+﻿@model CheckboxFilter
+
+@{
+    if (Model == null)
+        return;
+    var filterGroup = Model;
+}
+
+<div class="filter-group checkbox-filter">
+    <div class="filter-title text-capitalize">
+        @filterGroup.Title <i class="fas fa-chevron-down"></i>
+    </div>
+        <div class="filter-options">
+            @foreach (var filterOption in filterGroup.FilterOptions)
+            {
+                <label class="filter-option-row text-capitalize">
+                    <input  type="checkbox" 
+                            class="filter-checkbox"
+                            value="@filterOption.Value"
+                            data-key="@filterGroup.RequestKey"
+                            @(filterOption.IsChecked ? "checked" : "") />
+
+                    <span class="checkbox-custom"></span>
+                    @filterOption.Label
+                    <span class="option-count">@filterOption.Count</span>
+                </label>
+            }
+        </div>
+</div>

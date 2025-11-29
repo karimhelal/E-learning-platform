@@ -21,7 +21,15 @@ var builder = WebApplication.CreateBuilder(args);
 // ========================================
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+
+
+// Current User Service
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+
 // ========================================
 // BLL SERVICES (Team's layer)
 // ========================================
@@ -35,7 +43,9 @@ builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>(
 // ========================================
 builder.Services.AddScoped<IStudentDashboardService, StudentDashboardService>();
 builder.Services.AddScoped<IStudentCoursesService, StudentCoursesService>();
-builder.Services.AddScoped<IStudentCourseDetailsService, StudentCourseDetailsService>();
+builder.Services.AddScoped<IStudentTrackService, StudentTracksService>();
+builder.Services.AddScoped<IStudentTrackDetailsService, StudentTrackDetailsService>();
+
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -105,6 +115,23 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Instructor}/{action=Dashboard}"
 );
+
+
+// --- Seed roles and admin user ---
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+    string[] roles = { "Student", "Instructor", "Admin" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole<int>(role));
+    }
+}
+
 
 app.Run();
 

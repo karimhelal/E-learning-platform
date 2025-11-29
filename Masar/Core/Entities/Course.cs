@@ -33,11 +33,6 @@ public class Course : LearningEntity
     [Column("thumbnail_image_url")]
     public string? ThumbnailImageUrl { get; set; }
 
-    [Required(ErrorMessage = "{0} is required")]
-    [Column("language")]
-    [Display(Name = "Course Language")]
-    public string Language { get; set; }
-
     [Column("difficulty_level")]
     [Display(Name = "Difficulty Level")]
     public CourseLevel Level { get; set; } = CourseLevel.Undefined;

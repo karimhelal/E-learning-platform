@@ -1,8 +1,5 @@
-@model Web.ViewModels.Student.StudentDashboardViewModel
+@model StudentDashboardViewModel
 
-@{
-    Layout = "~/Views/Shared/_StudentLayout.cshtml";
-}
 
 <!-- Page Header -->
 <section class="page-header">
@@ -67,91 +64,93 @@
         </div>
     </div>
 
-    <!-- Main Dashboard Content -->
-    <div class="dashboard-full-width">
-        <!-- Continue Learning Section -->
-        <div class="dashboard-section">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-play-circle"></i>
-                    Continue Learning
-                </h2>
-                <a href="/student/my-courses" class="section-link">
-                    View All
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Left Column -->
+        <div class="dashboard-main">
+            <!-- Continue Learning Section -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-play-circle"></i>
+                        Continue Learning
+                    </h2>
+                    <a href="~/student/my-courses" class="section-link">
+                        View All
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
 
-            <div class="courses-grid">
-                @if (Model.Data.ContinueLearningCourses.Any())
-                {
-                    @foreach (var course in Model.Data.ContinueLearningCourses)
+                <div class="courses-grid">
+                    @if (Model.Data.ContinueLearningCourses.Any())
                     {
-                        <div class="course-card">
-                            <div class="course-card-header">
-                                <span class="badge @course.CategoryBadgeClass">
-                                    <i class="fas @course.CategoryIcon"></i>
-                                    @course.CategoryName
-                                </span>
-                            </div>
-                            <div class="course-card-body">
-                                <h3 class="course-card-title">@course.Title</h3>
-                                <p class="course-card-description">
-                                    @course.Description
-                                </p>
-                                <div class="course-card-meta">
-                                    <div class="meta-item">
-                                        <i class="fas fa-user"></i>
-                                        <span>@course.InstructorName</span>
+                        @foreach (var course in Model.Data.ContinueLearningCourses)
+                        {
+                            <div class="course-card">
+                                <div class="course-card-header">
+                                    <span class="badge @course.CategoryBadgeClass">
+                                        <i class="fas @course.CategoryIcon"></i>
+                                        @course.CategoryName
+                                    </span>
+                                </div>
+                                <div class="course-card-body">
+                                    <h3 class="course-card-title">@course.Title</h3>
+                                    <p class="course-card-description">
+                                        @course.Description
+                                    </p>
+                                    <div class="course-card-meta">
+                                        <div class="meta-item">
+                                            <i class="fas fa-user"></i>
+                                            <span>@course.InstructorName</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span>@course.DurationHours Hours</span>
+                                        </div>
                                     </div>
-                                    <div class="meta-item">
-                                        <i class="fas fa-clock"></i>
-                                        <span>@course.DurationHours Hours</span>
+                                    <div class="course-card-progress">
+                                        <div class="progress-header">
+                                            <span class="progress-label">Progress</span>
+                                            <span class="progress-percentage">@course.ProgressPercentage%</span>
+                                        </div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar" style="width: @course.ProgressPercentage%"></div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="course-card-progress">
-                                    <div class="progress-header">
-                                        <span class="progress-label">Progress</span>
-                                        <span class="progress-percentage">@course.ProgressPercentage%</span>
-                                    </div>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-bar" style="width: @course.ProgressPercentage%"></div>
-                                    </div>
+                                <div class="course-card-footer">
+                                    <a href="~/student/course/@course.CourseId" class="btn btn-primary btn-block">
+                                        <span>Continue Course</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                    </a>
                                 </div>
                             </div>
-                            <div class="course-card-footer">
-                                <a href="/student/course/@course.CourseId" class="btn btn-primary btn-block">
-                                    <span>Continue Course</span>
-                                    <i class="fas fa-arrow-right"></i>
-                                </a>
-                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-book-open"></i>
+                            <p>No courses in progress. <a href="~/browse-courses">Browse courses</a> to get started!</p>
                         </div>
                     }
-                }
-                else
-                {
-                    <div class="empty-state">
-                        <i class="fas fa-book-open"></i>
-                        <p>No courses in progress. <a href="/student/browse-courses">Browse courses</a> to get started!</p>
-                    </div>
-                }
-            </div>
-        </div>
-
-        <!-- My Tracks Section -->
-        <div class="dashboard-section">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-route"></i>
-                    My Learning Tracks
-                </h2>
-                <a href="/student/my-tracks" class="section-link">
-                    View All
-                    <i class="fas fa-arrow-right"></i>
-                </a>
+                </div>
             </div>
 
-            <div class="tracks-list">
+            <!-- My Tracks Section -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-route"></i>
+                        My Learning Tracks
+                    </h2>
+                    <a href="~/student/my-tracks" class="section-link">
+                        View All
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="tracks-list">
                 @if (Model.Data.EnrolledTracks.Any())
                 {
                     @foreach (var track in Model.Data.EnrolledTracks)
@@ -195,7 +194,7 @@
                                     <span class="progress-text">@((int)track.ProgressPercentage)%</span>
                                 </div>
                             </div>
-                            <a href="/student/track/@track.TrackId" class="track-link">
+                            <a href="~/student/track/@track.TrackId" class="track-link">
                                 <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
@@ -205,11 +204,179 @@
                 {
                     <div class="empty-state">
                         <i class="fas fa-route"></i>
-                        <p>No tracks enrolled yet. <a href="/student/browse-tracks">Explore tracks</a> to start learning!</p>
+                        <p>No tracks enrolled yet. <a href="~/browse-tracks">Explore tracks</a> to start learning!</p>
                     </div>
                 }
             </div>
+            </div>
         </div>
+
+        <!-- Right Sidebar -->
+        <aside class="dashboard-sidebar">
+            <!-- Recent Activity -->
+            <div class="sidebar-widget">
+                <h3 class="widget-title">
+                    <i class="fas fa-clock"></i>
+                    Recent Activity
+                </h3>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="icon-box icon-box-green">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="activity-info">
+                            <p class="activity-text">
+                                Completed lesson:
+                                <strong>React Hooks</strong>
+                            </p>
+                            <span class="activity-time">2 hours ago</span>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="icon-box icon-box-purple">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="activity-info">
+                            <p class="activity-text">
+                                Earned
+                                <strong>Quick Learner</strong>
+                                badge
+                            </p>
+                            <span class="activity-time">Yesterday</span>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="icon-box icon-box-orange">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="activity-info">
+                            <p class="activity-text">
+                                Received certificate for
+                                <strong>JavaScript Basics</strong>
+                            </p>
+                            <span class="activity-time">2 days ago</span>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="icon-box icon-box-cyan">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="activity-info">
+                            <p class="activity-text">
+                                Started new course:
+                                <strong>
+                                    Python for Data
+                                    Analysis
+                                </strong>
+                            </p>
+                            <span class="activity-time">3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Assignments -->
+            <div class="sidebar-widget">
+                <h3 class="widget-title">
+                    <i class="fas fa-tasks"></i>
+                    Upcoming Assignments
+                </h3>
+                <div class="assignments-list">
+                    <div class="assignment-item">
+                        <div class="assignment-header">
+                            <h4 class="assignment-title">
+                                Build a Redux Store
+                            </h4>
+                            <span class="badge badge-orange">Due in 2 days</span>
+                        </div>
+                        <p class="assignment-course">
+                            Advanced React & Redux
+                        </p>
+                    </div>
+
+                    <div class="assignment-item">
+                        <div class="assignment-header">
+                            <h4 class="assignment-title">
+                                Data Visualization Project
+                            </h4>
+                            <span class="badge badge-red">Due in 5 days</span>
+                        </div>
+                        <p class="assignment-course">
+                            Python for Data Analysis
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="sidebar-widget">
+                <h3 class="widget-title">
+                    <i class="fas fa-trophy"></i>
+                    Recent Achievements
+                </h3>
+                <div class="badges-grid">
+                    <div class="badge-item"
+                         title="Completed 5 courses">
+                        <div class="badge-icon"
+                             style="
+                                                background: linear-gradient(
+                                                    135deg,
+                                                    #f59e0b,
+                                                    #ef4444
+                                                );
+                                            ">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <span class="badge-name">On Fire</span>
+                    </div>
+                    <div class="badge-item"
+                         title="7 day streak">
+                        <div class="badge-icon"
+                             style="
+                                                background: linear-gradient(
+                                                    135deg,
+                                                    #10b981,
+                                                    #06b6d4
+                                                );
+                                            ">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <span class="badge-name">Consistent</span>
+                    </div>
+                    <div class="badge-item"
+                         title="Completed track">
+                        <div class="badge-icon"
+                             style="
+                                                background: linear-gradient(
+                                                    135deg,
+                                                    #7c3aed,
+                                                    #ec4899
+                                                );
+                                            ">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <span class="badge-name">Expert</span>
+                    </div>
+                    <div class="badge-item"
+                         title="Helped others">
+                        <div class="badge-icon"
+                             style="
+                                                background: linear-gradient(
+                                                    135deg,
+                                                    #3b82f6,
+                                                    #06b6d4
+                                                );
+                                            ">
+                            <i class="fas fa-hands-helping"></i>
+                        </div>
+                        <span class="badge-name">Helper</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
 </section>
 

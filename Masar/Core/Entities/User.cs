@@ -62,8 +62,8 @@ public class User : IdentityUser<int>
     public virtual StudentProfile? StudentProfile { get; set; }
     public virtual InstructorProfile? InstructorProfile { get; set; }
 
-    //public User()
-    //{
-    //    Role = UserRoles.Student;
-    //}
+    public User() : base()
+    {
+        StudentProfile = new StudentProfile();
+    }
 }

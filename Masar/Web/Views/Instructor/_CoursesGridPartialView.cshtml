@@ -82,7 +82,10 @@
                         </div>
                         <div class="stat-info">
                             <div class="stat-value">
-                                @course.NumberOfHours<span>h</span> @course.NumberOfMinutes<span>m</span>
+                                @if(course.NumberOfHours > 0) {
+                                    @course.NumberOfHours<span>h</span> 
+                                }
+                                @course.NumberOfMinutes<span>m</span>
                             </div>
                             <div class="stat-label">
                                 Duration

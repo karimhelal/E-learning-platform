@@ -21,17 +21,17 @@ public class StudentCoursesService : IStudentCoursesService
         _logger = logger;
     }
 
-    public async Task<StudentCoursesData?> GetMyCoursesAsync(int studentId)
+    public async Task<StudentCoursesData?> GetMyCoursesAsync(int userId)
     {
         try
         {
-            _logger.LogInformation("Fetching courses for student ID: {StudentId}", studentId);
+            _logger.LogInformation("Fetching courses for student ID: {StudentId}", userId);
             
-            var studentProfile = await _userRepo.GetStudentProfileAsync(studentId, includeUserBase: true);
+            var studentProfile = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
 
             if (studentProfile == null || studentProfile.User == null)
             {
-                _logger.LogWarning("Student profile not found for ID: {StudentId}", studentId);
+                _logger.LogWarning("Student profile not found for ID: {StudentId}", userId);
                 return null;
             }
 
@@ -58,7 +58,7 @@ public class StudentCoursesService : IStudentCoursesService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting courses for student {StudentId}", studentId);
+            _logger.LogError(ex, "Error getting courses for student {StudentId}", userId);
             return null;
         }
     }

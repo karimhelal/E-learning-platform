@@ -24,6 +24,5 @@ public class InstructorCourseDto
     public int NumberOfStudents { get; set; }
     public int NumberOfModules { get; set; }
     public int NumberOfMinutes { get; set; }
-    public int NumberOfHours => Math.Max(1, NumberOfMinutes / 60);
     public float AverageRating { get; set; }
 }

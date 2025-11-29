@@ -1,0 +1,183 @@
+﻿@model BrowseCoursesViewModel
+
+@{
+    ViewBag.Title = Model.PageTitle;
+}
+
+<main class="public-main">
+    <section class="page-header header-hero public-hero">
+        <div class="header-glow-bg"></div>
+        <div class="page-header-container">
+            <div class="header-content fade-in">
+                <div class="page-badge">
+                    <i class="fas fa-rocket"></i> Start Learning Today
+                </div>
+
+                <h1 class="page-title">
+                    Unlock Your Potential<br />
+                    with <span class="text-gradient">Masar</span>
+                </h1>
+
+                <p class="page-subtitle">
+                    Access our library of
+                    <span class="highlight-code">500+</span>
+                    industry-standard courses. From coding to design.
+                </p>
+            </div>
+
+            <div class="header-visuals slide-in">
+                <div class="hero-stat-card float-slow">
+                    <div class="hero-icon icon-box-purple">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="hero-stat-info">
+                        <span class="hero-number">Dev</span>
+                        <span class="hero-label">Development</span>
+                    </div>
+                </div>
+
+                <div class="hero-stat-card float-fast">
+                    <div class="hero-icon icon-box-cyan">
+                        <i class="fas fa-pen-nib"></i>
+                    </div>
+                    <div class="hero-stat-info">
+                        <span class="hero-number">UX</span>
+                        <span class="hero-label">Design</span>
+                    </div>
+                </div>
+
+                <div class="hero-stat-card float-medium">
+                    <div class="hero-icon icon-box-orange">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="hero-stat-info">
+                        <span class="hero-number">Cert</span>
+                        <span class="hero-label">Certified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="explore-container">
+        <aside class="filter-sidebar hidden" id="filterSidebar">
+            <button class="filter-close-btn" id="closeFilter">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="filter-header">
+                <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+                <button class="reset-btn">Reset All</button>
+            </div>
+            <div class="filter-groups-container">
+                <partial name="_FilterGroupsPartialView" model="@Model.Data.Settings.FilterGroups" />
+            </div>
+        </aside>
+
+        <div class="filter-overlay" id="filterOverlay"></div>
+
+        <div class="results-area">
+            <div class="results-toolbar">
+                <div style="display: flex; gap: 10px">
+                    <button class="mobile-filter-trigger"
+                            id="openFilter">
+                        <i class="fas fa-sliders-h"></i> Filters
+                    </button>
+
+                    <button class="btn btn-secondary btn-small desktop-filter-toggle"
+                            id="toggleSidebar">
+                        <i class="fas fa-columns"></i>
+                        <span id="toggleText">Show Filters</span>
+                    </button>
+                </div>
+
+                <div class="toolbar-search">
+                    <div class="search-box-large"
+                         style="padding: 0.6rem 1rem">
+                        <i class="fas fa-search"></i>
+                        <input type="text"
+                               placeholder="Search courses..." />
+                    </div>
+                </div>
+
+                <div style="
+                            display: flex;
+                            gap: 1rem;
+                            align-items: center;
+                            ">
+                    <div class="view-toggle-group">
+                        <button class="view-btn active"
+                                id="gridViewBtn"
+                                title="Grid View">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-btn"
+                                id="listViewBtn"
+                                title="List View">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+
+                    <div class="filter-dropdown" id="sortByContainer">
+                        <button class="filter-dropdown-btn" style="min-width: 180px">
+                            <span id="sortByDisplay">Creation Date</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+
+                        <div class="filter-dropdown-menu">
+                            <button class="filter-option" data-value="title">A-Z</button>
+                            <button class="filter-option active" data-value="creationDate">Creation Date</button>
+                            <button class="filter-option" data-value="students">Popularity</button>
+                            <button class="filter-option" data-value="rate">Rating</button>
+                            <button class="filter-option" data-value="reviews">Reviews</button>
+                        </div>
+
+                        <input type="hidden" id="sortFilter" value="creationDate" />
+                    </div>
+
+                    <div class="filter-dropdown" id="sortOrderContainer">
+                        <button class="filter-dropdown-btn" style="min-width: 150px">
+                            <span id="sortOrderDisplay">Descending</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+
+                        <div class="filter-dropdown-menu">
+                            <button class="filter-option" data-value="asc">Ascending</button>
+                            <button class="filter-option active" data-value="desc">Descending</button>
+                        </div>
+
+                        <input type="hidden" id="sortOrder" value="desc" />
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="results-info">
+                <p class="results-count">
+                    Showing <strong>@Model.Data.Settings.PaginationSettings.TotalCount</strong> courses
+                </p>
+            </div>
+
+            <div class="courses-catalog">
+                <partial name="_CoursesGridBrowsePartialView" model="@Model.Data.Items" />
+            </div>
+
+            <!-- Pagination Section -->
+            <div class="pagination-container">
+                <partial name="_PaginationPartialView" model="@Model.Data.Settings.PaginationSettings" />
+            </div>
+        </div>
+    </div>
+</main>
+
+
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/Home/browse-courses.css" />
+    <link rel="stylesheet" href="~/css/pagination.css" />
+}
+
+@section Scripts {
+    <script src="~/js/Home/browse-courses.js" asp-append-version="true"></script>
+}
+

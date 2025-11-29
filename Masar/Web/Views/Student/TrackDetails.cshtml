@@ -1,0 +1,307 @@
+@model Web.ViewModels.Student.StudentTrackDetailsViewModel
+
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    var completedCourses = Model.Data.Courses.Count(c => c.ProgressPercentage >= 100);
+    var totalCourses = Model.Data.Courses.Count;
+}
+
+<!-- Track Hero Section -->
+<section class="track-hero">
+    <div class="track-hero-bg"></div>
+    <div class="track-hero-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/student/my-tracks" class="breadcrumb-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to My Tracks
+            </a>
+        </div>
+
+        <div class="track-hero-content">
+            <div class="track-hero-left">
+                <div class="track-icon-wrapper">
+                    <div class="track-icon-large">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                </div>
+                <div class="track-info">
+                    <h1 class="track-title">@Model.Data.Title</h1>
+                    <p class="track-description">@Model.Data.Description</p>
+                    <div class="track-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-book-open"></i>
+                            <span>@totalCourses Courses</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>@Model.Data.Courses.Sum(c => c.DurationHours) Hours Total</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>@completedCourses of @totalCourses Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Widget -->
+            <div class="track-progress-widget">
+                <div class="progress-circle">
+                    <svg viewBox="0 0 100 100" style="transform: rotate(-90deg)">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border-color)" stroke-width="3"></circle>
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="url(#gradient)" stroke-width="3"
+                            stroke-dasharray="@(282.7 * (double)Model.Data.TotalProgress / 100) 282.7"
+                            style="transition: stroke-dasharray 0.5s ease;">
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:var(--accent-purple);stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:var(--accent-cyan);stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </circle>
+                    </svg>
+                    <div class="progress-center">
+                        <span class="progress-percent">@((int)Model.Data.TotalProgress)%</span>
+                        <span class="progress-text">Complete</span>
+                    </div>
+                </div>
+                <div class="widget-stats">
+                    <div class="widget-stat">
+                        <span class="widget-stat-value">@completedCourses</span>
+                        <span class="widget-stat-label">Completed</span>
+                    </div>
+                    <div class="widget-stat">
+                        <span class="widget-stat-value">@(totalCourses - completedCourses)</span>
+                        <span class="widget-stat-label">Remaining</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Track Content -->
+<section class="track-content">
+    <div class="content-container">
+        
+        <!-- Main Column: Learning Path -->
+        <div>
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-route"></i>
+                        Learning Path
+                    </h2>
+                    <p class="section-description">Complete each course in order to master the track</p>
+                </div>
+
+                <div class="learning-path">
+                    @if (Model.Data.Courses.Any())
+                    {
+                        @foreach (var course in Model.Data.Courses)
+                        {
+                            var isCompleted = course.ProgressPercentage >= 100;
+                            var statusClass = isCompleted ? "completed" : "in-progress";
+                            var stepNumber = Model.Data.Courses.IndexOf(course) + 1;
+
+                            <div class="path-item @statusClass">
+                                @if (stepNumber < Model.Data.Courses.Count)
+                                {
+                                    <div class="path-line"></div>
+                                }
+
+                                <div class="path-node">
+                                    @if (isCompleted)
+                                    {
+                                        <i class="fas fa-check"></i>
+                                    }
+                                    else
+                                    {
+                                        <span>@stepNumber</span>
+                                    }
+                                </div>
+
+                                <div class="path-content">
+                                    <div class="course-card">
+                                        <div class="course-header">
+                                            <div class="course-main">
+                                                <h3 class="course-name">@course.Title</h3>
+                                                <p class="course-desc">@course.Description</p>
+                                            </div>
+                                            @if (isCompleted)
+                                            {
+                                                <span class="course-badge completed">
+                                                    <i class="fas fa-check-circle"></i>
+                                                    Completed
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="course-badge in-progress">
+                                                    <i class="fas fa-spinner fa-spin"></i>
+                                                    In Progress
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <div class="course-body">
+                                            <div class="course-info-row">
+                                                <div class="info-item">
+                                                    <i class="fas fa-layer-group"></i>
+                                                    <span>@course.LessonsCount Lessons</span>
+                                                </div>
+                                                <div class="info-item">
+                                                    <i class="fas fa-clock"></i>
+                                                    <span>@course.DurationHours hours</span>
+                                                </div>
+                                            </div>
+
+                                            @if (!isCompleted)
+                                            {
+                                                <div class="course-progress-wrapper">
+                                                    <div class="progress-info">
+                                                        <span class="progress-label">Your Progress</span>
+                                                        <span class="progress-time">@((int)course.ProgressPercentage)%</span>
+                                                    </div>
+                                                    <div class="progress-bar-full">
+                                                        <div class="progress-fill in-progress" style="width: @course.ProgressPercentage%"></div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <div class="course-footer">
+                                            @if (isCompleted)
+                                            {
+                                                <a href="/student/certificates" class="btn btn-primary">
+                                                    <i class="fas fa-certificate"></i>
+                                                    View Certificate
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="/student/course/@course.CourseId" class="btn btn-primary">
+                                                    <i class="fas fa-play-circle"></i>
+                                                    Continue Learning
+                                                </a>
+                                            }
+                                            <a href="/student/course/@course.CourseId" class="btn btn-outline">
+                                                <i class="fas fa-external-link-alt"></i>
+                                                View Course
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No courses available in this track yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Column -->
+        <aside class="track-sidebar">
+            
+            <!-- Progress Widget -->
+            <div class="sidebar-widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Your Progress
+                    </h3>
+                </div>
+                <div class="widget-body">
+                    <div class="stats-list">
+                        <div class="stat-row">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">@completedCourses</span>
+                                <span class="stat-label">Courses Completed</span>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-icon">
+                                <i class="fas fa-hourglass-half"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">@(totalCourses - completedCourses)</span>
+                                <span class="stat-label">Courses Remaining</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Widget -->
+            <div class="sidebar-widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-star"></i>
+                        Skills You'll Learn
+                    </h3>
+                </div>
+                <div class="widget-body">
+                    <div class="skills-cloud">
+                        @foreach (var tag in Model.Data.Tags)
+                        {
+                            <span class="skill-pill">@tag</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reward Widget -->
+            @if (Model.Data.TotalProgress >= 100)
+            {
+                <div class="sidebar-widget reward-widget">
+                    <div class="reward-content">
+                        <div class="reward-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3 class="reward-title">Track Completed!</h3>
+                        <p class="reward-text">Congratulations! You've completed all courses in this track.</p>
+                        <a href="/student/certificates" class="btn btn-primary btn-block">
+                            <i class="fas fa-certificate"></i>
+                            View Your Certificate
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="sidebar-widget reward-widget">
+                    <div class="reward-content">
+                        <div class="reward-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <h3 class="reward-title">Earn Your Certificate</h3>
+                        <p class="reward-text">Complete @(totalCourses - completedCourses) more @((totalCourses - completedCourses) == 1 ? "course" : "courses") to earn your track certificate!</p>
+                        <div class="reward-progress-text">
+                            Progress: @((int)(((decimal)completedCourses / totalCourses) * 100))%
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </aside>
+
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/track-details.css" />
+}
+
+@section Scripts {
+    <script src="~/js/track-details.js"></script>
+}

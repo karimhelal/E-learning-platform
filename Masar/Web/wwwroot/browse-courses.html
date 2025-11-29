@@ -1,0 +1,493 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Explore Courses | Masar</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet" />
+
+    <link rel="stylesheet" href="masar-core.css" />
+    <link rel="stylesheet" href="components.css" />
+    <link rel="stylesheet" href="browse-courses.css" />
+    <link rel="stylesheet" href="public-layout.css" />
+    <link rel="stylesheet" href="explore-layout.css" />
+</head>
+<body>
+    <div class="grid-background"></div>
+
+    <nav class="public-nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">Masar</span>
+            </a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html">Home</a></li>
+                <li class="nav-item">
+                    <a href="#" class="active">Courses</a>
+                </li>
+                <li class="nav-item"><a href="#">Paths</a></li>
+                <li class="nav-item"><a href="#">Community</a></li>
+                <li class="nav-item"><a href="#">Pricing</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-outline btn-small">Log In</a>
+                <a href="register.html" class="btn btn-primary btn-small">Get Started</a>
+            </div>
+            <button class="nav-toggle"><i class="fas fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <main class="public-main">
+        <section class="page-header header-hero public-hero">
+            <div class="header-glow-bg"></div>
+            <div class="page-header-container">
+                <div class="header-content fade-in">
+                    <div class="page-badge">
+                        <i class="fas fa-rocket"></i> Start Learning Today
+                    </div>
+                    <h1 class="page-title">
+                        Unlock Your Potential<br />
+                        with <span class="text-gradient">Masar</span>
+                    </h1>
+                    <p class="page-subtitle">
+                        Access our library of
+                        <span class="highlight-code">500+</span>
+                        industry-standard courses. From coding to design.
+                    </p>
+                </div>
+
+                <div class="header-visuals slide-in">
+                    <div class="hero-stat-card float-slow">
+                        <div class="hero-icon icon-box-purple">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="hero-stat-info">
+                            <span class="hero-number">Dev</span>
+                            <span class="hero-label">Development</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-stat-card float-medium">
+                        <div class="hero-icon icon-box-cyan">
+                            <i class="fas fa-pen-nib"></i>
+                        </div>
+                        <div class="hero-stat-info">
+                            <span class="hero-number">UX</span>
+                            <span class="hero-label">Design</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-stat-card float-fast">
+                        <div class="hero-icon icon-box-orange">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="hero-stat-info">
+                            <span class="hero-number">Cert</span>
+                            <span class="hero-label">Certified</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="explore-container">
+            <aside class="filter-sidebar" id="filterSidebar">
+                <button class="filter-close-btn" id="closeFilter">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <div class="filter-header">
+                    <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+                    <button class="reset-btn">Reset All</button>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-title">
+                        Category <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="filter-options">
+                        <label class="filter-option-row">
+                            <input type="checkbox" checked />
+                            <span class="checkbox-custom"></span>
+                            Web Development
+                            <span class="option-count">120</span>
+                        </label>
+                        <label class="filter-option-row">
+                            <input type="checkbox" />
+                            <span class="checkbox-custom"></span>
+                            Data Science
+                            <span class="option-count">85</span>
+                        </label>
+                        <label class="filter-option-row">
+                            <input type="checkbox" />
+                            <span class="checkbox-custom"></span>
+                            Mobile Apps
+                            <span class="option-count">64</span>
+                        </label>
+                        <label class="filter-option-row">
+                            <input type="checkbox" />
+                            <span class="checkbox-custom"></span>
+                            UI/UX Design
+                            <span class="option-count">42</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-title">
+                        Level <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="filter-options">
+                        <label class="filter-option-row">
+                            <input type="checkbox" />
+                            <span class="checkbox-custom"></span>
+                            Beginner
+                            <span class="option-count">200+</span>
+                        </label>
+                        <label class="filter-option-row">
+                            <input type="checkbox" />
+                            <span class="checkbox-custom"></span>
+                            Intermediate
+                            <span class="option-count">150</span>
+                        </label>
+                        <label class="filter-option-row">
+                            <input type="checkbox" />
+                            <span class="checkbox-custom"></span>
+                            Advanced
+                            <span class="option-count">80</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-title">
+                        Price <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="filter-options">
+                        <label class="filter-option-row">
+                            <input type="checkbox" />
+                            <span class="checkbox-custom"></span>
+                            Free
+                            <span class="option-count">50</span>
+                        </label>
+                        <label class="filter-option-row">
+                            <input type="checkbox" />
+                            <span class="checkbox-custom"></span>
+                            Paid
+                            <span class="option-count">450</span>
+                        </label>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="filter-overlay" id="filterOverlay"></div>
+
+            <div class="results-area">
+                <div class="results-toolbar">
+                    <div style="display: flex; gap: 10px">
+                        <button class="mobile-filter-trigger"
+                                id="openFilter">
+                            <i class="fas fa-sliders-h"></i> Filters
+                        </button>
+
+                        <button class="btn btn-secondary btn-small desktop-filter-toggle"
+                                id="toggleSidebar">
+                            <i class="fas fa-columns"></i>
+                            <span id="toggleText">Hide Filters</span>
+                        </button>
+                    </div>
+
+                    <div class="toolbar-search">
+                        <div class="search-box-large"
+                             style="padding: 0.6rem 1rem">
+                            <i class="fas fa-search"></i>
+                            <input type="text"
+                                   placeholder="Search courses..." />
+                        </div>
+                    </div>
+
+                    <div style="
+                                display: flex;
+                                gap: 1rem;
+                                align-items: center;
+                            ">
+                        <div class="view-toggle-group">
+                            <button class="view-btn active"
+                                    id="gridViewBtn"
+                                    title="Grid View">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="view-btn"
+                                    id="listViewBtn"
+                                    title="List View">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+
+                        <div class="filter-dropdown">
+                            <button class="filter-dropdown-btn"
+                                    style="min-width: 160px">
+                                <span>Sort: Popular</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="filter-dropdown-menu"
+                                 style="right: 0; left: auto">
+                                <button class="filter-option active">
+                                    Most Popular
+                                </button>
+                                <button class="filter-option">
+                                    Highest Rated
+                                </button>
+                                <button class="filter-option">
+                                    Newest First
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-info">
+                    <p class="results-count">
+                        Showing <strong>24</strong> courses
+                    </p>
+                </div>
+
+                <div class="courses-catalog">
+                    <div class="catalog-course-card">
+                        <div class="course-thumbnail">
+                            <div class="course-thumbnail-placeholder">
+                                <i class="fas fa-laptop-code"></i>
+                            </div>
+                            <div class="course-overlay">
+                                <a href="#"
+                                   class="btn btn-primary btn-small">
+                                    <span>View Details</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            <span class="course-level-badge advanced">Advanced</span>
+                        </div>
+                        <div class="course-card-content">
+                            <span class="course-category">
+                                <i class="fas fa-laptop-code"></i>
+                                Web Development
+                            </span>
+                            <h3 class="course-card-title">
+                                Advanced React & Redux
+                            </h3>
+                            <p class="course-card-description">
+                                Master React and Redux to build scalable,
+                                production-ready web applications
+                            </p>
+                            <div class="course-instructor">
+                                <div class="avatar avatar-sm">SA</div>
+                                <span class="instructor-name">Dr. Sarah Ahmed</span>
+                            </div>
+                            <div class="course-stats-row">
+                                <div class="course-stat">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.9 (2.5K)</span>
+                                </div>
+                                <div class="course-stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>15K students</span>
+                                </div>
+                                <div class="course-stat">
+                                    <i class="fas fa-clock"></i>
+                                    <span>12h</span>
+                                </div>
+                            </div>
+                            <div class="course-card-footer">
+                                <button class="btn btn-primary btn-block enroll-btn">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Enroll Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="catalog-course-card">
+                        <div class="course-thumbnail">
+                            <div class="course-thumbnail-placeholder"
+                                 style="
+                                        background: linear-gradient(
+                                            135deg,
+                                            rgba(6, 182, 212, 0.2),
+                                            rgba(16, 185, 129, 0.2)
+                                        );
+                                    ">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="course-overlay">
+                                <a href="#"
+                                   class="btn btn-primary btn-small">
+                                    <span>View Details</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            <span class="course-level-badge intermediate">Intermediate</span>
+                        </div>
+                        <div class="course-card-content">
+                            <span class="course-category">
+                                <i class="fas fa-brain"></i>
+                                Data Science
+                            </span>
+                            <h3 class="course-card-title">
+                                Python for Data Analysis
+                            </h3>
+                            <p class="course-card-description">
+                                Learn data analysis with Python, Pandas, and
+                                NumPy for real world projects.
+                            </p>
+                            <div class="course-instructor">
+                                <div class="avatar avatar-sm">MC</div>
+                                <span class="instructor-name">Prof. Michael Chen</span>
+                            </div>
+                            <div class="course-stats-row">
+                                <div class="course-stat">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.8 (1.8K)</span>
+                                </div>
+                                <div class="course-stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>12K students</span>
+                                </div>
+                                <div class="course-stat">
+                                    <i class="fas fa-clock"></i>
+                                    <span>15h</span>
+                                </div>
+                            </div>
+                            <div class="course-card-footer">
+                                <button class="btn btn-primary btn-block enroll-btn">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Enroll Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="catalog-course-card">
+                        <div class="course-thumbnail">
+                            <div class="course-thumbnail-placeholder"
+                                 style="
+                                        background: linear-gradient(
+                                            135deg,
+                                            rgba(245, 158, 11, 0.2),
+                                            rgba(239, 68, 68, 0.2)
+                                        );
+                                    ">
+                                <i class="fas fa-paint-brush"></i>
+                            </div>
+                            <div class="course-overlay">
+                                <a href="#"
+                                   class="btn btn-primary btn-small">
+                                    <span>View Details</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            <span class="course-level-badge beginner">Beginner</span>
+                            <span class="course-tag bestseller">Bestseller</span>
+                        </div>
+                        <div class="course-card-content">
+                            <span class="course-category">
+                                <i class="fas fa-paint-brush"></i>
+                                Design
+                            </span>
+                            <h3 class="course-card-title">
+                                UI/UX Design Fundamentals
+                            </h3>
+                            <p class="course-card-description">
+                                Learn the principles of user interface and
+                                user experience design.
+                            </p>
+                            <div class="course-instructor">
+                                <div class="avatar avatar-sm">AR</div>
+                                <span class="instructor-name">Alex Rodriguez</span>
+                            </div>
+                            <div class="course-stats-row">
+                                <div class="course-stat">
+                                    <i class="fas fa-star"></i>
+                                    <span>5.0 (4.1K)</span>
+                                </div>
+                                <div class="course-stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>35K students</span>
+                                </div>
+                                <div class="course-stat">
+                                    <i class="fas fa-clock"></i>
+                                    <span>8h</span>
+                                </div>
+                            </div>
+                            <div class="course-card-footer">
+                                <button class="btn btn-primary btn-block enroll-btn">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Enroll Now</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pagination mt-4">
+                    <button class="pagination-btn disabled">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="pagination-btn active">1</button>
+                    <button class="pagination-btn">2</button>
+                    <button class="pagination-btn">3</button>
+                    <span class="pagination-dots">...</span>
+                    <button class="pagination-btn">10</button>
+                    <button class="pagination-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="public-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon"></div>
+                    <span class="logo-text">Masar</span>
+                </a>
+                <p>
+                    Empowering the next generation of developers and
+                    creators. Every code is a step forward.
+                </p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="#">Browse Courses</a></li>
+                        <li><a href="#">Learning Paths</a></li>
+                        <li><a href="#">Success Stories</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2023 Masar Education. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="~/js/Home/browse-courses.js"></script>
+</body>
+</html>

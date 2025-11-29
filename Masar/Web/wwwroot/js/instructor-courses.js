@@ -1,179 +1,6 @@
-// ========================================
-// MY COURSES - JavaScript
-// ========================================
-
-//(function () {
-//    "use strict";
-
-//    // ========================================
-//    // SEARCH FUNCTIONALITY
-//    // ========================================
-
-//    function initSearch() {
-//        const searchInput = document.getElementById("courseSearch");
-//        const courseCards = document.querySelectorAll(".my-course-card");
-
-//        searchInput.addEventListener("input", (e) => {
-//            const searchTerm = e.target.value.toLowerCase();
-
-//            courseCards.forEach((card) => {
-//                const title = card
-//                    .querySelector(".course-title")
-//                    .textContent.toLowerCase();
-//                const description = card
-//                    .querySelector(".course-description")
-//                    .textContent.toLowerCase();
-
-//                if (
-//                    title.includes(searchTerm) ||
-//                    description.includes(searchTerm)
-//                ) {
-//                    card.style.display = "";
-//                } else {
-//                    card.style.display = "none";
-//                }
-//            });
-
-//            updateEmptyState();
-//        });
-//    }
-
-//    // ========================================
-//    // FILTER BY STATUS
-//    // ========================================
-
-//    function initStatusFilter() {
-//        const statusFilter = document.getElementById("statusFilter");
-//        const courseCards = document.querySelectorAll(".my-course-card");
-
-//        statusFilter.addEventListener("change", (e) => {
-//            const status = e.target.value;
-
-//            courseCards.forEach((card) => {
-//                if (status === "all" || card.dataset.status === status) {
-//                    card.style.display = "";
-//                } else {
-//                    card.style.display = "none";
-//                }
-//            });
-
-//            updateEmptyState();
-//        });
-//    }
-
-//    // ========================================
-//    // SORT FUNCTIONALITY
-//    // ========================================
-
-//    function initSort() {
-//        const sortFilter = document.getElementById("sortFilter");
-//        const coursesGrid = document.getElementById("coursesGrid");
-//        const courseCards = Array.from(
-//            document.querySelectorAll(".my-course-card")
-//        );
-
-//        sortFilter.addEventListener("change", (e) => {
-//            const sortBy = e.target.value;
-//            let sortedCards = [...courseCards];
-
-//            // Simple sorting (in production, would use actual data)
-//            if (sortBy === "newest") {
-//                sortedCards.reverse();
-//            } else if (sortBy === "popular") {
-//                sortedCards.sort((a, b) => {
-//                    const aStudents = parseInt(
-//                        a.querySelector(".stat-item:first-child span")
-//                            .textContent
-//                    );
-//                    const bStudents = parseInt(
-//                        b.querySelector(".stat-item:first-child span")
-//                            .textContent
-//                    );
-//                    return (bStudents || 0) - (aStudents || 0);
-//                });
-//            } else if (sortBy === "rating") {
-//                sortedCards.sort((a, b) => {
-//                    const aRating = parseFloat(
-//                        a.querySelector(".course-rating span").textContent
-//                    );
-//                    const bRating = parseFloat(
-//                        b.querySelector(".course-rating span").textContent
-//                    );
-//                    return (bRating || 0) - (aRating || 0);
-//                });
-//            }
-
-//            // Re-append sorted cards
-//            sortedCards.forEach((card) => coursesGrid.appendChild(card));
-//        });
-//    }
-
-//    // ========================================
-//    // VIEW TOGGLE (Grid/List)
-//    // ========================================
-
-//    function initViewToggle() {
-//        const viewButtons = document.querySelectorAll(".view-btn");
-//        const coursesGrid = document.getElementById("coursesGrid");
-
-//        viewButtons.forEach((btn) => {
-//            btn.addEventListener("click", () => {
-//                viewButtons.forEach((b) => b.classList.remove("active"));
-//                btn.classList.add("active");
-
-//                const view = btn.dataset.view;
-
-//                if (view === "list") {
-//                    coursesGrid.classList.add("list-view");
-//                } else {
-//                    coursesGrid.classList.remove("list-view");
-//                }
-//            });
-//        });
-//    }
-
-//    // ========================================
-//    // EMPTY STATE
-//    // ========================================
-
-//    function updateEmptyState() {
-//        const courseCards = document.querySelectorAll(".my-course-card");
-//        const visibleCards = Array.from(courseCards).filter(
-//            (card) => card.style.display !== "none"
-//        );
-//        const emptyState = document.getElementById("emptyState");
-//        const coursesGrid = document.getElementById("coursesGrid");
-
-//        if (visibleCards.length === 0) {
-//            coursesGrid.style.display = "none";
-//            emptyState.style.display = "flex";
-//        } else {
-//            coursesGrid.style.display = "grid";
-//            emptyState.style.display = "none";
-//        }
-//    }
-
-//    // ========================================
-//    // INITIALIZE
-//    // ========================================
-
-//    function init() {
-//        initSearch();
-//        initStatusFilter();
-//        initSort();
-//        initViewToggle();
-
-//        console.log("My Courses initialized");
-//    }
-
-//    if (document.readyState === "loading") {
-//        document.addEventListener("DOMContentLoaded", init);
-//    } else {
-//        init();
-//    }
-//})();
-
 // Instructor Courses Page JavaScript
+
+
 document.addEventListener("DOMContentLoaded", function () {
     // Search functionality
     const searchInput = document.getElementById("courseSearch");
@@ -415,12 +242,6 @@ document.addEventListener("DOMContentLoaded", function () {
             emptyState.style.display = "none";
         }
     }
-
-    //document.querySelectorAll(".pagintaion-btn").forEach(btn => {
-    //    btn.addEventListener("click", fucntion(this) {
-    //        this
-    //    })
-    //})
 });
 
 function updateCoursesView(coursesListContent) {
@@ -431,7 +252,7 @@ function updatePaginationView(paginationContent) {
     $(".pagination-container").html(paginationContent);
 }
 
-function updateCourses(caller, dir) {
+function fetchPage(caller, dir) {
     const pageNumToFetch = parseInt((dir == 0)
         ? caller.textContent
         : (dir < 0)
