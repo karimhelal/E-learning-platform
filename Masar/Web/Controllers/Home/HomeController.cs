@@ -4,7 +4,6 @@ using BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Web.ViewModels;
-using Microsoft.AspNetCore.Mvc;
 using DAL.Data;
 using Web.Interfaces;
 using Web.ViewModels.Home;
@@ -25,7 +24,9 @@ namespace Web.Controllers.Home
         public HomeController(
             ILogger<HomeController> logger, 
             ICourseService courseService,
-            RazorViewToStringRenderer razorRenderer
+            RazorViewToStringRenderer razorRenderer,
+            AppDbContext context,
+            ICurrentUserService currentUserService
         ) {
             _logger = logger;
             _courseService = courseService;
@@ -40,18 +41,15 @@ namespace Web.Controllers.Home
         {
             var userId = _currentUserService.GetUserId();
             ViewBag.UserId = userId;
+
             return View();
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
 
         [HttpGet("~/browse-courses")]
         public async Task<IActionResult> BrowseCourses()
         {
-            var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 30 };
+            var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 3 };
             var initialRequest = new BrowseRequestDto();
             initialRequest.PagingRequest = pagingRequest;
 
@@ -90,7 +88,7 @@ namespace Web.Controllers.Home
 
                         // calculated fields
                         AverageRating = c.AverageRating,
-                        NumberOfRatings = c.NumberOfRatings,
+                        NumberOfReviews = c.NumberOfReviews,
 
                         NumberOfStudents = c.NumberOfStudents,
                         NumberOfLectures = c.NumberOfLectures,
@@ -103,12 +101,6 @@ namespace Web.Controllers.Home
             };
 
             return View(viewModel);
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
 
@@ -135,7 +127,7 @@ namespace Web.Controllers.Home
 
                     // calculated fields
                     AverageRating = c.AverageRating,
-                    NumberOfRatings = c.NumberOfRatings,
+                    NumberOfReviews = c.NumberOfReviews,
 
                     NumberOfStudents = c.NumberOfStudents,
                     NumberOfLectures = c.NumberOfLectures,
@@ -163,6 +155,20 @@ namespace Web.Controllers.Home
             });
         }
 
+
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+
         private async Task<List<FilterGroupViewModel>> BuildBrowseFilterGroupsAsync()
         {
             var filterGroups = await _courseService.GetFilterSectionConfig();
@@ -170,50 +176,54 @@ namespace Web.Controllers.Home
 
             var result = new List<FilterGroupViewModel>();
 
-            result.Add(new CheckboxFilter
-            {
-                Title = "Categories",
-                RequestKey = "CategoryNames",
-
-                FilterOptions = filterGroups.CategoryNames!.Select(cat => new FilterOption
+            if (filterGroupsStats.CategoryCounts.Any())
+                result.Add(new CheckboxFilter
                 {
-                    Label = cat,
-                    Count = filterGroupsStats.CategoryCounts.SingleOrDefault(e => e.Key.ToLower() == cat.ToLower()).Value,
-                    IsChecked = false,
-                    Value = cat
-                })
-                .OrderByDescending(x => x.Count)
-            });
+                    Title = "Categories",
+                    RequestKey = "CategoryNames",
 
-            result.Add(new CheckboxFilter
-            {
-                Title = "Levels",
-                RequestKey = "LevelNames",
+                    FilterOptions = filterGroups.CategoryNames!.Select(cat => new FilterOption
+                    {
+                        Label = cat,
+                        Count = filterGroupsStats.CategoryCounts.SingleOrDefault(e => e.Key.ToLower() == cat.ToLower()).Value,
+                        IsChecked = false,
+                        Value = cat
+                    })
+                    .OrderByDescending(x => x.Count)
+                });
 
-                FilterOptions = filterGroups.LevelNames!.Select(lev => new FilterOption
+
+            if (filterGroupsStats.LevelCounts.Any())
+                result.Add(new CheckboxFilter
                 {
-                    Label = lev,
-                    Count = filterGroupsStats.LevelCounts.SingleOrDefault(e => e.Key.ToLower() == lev.ToLower()).Value,
-                    IsChecked = false,
-                    Value = lev
-                })
-                .OrderByDescending(x => x.Count)
-            });
+                    Title = "Levels",
+                    RequestKey = "LevelNames",
 
-            result.Add(new CheckboxFilter
-            {
-                Title = "Languages",
-                RequestKey = "LanguageNames",
+                    FilterOptions = filterGroups.LevelNames!.Select(lev => new FilterOption
+                    {
+                        Label = lev,
+                        Count = filterGroupsStats.LevelCounts.SingleOrDefault(e => e.Key.ToLower() == lev.ToLower()).Value,
+                        IsChecked = false,
+                        Value = lev
+                    })
+                });
 
-                FilterOptions = filterGroups.LanguageNames!.Select(lang => new FilterOption
+
+            if (filterGroupsStats.LanguageCounts.Any())
+                result.Add(new CheckboxFilter
                 {
-                    Label = lang,
-                    Count = filterGroupsStats.LanguageCounts.SingleOrDefault(e => e.Key.ToLower() == lang.ToLower()).Value,
-                    IsChecked = false,
-                    Value = lang
-                })
-                .OrderByDescending(x => x.Count)
-            });
+                    Title = "Languages",
+                    RequestKey = "LanguageNames",
+
+                    FilterOptions = filterGroups.LanguageNames!.Select(lang => new FilterOption
+                    {
+                        Label = lang,
+                        Count = filterGroupsStats.LanguageCounts.SingleOrDefault(e => e.Key.ToLower() == lang.ToLower()).Value,
+                        IsChecked = false,
+                        Value = lang
+                    })
+                    .OrderByDescending(x => x.Count)
+                });
 
 
             result.Add(new NumberRangeFilter
@@ -258,6 +268,20 @@ namespace Web.Controllers.Home
             });
 
 
+            result.Add(new NumberRangeFilter
+            {
+                Title = "Reviews",
+                RequestKey = "Reviews",
+
+                MinRequestKey = "MinReviews",
+                MaxRequestKey = "MaxReviews",
+                MinValue = filterGroups.MinReviews ?? 0,
+                MaxValue = filterGroups.MaxReviews ?? 10000,
+                Step = 1,
+                Unit = ""
+            });
+
+
             result.Add(new DateRangeFilter
             {
                 Title = "Creation Date",
@@ -266,8 +290,18 @@ namespace Web.Controllers.Home
                 MinRequestKey = "MinCreationDate",
                 MaxRequestKey = "MaxCreationDate",
                 MinDate = filterGroups.MinCreationDate ?? DateOnly.MinValue,
-                MaxDate = filterGroups.MaxCreationDate ?? DateOnly.FromDateTime(DateTime.Now),
+                MaxDate = filterGroups.MaxCreationDate ?? DateOnly.FromDateTime(DateTime.Now)
             });
+
+
+            //result.Add(new ToggleFilter
+            //{
+            //    Title = "Certified",
+            //    RequestKey = "HasCertificates",
+
+            //    Label = "Include Certificates",
+            //    IsOn = filterGroups.HasCertificate ?? false
+            //});
 
             return result;
         }

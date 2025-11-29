@@ -137,7 +137,6 @@
         var text = $(this).text().trim();
 
         // Visual Updates: Update Button Text
-        // Optional: Add prefix logic if needed (e.g., "Sort: " + text)
         $displaySpan.text(text);
 
         // Visual Updates: Highlight Selected Option
@@ -243,6 +242,9 @@ const filterState = {
     MinEnrollments: null,
     MaxEnrollments: null,
 
+    MinReviews: null,
+    MaxReviews: null,
+
     MinRating: null,
     MaxRating: null,
 
@@ -264,17 +266,19 @@ function collectFilterState() {
 
         // Dynamically find the array in our state object based on the key
         // Note: We lowercase the key first because JS objects are case-sensitive usually
-        // But your DTO expects "CategoryIds". 
+        // But your DTO expects "CategoryIds".
         // Best practice: match your JS object keys to your HTML data-key exactly.
 
-        if (key === 'CategoryNames') {
-            filterState.CategoryNames.push(value);
-        }
-        else if (key === 'LevelNames') {
-            filterState.LevelNames.push(value);
-        } else if (key === 'LanguageNames') {
-            filterState.LanguageNames.push(value);
-        }
+        //if (key === 'CategoryNames') {
+        //    filterState.CategoryNames.push(value);
+        //}
+        //else if (key === 'LevelNames') {
+        //    filterState.LevelNames.push(value);
+        //} else if (key === 'LanguageNames') {
+        //    filterState.LanguageNames.push(value);
+        //}
+
+        filterState[key].push(value);
     });
 
     // C. Collect Ranges (Numbers)
@@ -282,22 +286,14 @@ function collectFilterState() {
         const key = $(this).data('key'); // "MinDuration"
         const val = $(this).val();
 
-        // Dynamically assign. We lower case the first letter to match JS object keys
-        // e.g. "MinDuration" -> "minDuration"
-        const jsKey = key;
-
-        filterState[jsKey] = val ? parseFloat(val) : null;
+        filterState[key] = val ? parseFloat(val) : null;
     });
 
     $('.filter-range-date').each(function () {
         const key = $(this).data('key'); // "MinDate"
         const val = $(this).val();
 
-        // Dynamically assign. We lower case the first letter to match JS object keys
-        // e.g. "MinDate" -> "minDate"
-        const jsKey = key;
-
-        filterState[jsKey] = val ? val : null;
+        filterState[key] = val ? val : null;
     });
 
 }
@@ -344,6 +340,8 @@ function fetchPage(caller, dir) {
                 MaxDuration: filterState.MaxDuration,
                 MinEnrollments: filterState.MinEnrollments,
                 MaxEnrollments: filterState.MaxEnrollments,
+                MinReviews: filterState.MinReviews,
+                MaxReviews: filterState.MaxReviews,
                 MinRating: filterState.MinRating,
                 MaxRating: filterState.MaxRating,
                 MinDate: filterState.MinCreationDate,
@@ -385,6 +383,8 @@ function filterCourses() {
                 MaxDuration: filterState.MaxDuration,
                 MinEnrollments: filterState.MinEnrollments,
                 MaxEnrollments: filterState.MaxEnrollments,
+                MinReviews: filterState.MinReviews,
+                MaxReviews: filterState.MaxReviews,
                 MinRating: filterState.MinRating,
                 MaxRating: filterState.MaxRating,
                 MinCreationDate: filterState.MinCreationDate,

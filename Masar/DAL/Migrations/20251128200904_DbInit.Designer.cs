@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:Masar/DAL/Migrations/20251127204325_InitDbCreate.Designer.cs
-    [Migration("20251127204325_InitDbCreate")]
-    partial class InitDbCreate
-========
-    [Migration("20251126190554_intialCreate")]
-    partial class intialCreate
->>>>>>>> fa6f8f94caeff339895e70782d8c759fa89575ed:Masar/DAL/Migrations/20251126190554_intialCreate.Designer.cs
+    [Migration("20251128200904_DbInit")]
+    partial class DbInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

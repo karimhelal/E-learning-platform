@@ -7,6 +7,7 @@ using BLL.Interfaces;
 using Core.Entities;
 using Core.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.InteropServices;
 
 namespace BLL.Services;
 
@@ -186,8 +187,8 @@ public class CourseService : ICourseService
 
         query = sortBy switch
         {
-            "createddate" => isAsc ? query.OrderBy(c => c.CreatedDate)
-                                   : query.OrderByDescending(c => c.CreatedDate),
+            "creationdate" => isAsc ? query.OrderBy(c => c.CreatedDate)
+                                    : query.OrderByDescending(c => c.CreatedDate),
 
             "students" => isAsc ? query.OrderBy(c => c.Enrollments!.Count())
                                 : query.OrderByDescending(c => c.Enrollments!.Count()),
@@ -220,8 +221,8 @@ public class CourseService : ICourseService
                 Level = course.Level,
 
                 // calculated fields
-                AverageRating = 4.8f,                                               // HARD CODED
-                NumberOfRatings = (new Random()).Next(1, 601),      // HARD CODED
+                AverageRating = (float)Math.Round(((new Random()).NextDouble() * 5), 1),            // HARD CODED
+                NumberOfReviews = (new Random()).Next(0, 10001),                          // HARD CODED
                 NumberOfStudents = course.Enrollments!.Count(),
                 NumberOfMinutes = (int)(
                                 course.Modules!
@@ -292,6 +293,12 @@ public class CourseService : ICourseService
             .Select(lang => lang.ToLower())
             .ToList();
 
+        var ratersRange = new
+        {
+            MinRaters = request.FilterGroups?.MinReviews,
+            MaxRaters = request.FilterGroups?.MaxReviews
+        };
+
         var ratingRange = new
         {
             MinRating = request.FilterGroups?.MinRating,
@@ -348,7 +355,6 @@ public class CourseService : ICourseService
             query = query.Where(c => c.Enrollments!.Count() >= enrollmentsRange.MinEnrollments 
                                         && c.Enrollments!.Count() <= enrollmentsRange.MaxEnrollments);
 
-
         // applying sorting
         bool isAsc = request?.PagingRequest?.SortOrder.ToLower() == "asc";
         var sortBy = request?.PagingRequest?.SortBy.ToLower() ?? "students";
@@ -357,12 +363,14 @@ public class CourseService : ICourseService
             "createddate" => isAsc ? query.OrderBy(c => c.CreatedDate)
                                    : query.OrderByDescending(c => c.CreatedDate),
 
-            "students" => isAsc ? query.OrderBy(c => c.Enrollments!.Count()) 
+            "students" => isAsc ? query.OrderBy(c => c.Enrollments!.Count())
                                 : query.OrderByDescending(c => c.Enrollments!.Count()),
 
             "title" => isAsc ? query.OrderBy(c => c.Title)
                              : query.OrderByDescending(c => c.Title),
 
+            //"reviews" => isAsc 
+            //"rating" => isAsc
             _ => query.OrderByDescending(c => c.Enrollments!.Count())
         };
 
@@ -390,8 +398,8 @@ public class CourseService : ICourseService
                 Level = course.Level,
 
                 // calculated fields
-                AverageRating = 4.8f,                                               // HARD CODED
-                NumberOfRatings = (new Random()).Next(1, 601),      // HARD CODED
+                AverageRating = (float)Math.Round(((new Random()).NextDouble() * 5), 1),            // HARD CODED
+                NumberOfReviews = (new Random()).Next(0, 10001),                          // HARD CODED
                 NumberOfStudents = course.Enrollments!.Count(),
                 NumberOfMinutes = (int)(
                                 course.Modules!
@@ -430,36 +438,41 @@ public class CourseService : ICourseService
 
     public async Task<FilterGroupsDto> GetFilterSectionConfig()
     {
+        var coursesQuery = _courseRepo.GetAllQueryable();
+        var categriesQuery = _categoryRepo.GetAllQueryable();
+        var languagesQuery = _languageRepo.GetAllQueryable();
+
         var result = new FilterGroupsDto();
 
-        result.CategoryNames = await _categoryRepo.GetAllQueryable().Select(c => c.Name).ToListAsync();
-        result.LanguageNames = await _languageRepo.GetAllQueryable().Select(l => l.Name).ToListAsync();
+        result.CategoryNames = await categriesQuery.Select(c => c.Name).ToListAsync();
+        result.LanguageNames = await languagesQuery.Select(l => l.Name).ToListAsync();
         result.LevelNames = new List<string> { "Beginner", "Intermediate", "Advanced" };
 
-        result.MinDuration = Math.Ceiling(_courseRepo.GetAllQueryable()
-            .Min(c => c.Modules!
+
+        var durationsQuery = coursesQuery
+            .Select(c => c.Modules!
                 .SelectMany(m => m.Lessons!)
                 .Select(l => l.LessonContent)
                 .OfType<VideoContent>()
-                .Sum(v => v.DurationInSeconds)
-            ) / (double)3600);
+                .Sum(v => (int?)v.DurationInSeconds) ?? 0
+            );
+        result.MinDuration = Math.Ceiling(durationsQuery.Min() / 3600.0);
+        result.MaxDuration = Math.Ceiling(durationsQuery.Max() / 3600.0);
 
-        result.MaxDuration = Math.Ceiling(_courseRepo.GetAllQueryable()
-            .Min(c => c.Modules!
-                .SelectMany(m => m.Lessons!)
-                .Select(l => l.LessonContent)
-                .OfType<VideoContent>()
-                .Sum(v => v.DurationInSeconds)
-            ) / (double)3600);
 
-        result.MinEnrollments = _courseRepo.GetAllQueryable().Min(c => c.Enrollments!.Count());
-        result.MaxEnrollments = _courseRepo.GetAllQueryable().Max(c => c.Enrollments!.Count());
+        var enrollmentsQuery = coursesQuery.Select(c => c.Enrollments!.Count());
+        result.MinEnrollments = enrollmentsQuery.Min();
+        result.MaxEnrollments = enrollmentsQuery.Max();
 
-        result.MinCreationDate = _courseRepo.GetAllQueryable().Min(c => c.CreatedDate);
-        result.MaxCreationDate = _courseRepo.GetAllQueryable().Max(c => c.CreatedDate);
+
+        result.MinCreationDate = coursesQuery.Min(c => c.CreatedDate);
+        result.MaxCreationDate = coursesQuery.Max(c => c.CreatedDate);
 
         result.MinRating = 0f;
         result.MaxRating = 5f;
+
+        result.MinReviews = 0;
+        result.MaxReviews = 1000;
 
         result.HasCertificate = null;
 
@@ -663,8 +676,8 @@ public class CourseService : ICourseService
             Level = course.Level,
 
             // calculated fields
-            AverageRating = 4.8f,                                               // HARD CODED
-            NumberOfRatings = (new Random()).Next(1, 601),      // HARD CODED
+            AverageRating = (float)Math.Round(((new Random()).NextDouble() * 5), 1),            // HARD CODED
+            NumberOfReviews = (new Random()).Next(0, 10001),                          // HARD CODED
             NumberOfStudents = course.Enrollments!.Count(),
             NumberOfMinutes = (int)(
                                 course.Modules!

@@ -17,7 +17,7 @@ public class CourseBrowseCardViewModel
 
     // calculated fields
     public float AverageRating { get; set; }
-    public int NumberOfRatings { get; set; }
+    public int NumberOfReviews { get; set; }
 
     public int NumberOfLectures { get; set; }
     public int NumberOfStudents { get; set; }

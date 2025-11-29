@@ -113,5 +113,22 @@ app.MapControllerRoute(
     pattern: "{controller=Instructor}/{action=Dashboard}"
 );
 
+
+// --- Seed roles and admin user ---
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+    string[] roles = { "Student", "Instructor", "Admin" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole<int>(role));
+    }
+}
+
+
 app.Run();
 

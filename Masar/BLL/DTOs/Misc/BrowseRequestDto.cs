@@ -18,6 +18,8 @@ public class FilterGroupsDto
     public double? MaxDuration { get; set; }
     public int? MinEnrollments { get; set; }
     public int? MaxEnrollments { get; set; }
+    public int? MinReviews { get; set; }
+    public int? MaxReviews { get; set; }
     public float? MaxRating { get; set; }
     public float? MinRating { get; set; }
     public DateOnly? MinCreationDate { get; set; }

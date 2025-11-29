@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Core.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace DAL.Data
 {
@@ -39,18 +41,26 @@ namespace DAL.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
            
             modelBuilder.Entity<IdentityRole<int>>().ToTable("Roles");
             modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
             modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
             modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
             modelBuilder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
+
+
             modelBuilder.Entity<IdentityUserRole<int>>(entity =>
             {
-                entity.ToTable("UserRoles");
-                entity.Property(e => e.RoleId).HasColumnName("role_id");
-                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity
+                    .ToTable("UserRoles");
+
+                entity
+                    .Property(e => e.RoleId)
+                    .HasColumnName("role_id");
+                
+                entity
+                    .Property(e => e.UserId)
+                    .HasColumnName("user_id");
             });
 
             modelBuilder.Entity<User>(entity =>
@@ -58,16 +68,26 @@ namespace DAL.Data
                 // User - Table Name
                 entity.ToTable("Users");
 
-                entity.Property(u => u.Id).HasColumnName("user_id");
+                // User - Id
+                entity
+                    .Property(u => u.Id)
+                    .HasColumnName("user_id");
+
                 // User - Primary Key
-                entity.HasKey(u => u.Id);
+                entity
+                    .HasKey(u => u.Id);
 
                 // User - Unique Constraint on Email - Unique constraint: Email must be unique across all users
                 entity
                     .HasIndex(u => u.Email)
                     .IsUnique()
                     .HasDatabaseName("IX_User_Email");
-                entity.Property(u => u.Email).IsRequired().HasColumnName("email");
+
+                // User - Email
+                entity
+                    .Property(u => u.Email)
+                    .IsRequired()
+                    .HasColumnName("email");
 
                 // User - StudentProfile (One-to-One)
                 entity
@@ -80,7 +100,11 @@ namespace DAL.Data
                     .HasOne(u => u.InstructorProfile)
                     .WithOne(ip => ip.User)
                     .HasForeignKey<InstructorProfile>(ip => ip.UserId);
-                entity.Property(u => u.PasswordHash).HasColumnName("password_hash");
+
+                // User - Password Hash
+                entity
+                    .Property(u => u.PasswordHash)
+                    .HasColumnName("password_hash");
             });
 
             modelBuilder.Entity<StudentProfile>(entity =>
