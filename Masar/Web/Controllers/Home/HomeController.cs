@@ -10,6 +10,7 @@ using Web.ViewModels.Home;
 using Web.ViewModels.Misc;
 using Web.ViewModels.Misc.FilterRequestVMs;
 
+using Web.Services; // <-- Add this if ICurrentUserService is in Web.Services namespace
 
 namespace Web.Controllers.Home
 {
