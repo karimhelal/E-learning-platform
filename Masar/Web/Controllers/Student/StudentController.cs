@@ -79,8 +79,8 @@ public class StudentController : Controller
     {
         ViewBag.Title = "My Tracks | Masar";
 
-        var studentId = 1001; // TODO: Replace with actual logged-in student ID
-        var tracksData = await _tracksService.GetStudentTracksAsync(studentId);
+        //var userId = 2; // TODO: Replace with actual logged-in student ID
+        var tracksData = await _tracksService.GetStudentTracksAsync(userId);
 
         if (tracksData == null)
         {
@@ -127,9 +127,9 @@ public class StudentController : Controller
     public async Task<IActionResult> TrackDetails(int trackId)
     {
         ViewBag.Title = "Track Details | Masar";
-        int studentId = 1001; // TODO: replace with actual logged-in student ID
 
-        var data = await _trackDetailsService.GetTrackDetailsAsync(studentId, trackId);
+        //int userId = 2; // TODO: replace with actual logged-in student ID
+        var data = await _trackDetailsService.GetTrackDetailsAsync(userId, trackId);
         if (data == null)
             return NotFound("Track not found or not enrolled");
 

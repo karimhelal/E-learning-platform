@@ -5,7 +5,7 @@
 /// </summary>
 public interface IStudentTrackService
 {
-    Task<StudentTracksData?> GetStudentTracksAsync(int studentId);
+    Task<StudentTracksData?> GetStudentTracksAsync(int userId);
 }
 
 /// <summary>
