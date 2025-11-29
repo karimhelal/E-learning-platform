@@ -9,16 +9,19 @@ public class StudentController : Controller
 {
     private readonly IStudentDashboardService _dashboardService;
     private readonly IStudentCoursesService _coursesService;
-    private readonly ITrackService _tracksService;
+    private readonly IStudentTrackService _tracksService;
+    private readonly IStudentTrackDetailsService _trackDetailsService;
 
     public StudentController(
         IStudentDashboardService dashboardService,
         IStudentCoursesService coursesService,
-        ITrackService tracksService)
+        IStudentTrackService tracksService,
+        IStudentTrackDetailsService trackDetailsService)
     {
         _dashboardService = dashboardService;
         _coursesService = coursesService;
         _tracksService = tracksService;
+        _trackDetailsService = trackDetailsService;
     }
 
     [HttpGet("/student/dashboard")]
@@ -115,6 +118,24 @@ public class StudentController : Controller
         };
 
         return View(viewModel);
+    }
+    [HttpGet("/student/track/{trackId}")]
+    public async Task<IActionResult> TrackDetails(int trackId)
+    {
+        ViewBag.Title = "Track Details | Masar";
+        int studentId = 1001; // TODO: replace with actual logged-in student ID
+
+        var data = await _trackDetailsService.GetTrackDetailsAsync(studentId, trackId);
+        if (data == null)
+            return NotFound("Track not found or not enrolled");
+
+        var vm = new StudentTrackDetailsViewModel
+        {
+            Data = data,
+            PageTitle = data.Title
+        };
+
+        return View(vm);
     }
 
     private string GetGreeting()

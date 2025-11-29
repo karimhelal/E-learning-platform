@@ -47,6 +47,7 @@
                 var statusClass = track.Status;
                 var progressPercent = track.Progress;
                 var coursesCompleted = (int)Math.Round(track.Courses.Count * progressPercent / 100.0);
+                var isCompleted = statusClass == "completed";
 
                 <div class="track-card-detailed" data-status="@statusClass">
                     <div class="track-card-header">
@@ -54,8 +55,8 @@
                             <i class="@track.IconClass"></i>
                         </div>
                         <span class="track-status-badge @statusClass">
-                            <i class="fas @(statusClass == "completed" ? "fa-check-circle" : "fa-spinner")"></i>
-                            <span>@(statusClass == "completed" ? "Completed" : "In Progress")</span>
+                            <i class="fas @(isCompleted ? "fa-check-circle" : "fa-spinner")"></i>
+                            <span>@(isCompleted ? "Completed" : "In Progress")</span>
                         </span>
                     </div>
 
@@ -63,6 +64,7 @@
                         <h3 class="track-card-title">@track.Title</h3>
                         <p class="track-card-description">@track.Description</p>
 
+                        <!-- Track Stats -->
                         <div class="track-stats-grid">
                             <div class="track-stat-item">
                                 <i class="fas fa-book"></i>
@@ -87,19 +89,25 @@
                             </div>
                         </div>
 
+                        <!-- Progress Section -->
                         <div class="track-progress-section">
                             <div class="track-progress-header">
                                 <span class="track-progress-label">Overall Progress</span>
                                 <span class="track-progress-percentage">@progressPercent%</span>
                             </div>
                             <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: @progressPercent%"></div>
+                                <div class="progress-bar @(isCompleted ? "completed" : "")" style="width: @progressPercent%"></div>
                             </div>
                             <div class="track-progress-details">
                                 <span class="progress-detail">@coursesCompleted of @track.CoursesCount courses completed</span>
+                                @if (track.CertificatesEarned > 0)
+                                {
+                                    <span class="progress-detail">@track.CertificatesEarned @(track.CertificatesEarned == 1 ? "certificate" : "certificates") earned</span>
+                                }
                             </div>
                         </div>
 
+                        <!-- Courses List -->
                         <div class="track-courses-preview">
                             <h4 class="courses-preview-title">Included Courses</h4>
                             <div class="courses-preview-list">
@@ -108,6 +116,7 @@
                                     var courseClass = course.Status;
                                     var iconClass = courseClass == "completed" ? "fa-check-circle" :
                                     courseClass == "in-progress" ? "fa-spinner fa-spin" : "fa-lock";
+                                    
                                     <div class="course-preview-item @courseClass">
                                         <i class="fas @iconClass"></i>
                                         <span>@course.Title</span>
@@ -115,19 +124,31 @@
                                 }
                             </div>
                         </div>
+
+                        <!-- Completion Badge (for completed tracks) -->
+                        @if (isCompleted)
+                        {
+                            <div class="track-completion-badge">
+                                <i class="fas fa-trophy"></i>
+                                <div>
+                                    <div class="completion-title">Track Completed!</div>
+                                    <div class="completion-date">Great job on completing this track!</div>
+                                </div>
+                            </div>
+                        }
                     </div>
 
                     <div class="track-card-footer">
-                        @if (statusClass == "completed")
+                        @if (isCompleted)
                         {
-                            <a href="/student/certificates" class="btn btn-primary">
+                            <a href="/student/certificates" class="btn btn-primary btn-block">
                                 <i class="fas fa-certificate"></i>
                                 <span>View Certificate</span>
                             </a>
                         }
                         else
                         {
-                            <a href="/student/track/@track.TrackId" class="btn btn-primary">
+                            <a href="/student/track/@track.TrackId" class="btn btn-primary btn-block">
                                 <span>Continue Learning</span>
                                 <i class="fas fa-arrow-right"></i>
                             </a>

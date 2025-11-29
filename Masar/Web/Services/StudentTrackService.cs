@@ -7,7 +7,7 @@ namespace Web.Services;
 /// <summary>
 /// Service for handling Student "My Tracks" functionality
 /// </summary>
-public class StudentTracksService : ITrackService
+public class StudentTracksService : IStudentTrackService
 {
     private readonly IUserRepository _userRepo;
     private readonly ILogger<StudentTracksService> _logger;

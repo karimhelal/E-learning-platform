@@ -3,7 +3,7 @@
 /// <summary>
 /// Service for retrieving Track page data (My Tracks)
 /// </summary>
-public interface ITrackService
+public interface IStudentTrackService
 {
     Task<StudentTracksData?> GetStudentTracksAsync(int studentId);
 }
