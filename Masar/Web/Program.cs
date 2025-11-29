@@ -21,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ========================================
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 // ========================================
 // BLL SERVICES (Team's layer)
 // ========================================
@@ -35,6 +35,7 @@ builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>(
 // ========================================
 builder.Services.AddScoped<IStudentDashboardService, StudentDashboardService>();
 builder.Services.AddScoped<IStudentCoursesService, StudentCoursesService>();
+builder.Services.AddScoped<IStudentCourseDetailsService, StudentCourseDetailsService>();
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
