@@ -14,7 +14,7 @@ public class StudentController : Controller
     private readonly ICurrentUserService _currentUserService;
     private readonly IStudentCourseDetailsService _courseDetailsService;
 
-    private readonly int userId = 1004;
+    private readonly int userId = 1001;
 
     public StudentController(
         IStudentDashboardService dashboardService,
