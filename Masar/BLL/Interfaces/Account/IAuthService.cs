@@ -8,5 +8,7 @@ namespace BLL.Interfaces.Account
     public interface IAuthService
     {
         Task<(IdentityResult Result,User user)> RegisterUserAsync(RegisterDto registerDto);
+        Task<string> GeneratePasswordResetTokenAsync(string email);
+        Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto model);
     }
 }

@@ -1,3 +1,4 @@
+using BLL.DTOs.Account;
 using BLL.Helpers;
 using BLL.Interfaces;
 using BLL.Interfaces.Account;
@@ -49,6 +50,7 @@ builder.Services.AddScoped<IStudentTrackDetailsService, StudentTrackDetailsServi
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 
 builder.Services.AddScoped<RazorViewToStringRenderer>();
@@ -65,6 +67,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             errorNumbersToAdd: null
     )
 ));
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options => {
     options.Password.RequireDigit = true;

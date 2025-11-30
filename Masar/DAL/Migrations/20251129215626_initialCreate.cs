@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
+
     public partial class initialCreate : Migration
     {
         /// <inheritdoc />
