@@ -12,7 +12,7 @@ public class StudentController : Controller
     private readonly IStudentTrackService _tracksService;
     private readonly IStudentTrackDetailsService _trackDetailsService;
     private readonly ICurrentUserService _currentUserService;
-    private readonly int userId = 2;
+    private readonly int userId = 1001;
 
     public StudentController(
         IStudentDashboardService dashboardService,

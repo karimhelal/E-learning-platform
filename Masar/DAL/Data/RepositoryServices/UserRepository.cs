@@ -128,4 +128,27 @@ public class UserRepository : IUserRepository
 
         return query.FirstOrDefaultAsync(sp => sp.StudentId == studentId);
     }
+
+
+    public IQueryable<StudentProfile>? GetStudentProfileQueryable(int studentId)
+    {
+        return _context.StudentProfiles.Where(sp => sp.StudentId == studentId);
+    }
+
+    public IQueryable<InstructorProfile>? GetInstructorProfileQueryable(int instructorId)
+    {
+        return _context.InstructorProfiles.Where(ip => ip.InstructorId == instructorId);
+    }
+
+
+    public bool HasStudentProfileWithId(int studentId)
+    {
+        return _context.StudentProfiles.Find(studentId) != null;
+    }
+
+    public bool HasInstructorProfileWithId(int instructorId)
+    {
+        return _context.InstructorProfiles.Find(instructorId) != null;
+    }
+
 }

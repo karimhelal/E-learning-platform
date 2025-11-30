@@ -69,13 +69,13 @@ public class InstructorController : Controller
                 ),
 
                 CourseCards = dashboardData.CourseCards.Select(c => 
-                    new CourseCardViewModel
+                    new InstructorCourseCardViewModel
                     {
                         CourseId = c.CourseId,
                         Title = c.Title,
                         Description = c.Description,
                         
-                        MainCategory = c.MainCategory?.Name ??  "Undefined",
+                        MainCategory = c.MainCategory,
                         Level = c.Level.ToString(),
 
                         ModulesCount = c.ModulesCount,
