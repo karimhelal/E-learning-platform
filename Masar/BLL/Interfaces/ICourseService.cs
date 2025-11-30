@@ -18,4 +18,5 @@ public interface ICourseService
     Task<BrowseResultDto<CourseBrowseCardDto>> GetAllCoursesFilteredForBrowsingPagedAsync(BrowseRequestDto request);
     Task<FilterGroupsDto> GetFilterSectionConfig();
     Task<FilterGroupsStatsDto> GetFilterGroupsStats();
+    Task<CourseDetailsDto?> GetCourseDetailsByIdAsync(int courseId);
 }
