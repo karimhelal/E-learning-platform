@@ -23,6 +23,7 @@ public class StudentController : Controller
     private readonly IHttpContextAccessor _http;
     private readonly IStudentCourseDetailsService _courseDetailsService;
 
+    private readonly int userId = 1001;
     /// <summary>
     /// Default student ID for testing. 
     /// Valid IDs from seeded data: 1-7 (Students: Alice, Bob, Charlie, Diana, Emma, Frank, Grace)
