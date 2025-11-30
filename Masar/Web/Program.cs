@@ -50,6 +50,7 @@ builder.Services.AddScoped<IStudentTrackDetailsService, StudentTrackDetailsServi
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 
 builder.Services.AddScoped<RazorViewToStringRenderer>();

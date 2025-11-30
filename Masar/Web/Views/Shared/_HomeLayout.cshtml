@@ -61,9 +61,13 @@
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#testimonials">Reviews</a></li>
                 <li><a href="#contact">Contact</a></li>
-                <li>
+                @if(!User.Identity.IsAuthenticated){ 
+                 <li>
                     <a href="/Account/Login" class="nav-btn">Get Started</a>
                 </li>
+                }else {
+                    <a href="/Account/Logout" class="nav-btn">Logout</a>
+                }
             </ul>
             <!-- Mobile Toggle -->
             <button class="mobile-toggle" id="mobileToggle" type="button">

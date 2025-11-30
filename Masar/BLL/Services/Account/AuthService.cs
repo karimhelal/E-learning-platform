@@ -15,9 +15,13 @@ namespace BLL.Services.Account
             _userManager = userManager;
         }
 
-        public Task<string> GeneratePasswordResetTokenAsync(string email)
+        public async Task<string> GeneratePasswordResetTokenAsync(string email)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return null;
+
+          
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
         }
 
         public async Task<(IdentityResult Result,User user)> RegisterUserAsync(RegisterDto registerDto)
@@ -50,9 +54,14 @@ namespace BLL.Services.Account
             return (result, user);
         }
 
-        public Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto model)
+        public async Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto model)
         {
-            throw new NotImplementedException();
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+            
+            return await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
         }
     }
 }

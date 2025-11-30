@@ -34,6 +34,7 @@ public class StudentController : Controller
         ViewBag.Title = "Student Dashboard | Masar";
 
         //var userId = 2; // TODO : Replace with actual logged-in student ID retrieval
+        var userId = _currentUserService.GetUserId();
         var dashboardData = await _dashboardService.GetDashboardDataAsync(userId);
 
         if (dashboardData == null)
