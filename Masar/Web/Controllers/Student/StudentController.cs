@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Web.Interfaces;
 using Web.ViewModels.Student;
 using Web.ViewModels;
@@ -14,20 +14,22 @@ public class StudentController : Controller
     private readonly ICurrentUserService _currentUserService;
     private readonly IStudentCourseDetailsService _courseDetailsService;
 
-    private readonly int userId = 1004;
+    private readonly int userId = 35;
 
     public StudentController(
         IStudentDashboardService dashboardService,
         IStudentCoursesService coursesService,
         IStudentTrackService tracksService,
         IStudentTrackDetailsService trackDetailsService,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IStudentCourseDetailsService courseDetailsService)  // ✅ ADD THIS PARAMETER
     {
         _dashboardService = dashboardService;
         _coursesService = coursesService;
         _tracksService = tracksService;
         _trackDetailsService = trackDetailsService;
         _currentUserService = currentUserService;
+        _courseDetailsService = courseDetailsService;  // ✅ ADD THIS LINE
     }
 
     [HttpGet("/student/dashboard")]
@@ -35,7 +37,6 @@ public class StudentController : Controller
     {
         ViewBag.Title = "Student Dashboard | Masar";
 
-        //var userId = 2; // TODO : Replace with actual logged-in student ID retrieval
         var dashboardData = await _dashboardService.GetDashboardDataAsync(userId);
 
         if (dashboardData == null)
@@ -53,35 +54,32 @@ public class StudentController : Controller
         return View(viewModel);
     }
 
+    [HttpGet("/student/my-courses")]
+    public async Task<IActionResult> MyCourses()
+    {
+        ViewBag.Title = "My Courses | Masar";
 
-    //[HttpGet("/student/my-courses")]
-    //public async Task<IActionResult> MyCourses()
-    //{
-    //    ViewBag.Title = "My Courses | Masar";
+        var coursesData = await _coursesService.GetMyCoursesAsync(userId);
 
-    //    //var userId = 2; // TODO: Replace with actual logged-in student ID retrieval
-    //    var coursesData = await _coursesService.GetMyCoursesAsync(userId);
+        if (coursesData == null)
+        {
+            return NotFound("Student profile not found");
+        }
 
-    //    if (coursesData == null)
-    //    {
-    //        return NotFound("Student profile not found");
-    //    }
+        var viewModel = new StudentCoursesViewModel
+        {
+            Data = coursesData,
+            PageTitle = "My Courses"
+        };
 
-    //    var viewModel = new StudentCoursesViewModel
-    //    {
-    //        Data = coursesData,
-    //        PageTitle = "My Courses"
-    //    };
-
-    //    return View(viewModel);
-    //}
+        return View(viewModel);
+    }
 
     [HttpGet("/student/my-tracks")]
     public async Task<IActionResult> MyTracks()
     {
         ViewBag.Title = "My Tracks | Masar";
 
-        //var userId = 2; // TODO: Replace with actual logged-in student ID
         var tracksData = await _tracksService.GetStudentTracksAsync(userId);
 
         if (tracksData == null)
@@ -125,13 +123,14 @@ public class StudentController : Controller
 
         return View(viewModel);
     }
+
     [HttpGet("/student/track/{trackId}")]
     public async Task<IActionResult> TrackDetails(int trackId)
     {
         ViewBag.Title = "Track Details | Masar";
 
-        //int userId = 2; // TODO: replace with actual logged-in student ID
         var data = await _trackDetailsService.GetTrackDetailsAsync(userId, trackId);
+
         if (data == null)
             return NotFound("Track not found or not enrolled");
 
@@ -144,43 +143,16 @@ public class StudentController : Controller
         return View(vm);
     }
 
-   
-
-
-
-    [HttpGet("/student/my-courses")]
-    public async Task<IActionResult> MyCourses()
-    {
-        ViewBag.Title = "My Courses | Masar";
-
-       // var studentId = 1001; // TODO: Replace with actual logged-in student ID retrieval
-        var coursesData = await _coursesService.GetMyCoursesAsync(userId);
-
-        if (coursesData == null)
-        {
-            return NotFound("Student profile not found");
-        }
-
-        var viewModel = new StudentCoursesViewModel
-        {
-            Data = coursesData,
-            PageTitle = "My Courses"
-        };
-
-        return View(viewModel);
-    }
-
     [HttpGet("/student/course/{courseId}/details")]
     public async Task<IActionResult> CourseDetails(int courseId)
     {
         ViewBag.Title = "Course Details | Masar";
 
-        var studentId = 1001; // TODO: Get from authenticated user
         var courseData = await _courseDetailsService.GetCourseDetailsAsync(userId, courseId);
 
         if (courseData == null)
         {
-            return NotFound();
+            return NotFound("Course not found or not enrolled");
         }
 
         var viewModel = new StudentCourseDetailsViewModel
@@ -195,8 +167,6 @@ public class StudentController : Controller
     [HttpPost("/student/lesson/{lessonId}/toggle")]
     public async Task<IActionResult> ToggleLessonCompletion(int lessonId, [FromBody] ToggleRequest request)
     {
-       // var studentId = 1001; // TODO: Get from authenticated user
-
         var result = await _courseDetailsService.ToggleLessonCompletionAsync(
             userId,
             lessonId,
@@ -216,14 +186,4 @@ public class StudentController : Controller
     {
         public bool IsCompleted { get; set; }
     }
-
-
-
 }
-
-
-
-
-
-
-

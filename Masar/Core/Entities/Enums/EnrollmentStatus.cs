@@ -5,6 +5,7 @@
 /// </summary>
 public enum EnrollmentStatus
 {
+    NotStarted = 0,
     Enrolled = 1,
     InProgress = 2,
     Completed = 3,

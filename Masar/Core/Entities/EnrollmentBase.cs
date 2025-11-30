@@ -31,17 +31,19 @@ public abstract class EnrollmentBase
     [Range(0, 100, ErrorMessage = "Progress must be between 0 and 100")]
     public decimal ProgressPercentage { get; set; }
 
-
     [NotMapped]
     public string EnrollmentType => GetType().Name; // "CourseEnrollment" or "TrackEnrollment"
-
-
-
 
     // Navigation Properties
     [ForeignKey(nameof(StudentId))]
     public virtual StudentProfile? Student { get; set; }
 
-
     public abstract LearningEntity GetLearningEntity();
+
+    public EnrollmentBase()
+    {
+        EnrollmentDate = DateTime.Now;
+        Status = EnrollmentStatus.Enrolled;  // Or NotStarted
+        ProgressPercentage = 0;
+    }
 }

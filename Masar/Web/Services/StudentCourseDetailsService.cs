@@ -1,286 +1,254 @@
-using BLL.DTOs.Student;
-using Core.Entities;
-using Core.Entities.Enums;
+﻿using Core.Entities;
 using Core.RepositoryInterfaces;
-using DAL.Data;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Web.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using DAL.Data;
 
 namespace Web.Services;
 
 public class StudentCourseDetailsService : IStudentCourseDetailsService
 {
+    private readonly IUserRepository _userRepo;
     private readonly ICourseRepository _courseRepo;
-    private readonly IGenericRepository<CourseEnrollment> _enrollmentRepo;
-    private readonly IGenericRepository<LessonProgress> _progressRepo;
     private readonly AppDbContext _context;
+    private readonly ILogger<StudentCourseDetailsService> _logger;
 
     public StudentCourseDetailsService(
+        IUserRepository userRepo,
         ICourseRepository courseRepo,
-        IGenericRepository<CourseEnrollment> enrollmentRepo,
-        IGenericRepository<LessonProgress> progressRepo,
-        AppDbContext context)
+        AppDbContext context,
+        ILogger<StudentCourseDetailsService> logger)
     {
+        _userRepo = userRepo;
         _courseRepo = courseRepo;
-        _enrollmentRepo = enrollmentRepo;
-        _progressRepo = progressRepo;
         _context = context;
+        _logger = logger;
     }
 
-    public async Task<StudentCourseDetailsDto?> GetCourseDetailsAsync(int studentId, int courseId)
+    public async Task<StudentCourseDetailsData?> GetCourseDetailsAsync(int userId, int courseId)
     {
-        // Get course with all relationships
-        var course = await _courseRepo.GetCourseByIdQueryable(courseId)
-            .Include(c => c.Instructor!)
-                .ThenInclude(i => i.User)
-            .Include(c => c.Categories)
-            .Include(c => c.LearningOutcomes)
-            .Include(c => c.Modules!.OrderBy(m => m.Order))
-                .ThenInclude(m => m.Lessons!.OrderBy(l => l.Order))
-                    .ThenInclude(l => l.LessonContent)
-            .Include(c => c.Modules!)
-                .ThenInclude(m => m.Assignments)
-            .Include(c => c.Enrollments!.Where(e => e.StudentId == studentId))
-            .FirstOrDefaultAsync();
-
-        if (course == null) return null;
-
-        // Get student enrollment
-        var enrollment = course.Enrollments?.FirstOrDefault();
-        if (enrollment == null) return null;
-
-        // GET STUDENT INFO (ADD THIS)
-        var studentProfile = await _context.StudentProfiles
-            .Include(sp => sp.User)
-            .FirstOrDefaultAsync(sp => sp.StudentId == studentId);
-        
-        if (studentProfile?.User == null) return null;
-
-        var studentFirstName = studentProfile.User.FirstName ?? "Student";
-        var studentLastName = studentProfile.User.LastName ?? "";
-        var studentInitials = GetInitials($"{studentFirstName} {studentLastName}");
-
-        // Get all lesson progress for this student
-        var allLessonIds = course.Modules?
-            .SelectMany(m => m.Lessons ?? Enumerable.Empty<Lesson>())
-            .Select(l => l.LessonId)
-            .ToList() ?? new List<int>();
-
-        var lessonProgressList = await _progressRepo.GetAllQueryable()
-            .Where(lp => lp.StudentId == studentId && allLessonIds.Contains(lp.LessonId))
-            .ToListAsync();
-
-        var completedLessonIds = lessonProgressList
-            .Where(lp => lp.IsCompleted)
-            .Select(lp => lp.LessonId)
-            .ToHashSet();
-
-        // Calculate total duration (from VideoContent only)
-        var totalDurationSeconds = course.Modules?
-            .SelectMany(m => m.Lessons ?? Enumerable.Empty<Lesson>())
-            .Where(l => l.LessonContent is VideoContent)
-            .Sum(l => ((VideoContent)l.LessonContent).DurationInSeconds) ?? 0;
-
-        // Build modules with progress
-        var modulesDto = course.Modules?.OrderBy(m => m.Order).Select(module =>
+        try
         {
-            var lessons = module.Lessons?.OrderBy(l => l.Order).ToList() ?? new List<Lesson>();
+            _logger.LogInformation("📚 Fetching course details for user {UserId}, course {CourseId}", userId, courseId);
 
-            var moduleDuration = lessons
-                .Where(l => l.LessonContent is VideoContent)
-                .Sum(l => ((VideoContent)l.LessonContent).DurationInSeconds);
-
-            var completedInModule = lessons.Count(l => completedLessonIds.Contains(l.LessonId));
-
-            var lessonsDto = lessons.Select(lesson =>
-            {
-                var isCompleted = completedLessonIds.Contains(lesson.LessonId);
-
-                var duration = lesson.LessonContent is VideoContent video
-                    ? (int)Math.Ceiling(video.DurationInSeconds / 60.0)
-                    : 10; // Default for articles
-
-                // FIX: Use FirstOrDefault() instead of FirstOrDefaultAsync() since lessonProgressList is already a List
-                var completedDate = lessonProgressList
-                    .FirstOrDefault(lp => lp.LessonId == lesson.LessonId && lp.IsCompleted)?
-                    .CompletedDate;
-
-                return new LessonWithProgressDto
-                {
-                    LessonId = lesson.LessonId,
-                    LessonOrder = lesson.Order,
-                    LessonName = lesson.Title,
-                    ContentType = lesson.ContentType,
-                    DurationMinutes = duration,
-                    IsCompleted = isCompleted,
-                    CompletedDate = completedDate
-                };
-            }).ToList();
-
-            return new ModuleWithProgressDto
-            {
-                ModuleId = module.ModuleId,
-                ModuleOrder = module.Order,
-                ModuleName = module.Title,
-                ModuleDescription = module.Description ?? "",
-                TotalLessons = lessons.Count,
-                CompletedLessons = completedInModule,
-                DurationMinutes = (int)Math.Ceiling(moduleDuration / 60.0),
-                AssignmentsCount = module.Assignments?.Count ?? 0,
-                ProgressPercentage = lessons.Count > 0 ? (decimal)completedInModule / lessons.Count * 100 : 0,
-                Lessons = lessonsDto
-            };
-        }).ToList() ?? new List<ModuleWithProgressDto>();
-
-        var totalLessons = modulesDto.Sum(m => m.TotalLessons);
-        var completedLessons = modulesDto.Sum(m => m.CompletedLessons);
-
-        // Get track info using TrackCourses
-        var trackInfo = await _context.Set<TrackEnrollment>()
-            .Where(te => te.StudentId == studentId)
-            .Where(te => te.Track!.TrackCourses!.Any(tc => tc.CourseId == courseId))
-            .Select(te => new { te.TrackId, te.Track!.Title })
-            .FirstOrDefaultAsync();
-
-        // Get instructor name from User entity
-        var firstName = course.Instructor?.User?.FirstName ?? "Instructor";
-        var lastName = course.Instructor?.User?.LastName ?? "Name";
-        var initials = $"{firstName[0]}{lastName[0]}".ToUpper();
-
-        return new StudentCourseDetailsDto
-        {
-            // ADD THESE TWO LINES
-            StudentName = studentFirstName,
-            UserInitials = studentInitials,
+            // Get student profile
+            var studentProfile = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
             
-            CourseId = course.Id,
-            Title = course.Title,
-            Description = course.Description ?? "",
-            ThumbnailImageUrl = course.ThumbnailImageUrl ?? "",
-           // Language = course.Language,
-            Level = course.Level,
-            CategoryName = course.Categories?.FirstOrDefault()?.Name ?? "General",
-            InstructorName = $"{firstName} {lastName}",
-            InstructorInitials = initials,
-            TotalModules = course.Modules?.Count ?? 0,
-            TotalLessons = totalLessons,
-            TotalDurationMinutes = (int)Math.Ceiling(totalDurationSeconds / 60.0),
-            TotalStudentsEnrolled = course.Enrollments?.Count ?? 0,
-            ProgressPercentage = enrollment.ProgressPercentage,
-            CompletedLessons = completedLessons,
-            EnrollmentDate = enrollment.EnrollmentDate,
-            EnrollmentStatus = enrollment.Status.ToString(),
-            TrackId = trackInfo?.TrackId,
-            TrackName = trackInfo?.Title ?? "",
-            LearningOutcomes = course.LearningOutcomes?
-                .Select(lo => new LearningOutcomeDto
+            if (studentProfile == null)
+            {
+                _logger.LogWarning("⚠️ Student profile not found for user {UserId}", userId);
+                return null;
+            }
+
+            if (studentProfile.User == null)
+            {
+                _logger.LogWarning("⚠️ User data not found for student profile");
+                return null;
+            }
+
+            // Find enrollment
+            var enrollment = studentProfile.Enrollments?
+                .OfType<CourseEnrollment>()
+                .FirstOrDefault(e => e.CourseId == courseId);
+
+            if (enrollment == null)
+            {
+                _logger.LogWarning("⚠️ No enrollment found for user {UserId} in course {CourseId}", userId, courseId);
+                return null;
+            }
+
+            var course = enrollment.Course;
+            if (course == null)
+            {
+                _logger.LogWarning("⚠️ Course data not loaded for course {CourseId}", courseId);
+                return null;
+            }
+
+            // Get lesson progress
+            var lessonProgressList = await _context.LessonProgress
+                .Where(lp => lp.StudentId == studentProfile.StudentId)
+                .ToListAsync();
+
+            var lessonProgressDict = lessonProgressList.ToDictionary(lp => lp.LessonId, lp => lp.IsCompleted);
+
+            // Map modules and lessons
+            var modules = course.Modules?
+                .OrderBy(m => m.Order)
+                .Select(m => new ModuleDetailsItem
                 {
-                    Id = lo.Id,
-                    Title = lo.Title,
-                    Description = lo.Description
+                    ModuleId = m.ModuleId,
+                    Title = m.Title,
+                    Description = m.Description ?? string.Empty,
+                    Order = m.Order,
+                    Lessons = m.Lessons?
+                        .OrderBy(l => l.Order)
+                        .Select(l => new LessonDetailsItem
+                        {
+                            LessonId = l.LessonId,
+                            Title = l.Title,
+                            Order = l.Order,
+                            ContentType = l.ContentType.ToString(),
+                            DurationSeconds = l.LessonContent is VideoContent vc ? vc.DurationInSeconds : 0,
+                            IsCompleted = lessonProgressDict.GetValueOrDefault(l.LessonId, false)
+                        })
+                        .ToList() ?? new List<LessonDetailsItem>()
                 })
-                .ToList() ?? new List<LearningOutcomeDto>(),
-            Modules = modulesDto
-        };
-    }
+                .ToList() ?? new List<ModuleDetailsItem>();
 
-    public async Task<bool> ToggleLessonCompletionAsync(int studentId, int lessonId, bool isCompleted)
-    {
-        var progress = await _progressRepo.GetAllQueryable()
-            .FirstOrDefaultAsync(lp => lp.StudentId == studentId && lp.LessonId == lessonId);
+            var totalLessons = modules.Sum(m => m.Lessons.Count);
+            var completedLessons = modules.Sum(m => m.Lessons.Count(l => l.IsCompleted));
 
-        if (progress == null && isCompleted)
-        {
-            progress = new LessonProgress
+            var instructorName = course.Instructor?.User != null
+                ? $"{course.Instructor.User.FirstName} {course.Instructor.User.LastName}"
+                : "Unknown Instructor";
+
+            // Get student name and initials
+            var studentName = $"{studentProfile.User.FirstName} {studentProfile.User.LastName}";
+            var userInitials = GetInitials($"{studentProfile.User.FirstName} {studentProfile.User.LastName}");
+
+            var result = new StudentCourseDetailsData
             {
-                StudentId = studentId,
-                LessonId = lessonId,
-                IsCompleted = true,
-                StartedDate = DateTime.UtcNow,
-                CompletedDate = DateTime.UtcNow
+                CourseId = course.Id,
+                Title = course.Title,
+                Description = course.Description ?? string.Empty,
+                StudentName = studentName,
+                UserInitials = userInitials,  // ✅ ADD THIS LINE
+                InstructorName = instructorName,
+                CategoryName = course.Categories?.FirstOrDefault()?.Name ?? "General",
+                TotalModules = modules.Count,
+                TotalLessons = totalLessons,
+                CompletedLessons = completedLessons,
+                ProgressPercentage = enrollment.ProgressPercentage,
+                Modules = modules
             };
-            await _progressRepo.AddAsync(progress);
+
+            _logger.LogInformation("✅ Course details retrieved successfully");
+            return result;
         }
-        else if (progress != null)
+        catch (Exception ex)
         {
-            progress.IsCompleted = isCompleted;
-            progress.CompletedDate = isCompleted ? DateTime.UtcNow : null;
-            _progressRepo.Update(progress);
+            _logger.LogError(ex, "❌ Error getting course details for user {UserId}, course {CourseId}", userId, courseId);
+            return null;
         }
-
-        // Save lesson progress changes
-        await _context.SaveChangesAsync();
-
-        // Update course enrollment progress percentage
-        await UpdateCourseProgressAsync(studentId, lessonId);
-
-        return true;
     }
 
-    private async Task UpdateCourseProgressAsync(int studentId, int lessonId)
+    public async Task<bool> ToggleLessonCompletionAsync(int userId, int lessonId, bool isCompleted)
     {
-        // Get the lesson and its course
-        var lesson = await _context.Lessons
-            .Include(l => l.Module)
-            .FirstOrDefaultAsync(l => l.LessonId == lessonId);
-
-        if (lesson?.Module?.CourseId == null) return;
-
-        var courseId = lesson.Module.CourseId;
-
-        // Get all lessons in the course
-        var allLessonsInCourse = await _context.Modules
-            .Where(m => m.CourseId == courseId)
-            .SelectMany(m => m.Lessons!)
-            .Select(l => l.LessonId)
-            .ToListAsync();
-
-        // Get completed lessons count
-        var completedLessonsCount = await _context.Set<LessonProgress>()
-            .Where(lp => lp.StudentId == studentId 
-                      && allLessonsInCourse.Contains(lp.LessonId) 
-                      && lp.IsCompleted)
-            .CountAsync();
-
-        // Calculate progress percentage
-        var totalLessons = allLessonsInCourse.Count;
-        var progressPercentage = totalLessons > 0 
-            ? (decimal)completedLessonsCount / totalLessons * 100 
-            : 0;
-
-        // Update enrollment
-        var enrollment = await _context.Set<CourseEnrollment>()
-            .FirstOrDefaultAsync(e => e.StudentId == studentId && e.CourseId == courseId);
-
-        if (enrollment != null)
+        try
         {
-            enrollment.ProgressPercentage = progressPercentage;
+            _logger.LogInformation("🔄 Toggling lesson {LessonId} completion for user {UserId}", lessonId, userId);
+
+            var studentProfile = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: false);
             
-            // Update status based on progress
-            if (progressPercentage >= 100)
+            if (studentProfile == null)
             {
-                enrollment.Status = Core.Entities.Enums.EnrollmentStatus.Completed;
-                //enrollment.CompletionDate = DateTime.UtcNow;
-            }
-            else if (progressPercentage > 0)
-            {
-                enrollment.Status = Core.Entities.Enums.EnrollmentStatus.InProgress;
+                _logger.LogWarning("⚠️ Student profile not found");
+                return false;
             }
 
-            _context.Update(enrollment);
+            // Get or create lesson progress
+            var lessonProgress = await _context.LessonProgress
+                .FirstOrDefaultAsync(lp => lp.StudentId == studentProfile.StudentId && lp.LessonId == lessonId);
+
+            if (lessonProgress == null)
+            {
+                lessonProgress = new LessonProgress
+                {
+                    StudentId = studentProfile.StudentId,
+                    LessonId = lessonId,
+                    IsCompleted = isCompleted,
+                    StartedDate = DateTime.Now,
+                    CompletedDate = isCompleted ? DateTime.Now : null
+                };
+                _context.LessonProgress.Add(lessonProgress);
+            }
+            else
+            {
+                lessonProgress.IsCompleted = isCompleted;
+                lessonProgress.CompletedDate = isCompleted ? DateTime.Now : null;
+            }
+
+            // ✅ RECALCULATE COURSE PROGRESS
+            // Get the lesson to find which course it belongs to
+            var lesson = await _context.Lessons
+                .Include(l => l.Module)
+                .FirstOrDefaultAsync(l => l.LessonId == lessonId);
+
+            if (lesson != null && lesson.Module != null)
+            {
+                var courseId = lesson.Module.CourseId;
+
+                // Get all lessons in this course
+                var allCourseLessons = await _context.Modules
+                    .Where(m => m.CourseId == courseId)
+                    .SelectMany(m => m.Lessons)
+                    .Select(l => l.LessonId)
+                    .ToListAsync();
+
+                // Get completed lessons count
+                var completedLessonsCount = await _context.LessonProgress
+                    .Where(lp => lp.StudentId == studentProfile.StudentId && 
+                                allCourseLessons.Contains(lp.LessonId) && 
+                                lp.IsCompleted)
+                    .CountAsync();
+
+                // Calculate new progress percentage
+                var totalLessons = allCourseLessons.Count;
+                var newProgressPercentage = totalLessons > 0 
+                    ? (decimal)completedLessonsCount / totalLessons * 100 
+                    : 0;
+
+                // ✅ UPDATE ENROLLMENT PROGRESS
+                var enrollment = await _context.Set<CourseEnrollment>()
+                    .FirstOrDefaultAsync(e => e.StudentId == studentProfile.StudentId && 
+                                             e.CourseId == courseId);
+
+                if (enrollment != null)
+                {
+                    enrollment.ProgressPercentage = Math.Round(newProgressPercentage, 2);
+                    
+                    // Update status based on progress
+                    if (enrollment.ProgressPercentage >= 100)
+                    {
+                        enrollment.Status = Core.Entities.Enums.EnrollmentStatus.Completed;
+                    }
+                    else if (enrollment.ProgressPercentage > 0)
+                    {
+                        enrollment.Status = Core.Entities.Enums.EnrollmentStatus.InProgress;
+                    }
+
+                    _logger.LogInformation("📊 Updated course {CourseId} progress to {Progress}%", 
+                        courseId, enrollment.ProgressPercentage);
+                }
+            }
+
             await _context.SaveChangesAsync();
+            
+            _logger.LogInformation("✅ Lesson {LessonId} marked as {Status}", 
+                lessonId, isCompleted ? "completed" : "incomplete");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Error toggling lesson completion");
+            return false;
         }
     }
 
-    // ADD THIS HELPER METHOD at the end of the class
-    private string GetInitials(string name)
+    // ✅ ADD THIS HELPER METHOD
+    private string GetInitials(string fullName)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return "JD";
+        if (string.IsNullOrWhiteSpace(fullName))
+            return "ST";
 
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        
         if (parts.Length >= 2)
-            return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+            return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+        
+        if (parts.Length == 1 && parts[0].Length >= 2)
+            return parts[0].Substring(0, 2).ToUpper();
 
         return parts[0][0].ToString().ToUpper();
     }
