@@ -1,0 +1,294 @@
+﻿@model Web.ViewModels.Student.StudentBrowseTracksViewModel
+
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    ViewBag.Title = "Browse Learning Tracks | Masar";
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <h1 class="page-title">Browse Learning Tracks 🚀</h1>
+            <p class="page-subtitle">Discover structured learning paths designed to help you master new skills</p>
+        </div>
+        <div class="page-actions">
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="grid" title="Grid view">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="view-btn" data-view="list" title="List view">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Browse Content -->
+<section class="browse-content">
+    <!-- Filters and Search -->
+    <div class="browse-filters">
+        <div class="filters-left">
+            <!-- Search Box -->
+            <div class="search-box-large">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search for learning tracks..." id="trackSearch" />
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-dropdown">
+                <button class="filter-dropdown-btn" id="categoryDropdown">
+                    <i class="fas fa-folder"></i>
+                    <span>All Categories</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="filter-dropdown-menu" id="categoryMenu">
+                    <button class="filter-option active" data-category="all">
+                        <i class="fas fa-th"></i>
+                        <span>All Categories</span>
+                    </button>
+                    <button class="filter-option" data-category="web-development">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>Web Development</span>
+                    </button>
+                    <button class="filter-option" data-category="data-science">
+                        <i class="fas fa-brain"></i>
+                        <span>Data Science</span>
+                    </button>
+                    <button class="filter-option" data-category="mobile-development">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Mobile Development</span>
+                    </button>
+                    <button class="filter-option" data-category="programming">
+                        <i class="fas fa-code"></i>
+                        <span>Programming</span>
+                    </button>
+                    <button class="filter-option" data-category="design">
+                        <i class="fas fa-paint-brush"></i>
+                        <span>Design</span>
+                    </button>
+                    <button class="filter-option" data-category="devops">
+                        <i class="fas fa-server"></i>
+                        <span>DevOps</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Level Filter -->
+            <div class="filter-dropdown">
+                <button class="filter-dropdown-btn" id="levelDropdown">
+                    <i class="fas fa-signal"></i>
+                    <span>All Levels</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="filter-dropdown-menu" id="levelMenu">
+                    <button class="filter-option active" data-level="all">
+                        All Levels
+                    </button>
+                    <button class="filter-option" data-level="beginner">
+                        Beginner
+                    </button>
+                    <button class="filter-option" data-level="intermediate">
+                        Intermediate
+                    </button>
+                    <button class="filter-option" data-level="advanced">
+                        Advanced
+                    </button>
+                </div>
+            </div>
+
+            <!-- Duration Filter -->
+            <div class="filter-dropdown">
+                <button class="filter-dropdown-btn" id="durationDropdown">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span>Any Duration</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="filter-dropdown-menu" id="durationMenu">
+                    <button class="filter-option active" data-duration="all">
+                        Any Duration
+                    </button>
+                    <button class="filter-option" data-duration="short">
+                        Short (< 20 hours)
+                    </button>
+                    <button class="filter-option" data-duration="medium">
+                        Medium (20-50 hours)
+                    </button>
+                    <button class="filter-option" data-duration="long">
+                        Long (> 50 hours)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="filters-right">
+            <!-- Sort Dropdown -->
+            <div class="filter-dropdown">
+                <button class="filter-dropdown-btn" id="sortDropdown">
+                    <i class="fas fa-sort"></i>
+                    <span>Sort by: Popular</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="filter-dropdown-menu" id="sortMenu">
+                    <button class="filter-option active" data-sort="popular">
+                        Most Popular
+                    </button>
+                    <button class="filter-option" data-sort="newest">
+                        Newest First
+                    </button>
+                    <button class="filter-option" data-sort="rating">
+                        Highest Rated
+                    </button>
+                    <button class="filter-option" data-sort="title">A-Z</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info">
+        <p class="results-count">
+            Showing <strong id="resultsCount">@(Model?.Data?.Tracks?.Count ?? 0)</strong> learning tracks
+        </p>
+        <button class="clear-filters-btn" id="clearFilters" style="display: none;">
+            <i class="fas fa-times"></i>
+            <span>Clear Filters</span>
+        </button>
+    </div>
+
+    <!-- Tracks Grid -->
+    <div class="tracks-catalog" id="tracksCatalog">
+        @if (Model?.Data?.Tracks != null && Model.Data.Tracks.Any())
+        {
+            @foreach (var track in Model.Data.Tracks)
+            {
+                <div class="catalog-track-card" data-category="web-development" data-level="@track.Level.ToLower()" data-duration="long">
+                    <div class="track-header">
+                        <div class="track-icon-wrapper">
+                            <i class="fas @track.CategoryIcon"></i>
+                        </div>
+                        <div class="track-badge-container">
+                            <span class="track-level-badge @track.LevelBadgeClass">@track.Level</span>
+                        </div>
+                    </div>
+                    <div class="track-card-content">
+                        <span class="track-category">
+                            <i class="fas @track.CategoryIcon"></i>
+                            @track.CategoryName
+                        </span>
+                        <h3 class="track-card-title">@track.Title</h3>
+                        <p class="track-card-description">
+                            @track.Description
+                        </p>
+
+                        <div class="track-stats-grid">
+                            <div class="track-stat">
+                                <i class="fas fa-book"></i>
+                                <div class="stat-info">
+                                    <span class="stat-value">@track.CoursesCount</span>
+                                    <span class="stat-label">Courses</span>
+                                </div>
+                            </div>
+                            <div class="track-stat">
+                                <i class="fas fa-clock"></i>
+                                <div class="stat-info">
+                                    <span class="stat-value">@track.DurationHours h</span>
+                                    <span class="stat-label">Duration</span>
+                                </div>
+                            </div>
+                            <div class="track-stat">
+                                <i class="fas fa-star"></i>
+                                <div class="stat-info">
+                                    <span class="stat-value">@track.Rating.ToString("0.0")</span>
+                                    <span class="stat-label">Rating</span>
+                                </div>
+                            </div>
+                            <div class="track-stat">
+                                <i class="fas fa-users"></i>
+                                <div class="stat-info">
+                                    <span class="stat-value">@(track.StudentsCount > 999 ? (track.StudentsCount / 1000.0).ToString("0.#") + "K" : track.StudentsCount.ToString())</span>
+                                    <span class="stat-label">Students</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (track.Skills.Any())
+                        {
+                            <div class="track-skills">
+                                @foreach (var skill in track.Skills.Take(4))
+                                {
+                                    <span class="skill-tag">@skill</span>
+                                }
+                                @if (track.Skills.Count > 4)
+                                {
+                                    <span class="skill-tag">+@(track.Skills.Count - 4)</span>
+                                }
+                            </div>
+                        }
+
+                        @if (track.CoursesPreview.Any())
+                        {
+                            <div class="track-courses-preview">
+                                <h4 class="courses-preview-title">Included Courses</h4>
+                                <div class="courses-preview-list">
+                                    @foreach (var course in track.CoursesPreview)
+                                    {
+                                        <div class="course-preview-item">
+                                            <i class="fas fa-book"></i>
+                                            <span>@course.Title (@course.Difficulty)</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="track-card-footer">
+                            <a href="@track.ActionUrl" class="btn btn-primary btn-block">
+                                <span>@track.ActionText</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state" id="emptyState">
+                <div class="empty-state-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <h3 class="empty-state-title">No tracks available</h3>
+                <p class="empty-state-description">
+                    No learning tracks found. Check back soon for new tracks!
+                </p>
+            </div>
+        }
+    </div>
+
+    <!-- Empty State (hidden by default) -->
+    <div class="empty-state" id="emptyStateSearch" style="display: none;">
+        <div class="empty-state-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <h3 class="empty-state-title">No tracks found</h3>
+        <p class="empty-state-description">
+            Try adjusting your filters or search terms
+        </p>
+        <button class="btn btn-primary" id="resetFilters">
+            <i class="fas fa-redo"></i>
+            <span>Reset Filters</span>
+        </button>
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/Student/browse-tracks.css" />
+}
+
+@section Scripts {
+    <script src="~/js/browse-tracks.js"></script>
+}
+
+
