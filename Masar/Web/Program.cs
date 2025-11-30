@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Interfaces;
 using Web.Services;
+using Web.Interfaces.Admin; // ?? ADD THIS LINE
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,15 @@ builder.Services.AddScoped<IStudentCourseDetailsService, StudentCourseDetailsSer
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+// ?? ADMIN SERVICES - ADD THESE
+builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+builder.Services.AddScoped<IAdminUserManagementService, AdminUserManagementService>();
+builder.Services.AddScoped<IAdminCourseManagementService, AdminCourseManagementService>();
+builder.Services.AddScoped<IAdminTrackManagementService, AdminTrackManagementService>();
+builder.Services.AddScoped<IAdminCategoryService, AdminCategoryService>();
+builder.Services.AddScoped<IAdminReportsService, AdminReportsService>();
 
 
 builder.Services.AddScoped<RazorViewToStringRenderer>();
