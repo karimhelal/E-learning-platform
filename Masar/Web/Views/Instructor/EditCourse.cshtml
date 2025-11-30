@@ -1,0 +1,788 @@
+﻿@model Web.ViewModels.Instructor.EditCourseViewModel
+
+@{
+    ViewBag.Title = "Edit Course | Masar";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/edit-course.css" />
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <a href="~/instructor/my-courses" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to My Courses</span>
+            </a>
+            <h1 class="page-title">Edit Course ✏️</h1>
+            <p class="page-subtitle">@Model.Data.CourseTitle</p>
+        </div>
+        <div class="page-actions">
+            <button type="button" class="btn btn-secondary" id="saveChangesBtn">
+                <i class="fas fa-save"></i>
+                <span>Save Changes</span>
+            </button>
+            <button type="button" class="btn btn-danger" id="archiveCourseBtn">
+                <i class="fas fa-archive"></i>
+                <span>Archive</span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Add this at the top of the page, after the page header -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<!-- Course Stats Overview -->
+<section class="course-stats-overview">
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">@Model.Data.Stats.EnrolledStudents.ToString("N0")</div>
+                <div class="stat-label">Enrolled Students</div>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">@Model.Data.Stats.AverageRating.ToString("F1")</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">@Model.Data.Stats.Completions.ToString("N0")</div>
+                <div class="stat-label">Completions</div>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">@Model.Data.Stats.AverageProgress%</div>
+                <div class="stat-label">Avg. Progress</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tabs Navigation -->
+<section class="tabs-section">
+    <div class="tabs-nav">
+        <button class="tab-link active" data-tab="details">
+            <i class="fas fa-info-circle"></i>
+            <span>Course Details</span>
+        </button>
+        <button class="tab-link" data-tab="curriculum">
+            <i class="fas fa-book"></i>
+            <span>Curriculum</span>
+        </button>
+        <button class="tab-link" data-tab="students">
+            <i class="fas fa-users"></i>
+            <span>Students</span>
+        </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tabs-content">
+        <!-- Details Tab -->
+        <div class="tab-pane active" data-tab="details">
+            <form asp-action="EditCourse" asp-controller="Instructor" method="post" id="editCourseForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="courseId" value="@Model.Data.CourseId" />
+                
+                <div class="edit-form-card">
+                    <div class="form-section">
+                        <h3 class="section-heading">Basic Information</h3>
+
+                        <div class="form-group">
+                            <label for="editCourseTitle" class="form-label">Course Title *</label>
+                            <input type="text" 
+                                   id="editCourseTitle" 
+                                   name="CourseTitle"
+                                   class="form-input" 
+                                   value="@Model.Data.CourseTitle" 
+                                   required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editCourseDescription" class="form-label">Description *</label>
+                            <textarea id="editCourseDescription" 
+                                      name="Description"
+                                      class="form-textarea" 
+                                      rows="6" 
+                                      required>@Model.Data.Description</textarea>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="editCategory" class="form-label">Category *</label>
+                                <select id="editCategory" 
+                                        name="CategoryId"
+                                        class="form-select" 
+                                        required>
+                                    @foreach (var category in Model.Data.AvailableCategories)
+                                    {
+                                        <option value="@category.Value" 
+                                                selected="@(category.Value == Model.Data.SelectedCategoryId)">
+                                            @category.Text
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editLevel" class="form-label">Level *</label>
+                                <select id="editLevel" 
+                                        name="Level"
+                                        class="form-select" 
+                                        required>
+                                    @foreach (var level in Model.Data.AvailableLevels)
+                                    {
+                                        <option value="@level.Value" 
+                                                selected="@(level.Value == Model.Data.SelectedLevel)">
+                                            @level.Text
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-heading">Learning Outcomes</h3>
+                        <div class="outcomes-list" id="editOutcomesList">
+                            @for (int i = 0; i < Model.Data.LearningOutcomes.Count; i++)
+                            {
+                                <div class="outcome-item-edit">
+                                    <i class="fas fa-check-circle"></i>
+                                    <input type="text" 
+                                           name="LearningOutcomes[@i]"
+                                           class="form-input" 
+                                           value="@Model.Data.LearningOutcomes[i]" />
+                                    <button type="button" class="btn-remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-small" id="addEditOutcome">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Outcome</span>
+                        </button>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-heading">
+                            <i class="fas fa-image"></i>
+                            Course Thumbnail
+                        </h3>
+                        
+                        <div class="thumbnail-upload-section">
+                            <!-- Thumbnail Preview -->
+                            <div class="thumbnail-preview-wrapper">
+                                <div class="thumbnail-preview-container">
+                                    <img id="thumbnailPreview" 
+                                         src="@(string.IsNullOrEmpty(Model.Data.ThumbnailUrl) ? "https://via.placeholder.com/1280x720/7c3aed/ffffff?text=Upload+Course+Thumbnail" : Model.Data.ThumbnailUrl)" 
+                                         alt="Course Thumbnail" 
+                                         class="thumbnail-preview"
+                                         onerror="this.src='https://via.placeholder.com/1280x720/ef4444/ffffff?text=Failed+to+Load+Image'" />
+                                    
+                                    <div class="thumbnail-overlay">
+                                        <div class="overlay-buttons">
+                                            <button type="button" class="btn-overlay" id="uploadFromDeviceBtn">
+                                                <i class="fas fa-upload"></i>
+                                                <span>Upload from Device</span>
+                                            </button>
+                                            <button type="button" class="btn-overlay" id="useUrlBtn">
+                                                <i class="fas fa-link"></i>
+                                                <span>Use URL</span>
+                                            </button>
+                                            @if (!string.IsNullOrEmpty(Model.Data.ThumbnailUrl))
+                                            {
+                                                <button type="button" class="btn-overlay btn-danger-overlay" id="removeThumbnailBtn">
+                                                    <i class="fas fa-trash"></i>
+                                                    <span>Remove</span>
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Loading Indicator -->
+                                    <div id="uploadLoadingIndicator" class="upload-loading" style="display: none;">
+                                        <div class="loading-spinner"></div>
+                                        <p>Uploading...</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Image Info -->
+                                <div class="thumbnail-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Recommended: 1280x720px (16:9 ratio)</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-file-image"></i>
+                                        <span>Formats: JPG, PNG, WebP (Max 5MB)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden File Input -->
+                            <input type="file" 
+                                   id="thumbnailFileInput" 
+                                   accept="image/jpeg,image/png,image/webp,image/jpg"
+                                   style="display: none;" />
+                            
+                            <!-- URL Input (Hidden by default) -->
+                            <div id="urlInputContainer" class="url-input-container" style="display: none;">
+                                <div class="form-group">
+                                    <label for="thumbnailUrl" class="form-label">
+                                        <i class="fas fa-link"></i>
+                                        Image URL
+                                    </label>
+                                    <div class="url-input-group">
+                                        <input type="url" 
+                                               id="thumbnailUrlInput" 
+                                               class="form-input" 
+                                               placeholder="https://example.com/image.jpg" />
+                                        <button type="button" class="btn-apply-url" id="applyUrlBtn">
+                                            <i class="fas fa-check"></i>
+                                            Apply
+                                        </button>
+                                        <button type="button" class="btn-cancel-url" id="cancelUrlBtn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden input for form submission -->
+                            <input type="hidden" 
+                                   id="thumbnailUrl" 
+                                   name="ThumbnailUrl"
+                                   value="@Model.Data.ThumbnailUrl" />
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Curriculum Tab -->
+        <div class="tab-pane" data-tab="curriculum">
+            <div class="curriculum-manager">
+                <div class="curriculum-header">
+                    <h3 class="section-heading">Course Curriculum</h3>
+                    <button type="button" class="btn btn-primary" id="addNewModule">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Module</span>
+                    </button>
+                </div>
+
+                <div class="modules-list" id="editModulesList">
+                    @if (Model.Data.Modules != null && Model.Data.Modules.Any())
+                    {
+                        @foreach (var module in Model.Data.Modules)
+                        {
+                            <div class="edit-module-card" 
+                                 data-module-id="@module.ModuleId" 
+                                 data-module-order="@module.Order"
+                                 data-module-description="@module.Description">
+                                <div class="module-card-header">
+                                    <div class="module-info">
+                                        <i class="fas fa-grip-vertical drag-handle"></i>
+                                        <div class="module-details">
+                                            <h4 class="module-title-display">@module.Title</h4>
+                                            <span class="module-meta">@module.LessonsCount lessons • @module.DurationFormatted</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-card-actions">
+                                        <button type="button" class="btn-icon btn-edit-module" title="Edit Module">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn-icon btn-add-lesson" title="Add Lesson">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button type="button" class="btn-icon btn-delete-module" title="Delete Module">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <button type="button" class="btn-icon btn-toggle">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="module-card-body">
+                                    <div class="lessons-list-edit">
+                                        @if (module.Lessons != null && module.Lessons.Any())
+                                        {
+                                            @foreach (var lesson in module.Lessons)
+                                            {
+                                                <div class="lesson-card-edit" 
+                                                     data-lesson-id="@lesson.LessonId" 
+                                                     data-lesson-order="@lesson.Order"
+                                                     data-lesson-content-type="@lesson.ContentType"
+                                                     data-lesson-video-url="@(lesson.VideoUrl ?? "")"
+                                                     data-lesson-pdf-url="@(lesson.PdfUrl ?? "")"
+                                                     data-lesson-duration="@lesson.DurationInSeconds"
+                                                     data-lesson-resources='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(lesson.Resources))'>
+                                                    
+                                                    <div class="drag-handle">
+                                                        <i class="fas fa-grip-vertical"></i>
+                                                    </div>
+                                                    
+                                                    <div class="lesson-type-icon @lesson.TypeClass">
+                                                        <i class="fas @lesson.TypeIcon"></i>
+                                                    </div>
+                                                    
+                                                    <div class="lesson-info-edit">
+                                                        <div class="lesson-title-edit">@lesson.Title</div>
+                                                        <div class="lesson-meta-edit">
+                                                            <span><i class="fas fa-sort-numeric-up"></i> Order: @lesson.Order</span>
+                                                            <span><i class="fas fa-clock"></i> @lesson.DurationFormatted</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="lesson-actions-edit">
+                                                        <button type="button" class="btn-icon-small btn-edit-lesson" title="Edit Lesson">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" class="btn-icon-small btn-delete-lesson" title="Delete Lesson">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+
+                                    <button type="button" class="btn-add-lesson-edit">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Add Lesson to This Module</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-book-open"></i>
+                            <p>No modules yet. Click "Add Module" to get started!</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div class="tab-pane" data-tab="students">
+            <div class="students-manager">
+                <div class="students-header">
+                    <h3 class="section-heading">Enrolled Students (@Model.Data.Stats.EnrolledStudents.ToString("N0"))</h3>
+                    <div class="search-filter-group">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search students..." class="search-input" />
+                        </div>
+                        <select class="filter-select">
+                            <option value="all">All Students</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="students-table-container">
+                    @if (Model.Data.EnrolledStudents != null && Model.Data.EnrolledStudents.Any())
+                    {
+                        <table class="students-table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Enrolled Date</th>
+                                    <th>Progress</th>
+                                    <th>Last Activity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var student in Model.Data.EnrolledStudents)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="student-cell">
+                                                <div class="avatar avatar-sm">@student.Initials</div>
+                                                <div class="student-info">
+                                                    <div class="student-name">@student.Name</div>
+                                                    <div class="student-email">@student.Email</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@student.EnrolledDate</td>
+                                        <td>
+                                            <div class="progress-cell">
+                                                <div class="progress-bar-small">
+                                                    <div class="progress-fill" style="width: @student.ProgressPercentage%"></div>
+                                                </div>
+                                                <span class="progress-text">@student.ProgressPercentage%</span>
+                                            </div>
+                                        </td>
+                                        <td>@student.LastActivity</td>
+                                        <td><span class="status-badge @student.StatusClass">@student.Status</span></td>
+                                        <td>
+                                            <button type="button" class="btn-icon-small" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <p>No students enrolled yet.</p>
+                        </div>
+                    }
+                </div>
+
+                @if (Model.Data.TotalStudentPages > 1)
+                {
+                    <div class="pagination">
+                        <button class="pagination-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="pagination-info">Page 1 of @Model.Data.TotalStudentPages</span>
+                        <button class="pagination-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Edit Module Modal -->
+<div id="editModuleModal" class="modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Module</h3>
+            <button type="button" class="modal-close" onclick="closeEditModuleModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="editModuleForm">
+                <input type="hidden" id="moduleId" />
+                <input type="hidden" id="moduleOrder" />
+                
+                <div class="form-group">
+                    <label for="moduleTitle" class="form-label">Module Title *</label>
+                    <input type="text" id="moduleTitle" class="form-input" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="moduleDescription" class="form-label">Module Description</label>
+                    <textarea id="moduleDescription" class="form-textarea" rows="4"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeEditModuleModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="saveModule()">Save Module</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Lesson Modal -->
+<div id="editLessonModal" class="modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Lesson</h3>
+            <button type="button" class="modal-close" onclick="closeEditLessonModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="editLessonForm">
+                <input type="hidden" id="lessonId" />
+                <input type="hidden" id="lessonModuleId" />
+                <input type="hidden" id="lessonOrder" />
+                
+                <div class="form-group">
+                    <label for="lessonTitle" class="form-label">Lesson Title *</label>
+                    <input type="text" id="lessonTitle" class="form-input" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="lessonContentType" class="form-label">Content Type *</label>
+                    <select id="lessonContentType" class="form-select" required onchange="toggleContentFields()">
+                        <option value="0">Article (PDF)</option>
+                        <option value="1">Video</option>
+                    </select>
+                </div>
+                
+                <!-- Video Fields -->
+                <div id="videoFields">
+                    <div class="form-group">
+                        <label for="lessonVideoUrl" class="form-label">Video URL *</label>
+                        <input type="url" id="lessonVideoUrl" class="form-input" placeholder="https://www.youtube.com/watch?v=..." />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lessonDuration" class="form-label">Duration (minutes) *</label>
+                        <input type="number" id="lessonDuration" class="form-input" min="0" step="0.1" placeholder="5" />
+                        <small class="form-hint">Enter duration in minutes (e.g., 5 for 5 minutes, 5.5 for 5 minutes 30 seconds)</small>
+                    </div>
+                </div>
+                
+                <!-- PDF Fields -->
+                <div id="pdfFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="lessonPdfUrl" class="form-label">PDF URL *</label>
+                        <input type="url" id="lessonPdfUrl" class="form-input" placeholder="https://example.com/file.pdf" />
+                    </div>
+                </div>
+
+                <!-- Lesson Resources Section -->
+                <div class="form-section-resources">
+                    <div class="section-header-resources">
+                        <h4 class="section-heading-resources">
+                            <i class="fas fa-paperclip"></i>
+                            Lesson Resources
+                        </h4>
+                        <p class="section-description-resources">Add downloadable resources, external links, or files for students</p>
+                    </div>
+                    
+                    <div id="lessonResourcesList" class="resources-list">
+                        <!-- Resources will be dynamically added here -->
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary btn-small" id="addLessonResource">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Resource</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeEditLessonModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="saveLesson()">Save Lesson</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal Styles -->
+<style>
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+    }
+    
+    .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+        position: relative;
+        max-width: 600px;
+        margin: 50px auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    .modal-lg {
+        max-width: 800px;
+    }
+    
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    
+    .modal-close:hover {
+        background: #f3f4f6;
+        color: #1f2937;
+    }
+    
+    .modal-body {
+        padding: 24px;
+        max-height: calc(100vh - 250px);
+        overflow-y: auto;
+    }
+    
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 16px 24px;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    /* Modal Form Styles */
+    .modal .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .modal .form-label {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.6rem;
+    }
+    
+    .modal .form-input,
+    .modal .form-textarea,
+    .modal .form-select {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        color: #1f2937;
+        font-size: 0.95rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        transition: all 0.2s;
+    }
+    
+    .modal .form-input:focus,
+    .modal .form-textarea:focus,
+    .modal .form-select:focus {
+        outline: none;
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        background: #ffffff;
+    }
+    
+    .modal .form-input::placeholder,
+    .modal .form-textarea::placeholder {
+        color: #9ca3af;
+    }
+    
+    .modal .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+        line-height: 1.6;
+    }
+    
+    .modal .form-select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 3rem;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+    }
+</style>
+
+@section Scripts {
+    <script src="~/js/edit-course.js"></script>
+}
