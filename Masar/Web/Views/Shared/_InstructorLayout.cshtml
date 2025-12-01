@@ -1,4 +1,33 @@
-﻿<!DOCTYPE html>
+﻿@using System.Linq
+
+@{
+    var instructorName = ViewBag.InstructorName as string ?? "Instructor";
+    var userInitials = "SA";
+    
+    if (!string.IsNullOrEmpty(instructorName) && instructorName != "Instructor")
+    {
+        var nameParts = instructorName.Split(' ');
+        var initialsBuilder = "";
+        var count = 0;
+        
+        foreach (var part in nameParts)
+        {
+            if (count >= 2) break;
+            if (!string.IsNullOrEmpty(part))
+            {
+                initialsBuilder += part[0];
+                count++;
+            }
+        }
+        
+        if (!string.IsNullOrEmpty(initialsBuilder))
+        {
+            userInitials = initialsBuilder.ToUpper();
+        }
+    }
+}
+
+<!DOCTYPE html>
 
 <html lang="en">
 <head>
@@ -87,9 +116,9 @@
 
             <div class="sidebar-footer">
                 <a href="~/instructor/profile" class="user-profile">
-                    <div class="avatar avatar-md">SA</div>
+                    <div class="avatar avatar-md">@userInitials</div>
                     <div class="user-info">
-                        <div class="user-name">Dr. Sarah Ahmed</div>
+                        <div class="user-name">Dr. @instructorName</div>
                         <div class="user-role">Instructor</div>
                     </div>
                     <i class="fas fa-chevron-right"></i>

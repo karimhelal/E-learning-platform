@@ -259,12 +259,11 @@ public class StudentCourseDetailsService : IStudentCourseDetailsService
             // Update status based on progress
             if (progressPercentage >= 100)
             {
-                enrollment.Status = Core.Entities.Enums.EnrollmentStatus.Completed;
-                //enrollment.CompletionDate = DateTime.UtcNow;
+                enrollment.Status = EnrollmentStatus.Completed;
             }
             else if (progressPercentage > 0)
             {
-                enrollment.Status = Core.Entities.Enums.EnrollmentStatus.InProgress;
+                enrollment.Status = EnrollmentStatus.Active; // FIXED: Changed from InProgress to Active
             }
 
             _context.Update(enrollment);

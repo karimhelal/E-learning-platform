@@ -1,0 +1,116 @@
+@model StudentBrowseCoursesViewModel
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <h1 class="page-title">Browse Courses ??</h1>
+            <p class="page-subtitle">
+                Explore our wide range of courses and start learning today
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Browse Content -->
+<section class="browse-content">
+    <!-- Stats Summary -->
+    <div class="stats-summary">
+        <div class="stat-item">
+            <span class="stat-number">@Model.Data.Stats.TotalCourses</span>
+            <span class="stat-label">Total Courses</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">@Model.Data.Stats.BeginnerCourses</span>
+            <span class="stat-label">Beginner</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">@Model.Data.Stats.IntermediateCourses</span>
+            <span class="stat-label">Intermediate</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">@Model.Data.Stats.AdvancedCourses</span>
+            <span class="stat-label">Advanced</span>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="courses-grid">
+        @if (Model.Data.Courses.Any())
+        {
+            @foreach (var course in Model.Data.Courses)
+            {
+                <div class="course-card">
+                    @if (!string.IsNullOrEmpty(course.ThumbnailImageUrl))
+                    {
+                        <div class="course-card-image">
+                            <img src="@course.ThumbnailImageUrl" alt="@course.Title" />
+                            <span class="badge @course.CategoryBadgeClass">
+                                <i class="fas @course.CategoryIcon"></i>
+                                @course.CategoryName
+                            </span>
+                        </div>
+                    }
+                    
+                    <div class="course-card-body">
+                        <div class="course-header">
+                            <h3 class="course-title">@course.Title</h3>
+                            <span class="level-badge @course.LevelBadgeClass">@course.Level</span>
+                        </div>
+                        
+                        <p class="course-description">@course.Description</p>
+                        
+                        <div class="course-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>@course.InstructorName</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-book-open"></i>
+                                <span>@course.TotalLessons Lessons</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>@course.DurationHours Hours</span>
+                            </div>
+                        </div>
+
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-star"></i>
+                                <span>@course.Rating</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-users"></i>
+                                <span>@course.StudentsCount students</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="course-card-footer">
+                        <a href="@course.ActionUrl" class="btn btn-primary btn-block">
+                            <span>@course.ActionText</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No courses available</h3>
+                <p>Check back soon for new courses!</p>
+            </div>
+        }
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/Student/browse-courses.css" />
+}
+
+@section Scripts {
+    <script src="~/js/browse-courses.js"></script>
+}

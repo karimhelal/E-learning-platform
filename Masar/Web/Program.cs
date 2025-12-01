@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Interfaces;
 using Web.Services;
+using Microsoft.AspNetCore.Antiforgery;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+
+// Add generic repositories for LessonProgress and CourseEnrollment
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 
 // Current User Service
@@ -41,6 +45,7 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
+builder.Services.AddScoped<BLL.Interfaces.Student.IStudentProfileService, BLL.Services.Student.StudentProfileService>();
 
 // ========================================
 // WEB SERVICES (Your simplified layer)
@@ -49,14 +54,22 @@ builder.Services.AddScoped<IStudentDashboardService, StudentDashboardService>();
 builder.Services.AddScoped<IStudentCoursesService, StudentCoursesService>();
 builder.Services.AddScoped<IStudentTrackService, StudentTracksService>();
 builder.Services.AddScoped<IStudentTrackDetailsService, StudentTrackDetailsService>();
+builder.Services.AddScoped<IStudentBrowseTrackService, StudentBrowseTrackService>();
+builder.Services.AddScoped<IStudentCourseDetailsService, StudentCourseDetailsService>(); // ADDED THIS LINE
+builder.Services.AddScoped<Web.Interfaces.IStudentBrowseCoursesService, Web.Services.StudentBrowseCoursesService>(); // ADDED THIS LINE
 
 
 // Authentication Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 
-
 builder.Services.AddScoped<RazorViewToStringRenderer>();
+
+// Configure Antiforgery to accept tokens from headers
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";
+});
 
 builder.Services.AddControllersWithViews();
 
@@ -96,7 +109,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
-
+app.UseAuthentication();
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
@@ -138,6 +151,21 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// --- Seed database with users ---
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        await DbSeeder.SeedDatabaseAsync(services);
+        Console.WriteLine("? Database seeded successfully");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 app.Run();
 
