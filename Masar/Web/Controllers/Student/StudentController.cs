@@ -23,13 +23,6 @@ public class StudentController : Controller
     private readonly IHttpContextAccessor _http;
     private readonly IStudentCourseDetailsService _courseDetailsService;
 
-    private readonly int userId = 1001;
-    /// <summary>
-    /// Default student ID for testing. 
-    /// Valid IDs from seeded data: 1-7 (Students: Alice, Bob, Charlie, Diana, Emma, Frank, Grace)
-    /// </summary>
-    private readonly int userId = 1; // Alice Johnson
-
     public StudentController(
         IStudentDashboardService dashboardService,
         IStudentCoursesService coursesService,
@@ -37,7 +30,8 @@ public class StudentController : Controller
         IStudentTrackDetailsService trackDetailsService,
         ICurrentUserService currentUserService,
         IStudentBrowseTrackService browseTrackService,
-        IHttpContextAccessor http)
+        IHttpContextAccessor http,
+        IStudentCourseDetailsService courseDetailsService)
     {
         _dashboardService = dashboardService;
         _coursesService = coursesService;
@@ -46,6 +40,19 @@ public class StudentController : Controller
         _currentUserService = currentUserService;
         _browseTrackService = browseTrackService;
         _http = http;
+        _courseDetailsService = courseDetailsService;
+    }
+
+    /// <summary>
+    /// Helper method to get student ID from logged-in user.
+    /// Default student ID for testing: 1 (Alice Johnson)
+    /// Valid IDs from seeded data: 1-7 (Students: Alice, Bob, Charlie, Diana, Emma, Frank, Grace)
+    /// </summary>
+    private int GetStudentId()
+    {
+        // TODO: Replace with actual logged-in student ID from claims
+        // return _currentUserService.GetUserId();
+        return 1; // Alice Johnson
     }
 
     [HttpGet("/student/dashboard")]
@@ -53,8 +60,7 @@ public class StudentController : Controller
     {
         ViewBag.Title = "Student Dashboard | Masar";
 
-        // TODO: Replace with actual logged-in student ID from claims
-        // var userId = _currentUserService.GetUserId();
+        var userId = GetStudentId();
         var dashboardData = await _dashboardService.GetDashboardDataAsync(userId);
 
         if (dashboardData == null)
@@ -72,34 +78,12 @@ public class StudentController : Controller
         return View(viewModel);
     }
 
-    //[HttpGet("/student/my-courses")]
-    //public async Task<IActionResult> MyCourses()
-    //{
-    //    ViewBag.Title = "My Courses | Masar";
-
-    //    //var userId = 2; // TODO: Replace with actual logged-in student ID retrieval
-    //    var coursesData = await _coursesService.GetMyCoursesAsync(userId);
-
-    //    if (coursesData == null)
-    //    {
-    //        return NotFound("Student profile not found");
-    //    }
-
-    //    var viewModel = new StudentCoursesViewModel
-    //    {
-    //        Data = coursesData,
-    //        PageTitle = "My Courses"
-    //    };
-
-    //    return View(viewModel);
-    //}
-
     [HttpGet("/student/my-tracks")]
     public async Task<IActionResult> MyTracks()
     {
         ViewBag.Title = "My Tracks | Masar";
 
-        // TODO: Replace with actual logged-in student ID
+        var userId = GetStudentId();
         var tracksData = await _tracksService.GetStudentTracksAsync(userId);
 
         if (tracksData == null)
@@ -143,12 +127,13 @@ public class StudentController : Controller
 
         return View(viewModel);
     }
+
     [HttpGet("/student/track/{trackId}")]
     public async Task<IActionResult> TrackDetails(int trackId)
     {
         ViewBag.Title = "Track Details | Masar";
 
-        // TODO: Replace with actual logged-in student ID
+        var userId = GetStudentId();
         var data = await _trackDetailsService.GetTrackDetailsAsync(userId, trackId);
         if (data == null)
             return NotFound("Track not found or not enrolled");
@@ -161,10 +146,11 @@ public class StudentController : Controller
 
         return View(vm);
     }
+
     [HttpGet("/student/browse-tracks")]
     public async Task<IActionResult> BrowseTracks()
     {
-        // TODO: Replace with actual logged-in student ID
+        var userId = GetStudentId();
         var data = await _browseTrackService.GetAllTracksAsync(userId);
         if (data == null)
             return View("Error");
@@ -174,16 +160,12 @@ public class StudentController : Controller
         return View(vm);
     }
 
-   
-
-
-
     [HttpGet("/student/my-courses")]
     public async Task<IActionResult> MyCourses()
     {
         ViewBag.Title = "My Courses | Masar";
 
-        // TODO: Replace with actual logged-in student ID
+        var userId = GetStudentId();
         var coursesData = await _coursesService.GetMyCoursesAsync(userId);
 
         if (coursesData == null)
@@ -205,7 +187,7 @@ public class StudentController : Controller
     {
         ViewBag.Title = "Course Details | Masar";
 
-        // TODO: Replace with actual logged-in student ID
+        var userId = GetStudentId();
         var courseData = await _courseDetailsService.GetCourseDetailsAsync(userId, courseId);
 
         if (courseData == null)
@@ -225,7 +207,7 @@ public class StudentController : Controller
     [HttpPost("/student/lesson/{lessonId}/toggle")]
     public async Task<IActionResult> ToggleLessonCompletion(int lessonId, [FromBody] ToggleRequest request)
     {
-        // TODO: Replace with actual logged-in student ID
+        var userId = GetStudentId();
         var result = await _courseDetailsService.ToggleLessonCompletionAsync(
             userId,
             lessonId,
@@ -245,9 +227,6 @@ public class StudentController : Controller
     {
         public bool IsCompleted { get; set; }
     }
-
-
-
 }
 
 

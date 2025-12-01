@@ -6,12 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:Masar/DAL/Migrations/20251129175043_m1.cs
-    public partial class m1 : Migration
-========
-
     public partial class initialCreate : Migration
->>>>>>>> 0ad065956a343f26717781ffb0b37b48c4b62172:Masar/DAL/Migrations/20251129215626_initialCreate.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
