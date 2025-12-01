@@ -20,19 +20,24 @@ public class StudentTracksService : IStudentTrackService
         _logger = logger;
     }
 
-    public async Task<StudentTracksData?> GetStudentTracksAsync(int userId)
+    public async Task<StudentTracksData?> GetStudentTracksAsync(int studentId)
     {
         try
         {
-            _logger.LogInformation("Fetching Tracks for student ID: {StudentId}", userId);
+            _logger.LogInformation("Fetching Tracks for student ID: {StudentId}", studentId);
 
-            var studentProfile = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
+            // CHANGED: Use GetStudentProfileAsync instead of GetStudentProfileForUserAsync
+            var studentProfile = await _userRepo.GetStudentProfileAsync(studentId, includeUserBase: true);
 
             if (studentProfile == null || studentProfile.User == null)
             {
-                _logger.LogWarning("Student profile not found for ID: {StudentId}", userId);
+                _logger.LogWarning("Student profile not found for ID: {StudentId}", studentId);
                 return null;
             }
+
+            _logger.LogInformation("Student profile loaded. User: {FirstName} {LastName}", 
+                studentProfile.User.FirstName, studentProfile.User.LastName);
+            _logger.LogInformation("Total enrollments: {Count}", studentProfile.Enrollments?.Count ?? 0);
 
             var trackEnrollments = studentProfile.Enrollments
                 .OfType<TrackEnrollment>()
@@ -41,7 +46,7 @@ public class StudentTracksService : IStudentTrackService
 
             _logger.LogInformation("Found {Count} track enrollments", trackEnrollments.Count);
 
-            var mappedTracks = MapTracks(trackEnrollments, userId);
+            var mappedTracks = MapTracks(trackEnrollments, studentId);
 
             return new StudentTracksData
             {
@@ -59,7 +64,7 @@ public class StudentTracksService : IStudentTrackService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting tracks for student {StudentId}", userId);
+            _logger.LogError(ex, "Error getting tracks for student {StudentId}", studentId);
             return null;
         }
     }

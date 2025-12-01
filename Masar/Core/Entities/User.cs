@@ -65,5 +65,6 @@ public class User : IdentityUser<int>
     public User() : base()
     {
         StudentProfile = new StudentProfile();
+        InstructorProfile = new InstructorProfile();
     }
 }

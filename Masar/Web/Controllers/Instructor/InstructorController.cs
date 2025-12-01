@@ -7,12 +7,17 @@ using Web.ViewModels.Instructor.Dashboard;
 using Web.ViewModels.Misc;
 using Core.Entities.Enums;
 using BLL.DTOs.Instructor;
+using BLL.DTOs.Course;  // ADD THIS LINE
 using Microsoft.AspNetCore.Identity;
 using Core.Entities;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Core.RepositoryInterfaces;
+using Web.Interfaces;
 
 namespace Web.Controllers.Instructor;
 
+[Authorize(Roles = "Instructor")]
 public class InstructorController : Controller
 {
     private readonly IInstructorDashboardService _dashboardService;
@@ -20,51 +25,67 @@ public class InstructorController : Controller
     private readonly IInstructorProfileService _profileService;
     private readonly RazorViewToStringRenderer _razorRenderer;
     private readonly UserManager<User> _userManager;
+    private readonly IUserRepository _userRepository;
+    private readonly ICurrentUserService _currentUserService;
 
     public InstructorController(
         IInstructorDashboardService dashboardService, 
         IInstructorCoursesService courseService,
         IInstructorProfileService profileService,
         RazorViewToStringRenderer razorRenderer,
-        UserManager<User> userManager)
+        UserManager<User> userManager,
+        IUserRepository userRepository,
+        ICurrentUserService currentUserService)
     {
         _dashboardService = dashboardService;
         _coursesService = courseService;
         _profileService = profileService;
         _razorRenderer = razorRenderer;
         _userManager = userManager;
+        _userRepository = userRepository;
+        _currentUserService = currentUserService;
     }
 
-    // Helper method to get instructor ID from logged-in user
+    /// <summary>
+    /// Helper method to get instructor ID from logged-in user.
+    /// Returns the InstructorProfile ID (not User ID) of the authenticated user.
+    /// </summary>
     private async Task<int> GetInstructorIdAsync()
     {
-        // TODO: Replace this temporary hardcoded value with actual authentication
-        // For now, return instructor ID 1 which matches the seeded data
-        // After implementing authentication, use this code:
-        /*
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null)
+        var userId = _currentUserService.GetUserId();
+        
+        if (userId == 0)
             return 0;
         
-        var user = await _userManager.Users
-            .Include(u => u.InstructorProfile)
-            .FirstOrDefaultAsync(u => u.Id == int.Parse(userId));
-            
-        return user?.InstructorProfile?.InstructorId ?? 0;
-        */
+        var instructorProfile = await _userRepository.GetInstructorProfileForUserAsync(userId, includeUserBase: false);
         
-        return 1; // Matches john.instructor@example.com from seed data
+        return instructorProfile?.InstructorId ?? 0;
     }
 
+
+    // Add this helper method to set ViewBag data for the layout
+    private async Task SetInstructorViewBagDataAsync()
+    {
+        var instructorId = await GetInstructorIdAsync();
+        if (instructorId > 0)
+        {
+            var instructorProfile = await _userRepository.GetInstructorProfileAsync(instructorId, includeUserBase: true);
+            if (instructorProfile?.User != null)
+            {
+                ViewBag.InstructorName = $"{instructorProfile.User.FirstName} {instructorProfile.User.LastName}";
+            }
+        }
+    }
 
     [HttpGet("/instructor/dashboard")]
     public async Task<IActionResult> Dashboard()
     {
         ViewBag.Title = "Instructor Dashboard | Masar";
+        await SetInstructorViewBagDataAsync(); // Add this line
 
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
             
         var dashboardData = await _dashboardService.GetInstructorDashboardAsync(instructorId);
 
@@ -134,10 +155,11 @@ public class InstructorController : Controller
     public async Task<IActionResult> MyCourses()
     {
         ViewBag.Title = "My Courses | Masar";
+        await SetInstructorViewBagDataAsync(); // Add this line
         
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
             
         var initialRequest = new PagingRequestDto() { CurrentPage = 1, PageSize = 3 };
         var coursesData = await _coursesService.GetInstructorCoursesPagedAsync(instructorId, initialRequest);
@@ -166,7 +188,7 @@ public class InstructorController : Controller
                     LastUpdatedDate = c.LastUpdatedDate.ToString("dd-MM-yyyy"),
 
                     Level = c.Level.ToString(),
-                    MainCategory = c.MainCategory.Name ?? "Undefined",
+                    MainCategory = c.MainCategory?.Name ?? "Undefined",
 
                     NumberOfStudents = c.NumberOfStudents,
                     NumberOfModules = c.NumberOfModules,
@@ -189,7 +211,7 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
             
         var coursesData = await _coursesService.GetInstructorCoursesPagedAsync(instructorId, request);
         
@@ -215,7 +237,7 @@ public class InstructorController : Controller
                 LastUpdatedDate = c.LastUpdatedDate.ToString("MM-dd-yyyy"),
 
                 Level = c.Level.ToString(),
-                MainCategory = c.MainCategory.Name ?? "Undefined",
+                MainCategory = c.MainCategory?.Name ?? "Undefined",
 
                 NumberOfStudents = c.NumberOfStudents,
                 NumberOfModules = c.NumberOfModules,
@@ -239,10 +261,11 @@ public class InstructorController : Controller
     public async Task<IActionResult> Profile()
     {
         ViewBag.Title = "Instructor Profile | Masar";
+        await SetInstructorViewBagDataAsync(); // Add this line
 
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
             
         var profileData = await _profileService.GetInstructorProfileAsync(instructorId);
 
@@ -325,10 +348,11 @@ public class InstructorController : Controller
     public async Task<IActionResult> EditCourse(int courseId)
     {
         ViewBag.Title = "Edit Course | Masar";
+        await SetInstructorViewBagDataAsync(); // Add this line
 
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
 
         // Fetch actual course data from database
         var courseData = await _coursesService.GetCourseForEditAsync(instructorId, courseId);
@@ -485,7 +509,7 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
             
         if (!ModelState.IsValid)
         {
@@ -679,7 +703,7 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
 
         var result = await _coursesService.UpdateModuleAsync(instructorId, courseId, moduleDto);
 
@@ -695,7 +719,7 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
 
         var result = await _coursesService.DeleteModuleAsync(instructorId, courseId, moduleId);
 
@@ -711,7 +735,7 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
 
         var result = await _coursesService.UpdateLessonAsync(instructorId, courseId, lessonDto);
 
@@ -727,7 +751,7 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized();
+            return Unauthorized("Instructor profile not found");
 
         var result = await _coursesService.DeleteLessonAsync(instructorId, courseId, lessonId);
 

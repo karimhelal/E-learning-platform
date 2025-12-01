@@ -186,195 +186,10 @@
 
                 </div>
             </div>
-
-            <!-- Recent Student Activity -->
-            <div class="dashboard-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-history"></i>
-                        Recent Student Activity
-                    </h2>
-                    <a href="student-progress.html"
-                       class="section-link">
-                        View All
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <div class="activity-timeline">
-                    <div class="activity-item">
-                        <div class="activity-avatar">
-                            <div class="avatar avatar-sm">
-                                JD
-                            </div>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <strong>John Doe</strong>
-                                completed lesson
-                                <strong>"React Hooks"</strong>
-                            </div>
-                            <div class="activity-course">
-                                Advanced React & Redux
-                            </div>
-                            <div class="activity-time">
-                                2 hours ago
-                            </div>
-                        </div>
-                        <div class="activity-badge completed">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-avatar">
-                            <div class="avatar avatar-sm">
-                                MK
-                            </div>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <strong>Maria Kim</strong>
-                                enrolled in
-                                <strong>
-                                    "React Native
-                                    Mastery"
-                                </strong>
-                            </div>
-                            <div class="activity-course">
-                                New Student
-                            </div>
-                            <div class="activity-time">
-                                5 hours ago
-                            </div>
-                        </div>
-                        <div class="activity-badge enrolled">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-avatar">
-                            <div class="avatar avatar-sm">
-                                AB
-                            </div>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <strong>Ahmed Bakr</strong>
-                                submitted assignment
-                                <strong>
-                                    "Build a Redux
-                                    Store"
-                                </strong>
-                            </div>
-                            <div class="activity-course">
-                                Advanced React & Redux
-                            </div>
-                            <div class="activity-time">
-                                1 day ago
-                            </div>
-                        </div>
-                        <div class="activity-badge assignment">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-avatar">
-                            <div class="avatar avatar-sm">
-                                LS
-                            </div>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <strong>Lisa Smith</strong>
-                                completed course
-                                <strong>
-                                    "Advanced React &
-                                    Redux"
-                                </strong>
-                            </div>
-                            <div class="activity-course">
-                                Certificate Earned
-                            </div>
-                            <div class="activity-time">
-                                2 days ago
-                            </div>
-                        </div>
-                        <div class="activity-badge completed">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Right Sidebar -->
         <aside class="dashboard-sidebar">
-            <!-- Quick Stats -->
-            <div class="sidebar-widget">
-                <h3 class="widget-title">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>This Month</span>
-                </h3>
-                <div class="quick-stats">
-                    <div class="quick-stat-item">
-                        <div class="quick-stat-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div class="quick-stat-info">
-                            <div class="quick-stat-value">
-                                @Model.Data.CurrentMonthStats.NewStudents
-                            </div>
-                            <div class="quick-stat-label">
-                                New Students
-                            </div>
-                        </div>
-                        <div class="quick-stat-trend up">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>12%</span>
-                        </div>
-                    </div>
-
-                    <div class="quick-stat-item">
-                        <div class="quick-stat-icon">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <div class="quick-stat-info">
-                            <div class="quick-stat-value">
-                                @Model.Data.CurrentMonthStats.Completions
-                            </div>
-                            <div class="quick-stat-label">
-                                Completions
-                            </div>
-                        </div>
-                        <div class="quick-stat-trend up">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>8%</span>
-                        </div>
-                    </div>
-
-                    <div class="quick-stat-item">
-                        <div class="quick-stat-icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="quick-stat-info">
-                            <div class="quick-stat-value">
-                                @Model.Data.CurrentMonthStats.NewReviews
-                            </div>
-                            <div class="quick-stat-label">
-                                New Reviews
-                            </div>
-                        </div>
-                        <div class="quick-stat-trend up">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>15%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Top Performing Courses -->
             <div class="sidebar-widget">
                 <h3 class="widget-title">
@@ -407,67 +222,16 @@
                 </div>
             </div>
 
-            <!-- Recent Reviews -->
+            <!-- Role Switcher -->
             <div class="sidebar-widget">
                 <h3 class="widget-title">
-                    <i class="fas fa-comments"></i>
-                    <span>Recent Reviews</span>
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Switch Role</span>
                 </h3>
-                <div class="reviews-list">
-                    <div class="review-item">
-                        <div class="review-header">
-                            <div class="avatar avatar-sm">
-                                JD
-                            </div>
-                            <div class="review-author">
-                                <div class="review-name">
-                                    John Doe
-                                </div>
-                                <div class="review-rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="review-text">
-                            "Excellent course! Very well
-                            structured and easy to follow."
-                        </div>
-                        <div class="review-course">
-                            Advanced React & Redux
-                        </div>
-                    </div>
-
-                    <div class="review-item">
-                        <div class="review-header">
-                            <div class="avatar avatar-sm">
-                                MK
-                            </div>
-                            <div class="review-author">
-                                <div class="review-name">
-                                    Maria Kim
-                                </div>
-                                <div class="review-rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="review-text">
-                            "Best React Native course I've
-                            taken. Highly recommended!"
-                        </div>
-                        <div class="review-course">
-                            React Native Mastery
-                        </div>
-                    </div>
-                </div>
+                <a asp-controller="Account" asp-action="SwitchToStudent" class="btn btn-primary btn-block">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Switch to Student Dashboard</span>
+                </a>
             </div>
         </aside>
     </div>

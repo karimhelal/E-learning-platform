@@ -1,5 +1,6 @@
 ﻿using BLL.Interfaces.Account;
 using Core.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Web.ViewModels.Account;
@@ -12,12 +13,14 @@ namespace Web.Controllers.Account
         private readonly IAuthService _authService;
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailService _emailService;
+        private readonly UserManager<User> _userManager;
 
-        public AccountController(IAuthService authService, SignInManager<User> signInManager, IEmailService emailService)
+        public AccountController(IAuthService authService, SignInManager<User> signInManager, IEmailService emailService, UserManager<User> userManager)
         {
             _authService = authService;
             _signInManager = signInManager;
             _emailService = emailService;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -44,6 +47,16 @@ namespace Web.Controllers.Account
 
             if (signInResult.Succeeded)
             {
+                // Get the user
+                var user = await _userManager.FindByEmailAsync(loginViewModel.Email);
+                
+                if (user != null)
+                {
+                    // Since all users have both roles, redirect to Student dashboard by default
+                    // Users can switch to Instructor dashboard from the UI
+                    return RedirectToAction("Dashboard", "Student");
+                }
+                
                 return RedirectToAction("Index", "Home");
             }
 
@@ -94,7 +107,8 @@ namespace Web.Controllers.Account
 
                 await _signInManager.SignInAsync(user, registerViewModel.RememberMe);
 
-                return RedirectToAction("Index", "Home");
+                // Redirect new students to their dashboard
+                return RedirectToAction("Dashboard", "Student");
             }
 
             //var isEmailTaken = result.Errors.Any(e => e.Code == "DuplicateEmail" || e.Code == "DuplicateUserName");
@@ -208,7 +222,23 @@ namespace Web.Controllers.Account
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return View("Login");
+            return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        [Route("/Account/SwitchToInstructor")]
+        [Authorize(Roles = "Instructor")]
+        public IActionResult SwitchToInstructor()
+        {
+            return RedirectToAction("Dashboard", "Instructor");
+        }
+
+        [HttpGet]
+        [Route("/Account/SwitchToStudent")]
+        [Authorize(Roles = "Student")]
+        public IActionResult SwitchToStudent()
+        {
+            return RedirectToAction("Dashboard", "Student");
         }
     }
 }

@@ -32,10 +32,11 @@ public class InstructorCoursesService : IInstructorCoursesService
     {
         var query = _courseRepo.GetCoursesByInstructorQueryable(instructorId);
 
+        // Apply sorting BEFORE includes
         bool isASC = request.SortOrder.ToUpper() == "ASC";
         string sortBy = request.SortBy?.ToLower() ?? "createddate";
 
-        query = sortBy switch
+        IQueryable<Course> sortedQuery = sortBy switch
         {
             "createddate" => isASC ? query.OrderBy(c => c.CreatedDate)
                                    : query.OrderByDescending(c => c.CreatedDate),
@@ -44,9 +45,17 @@ public class InstructorCoursesService : IInstructorCoursesService
             _ => query.OrderByDescending(c => c.CreatedDate)
         };
 
-        var totalCount = await query.CountAsync();
+        // Now apply includes to the sorted query
+        var finalQuery = sortedQuery
+            .Include(c => c.Categories)
+            .Include(c => c.Modules)
+                .ThenInclude(m => m.Lessons)
+                    .ThenInclude(l => l.LessonContent)
+            .Include(c => c.Enrollments);
 
-        var items = await query
+        var totalCount = await finalQuery.CountAsync();
+
+        var items = await finalQuery
             .Skip((request.CurrentPage - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(c => new InstructorCourseDto
@@ -56,18 +65,24 @@ public class InstructorCoursesService : IInstructorCoursesService
                 Description = c.Description,
                 ThumbnailImageUrl = c.ThumbnailImageUrl,
                 CreatedDate = c.CreatedDate,
-                LastUpdatedDate = c.CreatedDate, // Using CreatedDate as fallback since LastUpdatedDate doesn't exist
+                LastUpdatedDate = c.CreatedDate,
                 Status = "Published",
                 Level = c.Level,
-                MainCategory = c.Categories.FirstOrDefault(),
-                NumberOfModules = c.Modules.Count(),
-                NumberOfStudents = c.Enrollments!.Count(),
-                NumberOfMinutes = (int)(c.Modules
-                    .SelectMany(m => m.Lessons)
-                    .Select(l => l.LessonContent)
-                    .OfType<VideoContent>()
-                    .Sum(l => l.DurationInSeconds) / 60.0),
-                AverageRating = 4.8f // Placeholder
+                MainCategory = c.Categories != null && c.Categories.Any() 
+                    ? c.Categories.FirstOrDefault() 
+                    : null,
+                NumberOfModules = c.Modules != null ? c.Modules.Count() : 0,
+                NumberOfStudents = c.Enrollments != null ? c.Enrollments.Count() : 0,
+                NumberOfMinutes = c.Modules != null 
+                    ? (int)(c.Modules
+                        .Where(m => m.Lessons != null)  // CHANGED: Use Where instead of SelectMany with ??
+                        .SelectMany(m => m.Lessons!)
+                        .Where(l => l.LessonContent != null)
+                        .Select(l => l.LessonContent)
+                        .OfType<VideoContent>()
+                        .Sum(l => l.DurationInSeconds) / 60.0)
+                    : 0,
+                AverageRating = 4.8f
             })
             .ToListAsync();
 
@@ -75,7 +90,7 @@ public class InstructorCoursesService : IInstructorCoursesService
 
         return new PagedResultDto<InstructorCourseDto>
         {
-            Items = items,
+            Items = items ?? new List<InstructorCourseDto>(),
             Settings = new PaginationSettingsDto
             {
                 TotalPages = totalPages,

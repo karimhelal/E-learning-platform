@@ -21,19 +21,24 @@ public class StudentCoursesService : IStudentCoursesService
         _logger = logger;
     }
 
-    public async Task<StudentCoursesData?> GetMyCoursesAsync(int userId)
+    public async Task<StudentCoursesData?> GetMyCoursesAsync(int studentId)
     {
         try
         {
-            _logger.LogInformation("Fetching courses for student ID: {StudentId}", userId);
+            _logger.LogInformation("Fetching courses for student ID: {StudentId}", studentId);
             
-            var studentProfile = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
+            // CHANGED: Use GetStudentProfileAsync instead of GetStudentProfileForUserAsync
+            var studentProfile = await _userRepo.GetStudentProfileAsync(studentId, includeUserBase: true);
 
             if (studentProfile == null || studentProfile.User == null)
             {
-                _logger.LogWarning("Student profile not found for ID: {StudentId}", userId);
+                _logger.LogWarning("Student profile not found for ID: {StudentId}", studentId);
                 return null;
             }
+
+            _logger.LogInformation("Student profile loaded. User: {FirstName} {LastName}", 
+                studentProfile.User.FirstName, studentProfile.User.LastName);
+            _logger.LogInformation("Total enrollments: {Count}", studentProfile.Enrollments?.Count ?? 0);
 
             var courseEnrollments = studentProfile.Enrollments
                 .OfType<CourseEnrollment>()
@@ -50,7 +55,7 @@ public class StudentCoursesService : IStudentCoursesService
             {
                 StudentId = studentProfile.StudentId,
                 StudentName = studentProfile.User.FirstName,
-                UserInitials = GetInitials($"{studentProfile.User.FirstName} {studentProfile.User.LastName}"), // ADD THIS LINE
+                UserInitials = GetInitials($"{studentProfile.User.FirstName} {studentProfile.User.LastName}"),
                 AllCourses = allCourses,
                 InProgressCourses = inProgressCourses,
                 CompletedCourses = completedCourses
@@ -58,7 +63,7 @@ public class StudentCoursesService : IStudentCoursesService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting courses for student {StudentId}", userId);
+            _logger.LogError(ex, "Error getting courses for student {StudentId}", studentId);
             return null;
         }
     }
@@ -126,7 +131,6 @@ public class StudentCoursesService : IStudentCoursesService
         return (int)Math.Ceiling(totalSeconds / 3600.0);
     }
 
-    // ADD THIS HELPER METHOD at the end of the class
     private string GetInitials(string name)
     {
         if (string.IsNullOrWhiteSpace(name))

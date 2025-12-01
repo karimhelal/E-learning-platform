@@ -21,23 +21,24 @@ public class StudentDashboardService : IStudentDashboardService
         _logger = logger;
     }
 
-    public async Task<StudentDashboardData?> GetDashboardDataAsync(int userId)
+    public async Task<StudentDashboardData?> GetDashboardDataAsync(int studentId)
     {
         try
         {
-            _logger.LogInformation("Fetching dashboard data for user ID: {UserId}", userId);
+            _logger.LogInformation("Fetching dashboard data for student ID: {StudentId}", studentId);
             
-            var studentProfile = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
+            // CHANGED: Use GetStudentProfileAsync instead of GetStudentProfileForUserAsync
+            var studentProfile = await _userRepo.GetStudentProfileAsync(studentId, includeUserBase: true);
 
             if (studentProfile == null)
             {
-                _logger.LogWarning("Student profile is NULL for ID: {StudentId}", userId);
+                _logger.LogWarning("Student profile is NULL for ID: {StudentId}", studentId);
                 return null;
             }
 
             if (studentProfile.User == null)
             {
-                _logger.LogWarning("Student profile found but User is NULL for ID: {StudentId}", userId);
+                _logger.LogWarning("Student profile found but User is NULL for ID: {StudentId}", studentId);
                 return null;
             }
 
@@ -88,7 +89,7 @@ public class StudentDashboardService : IStudentDashboardService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting dashboard data for student {StudentId}", userId);
+            _logger.LogError(ex, "Error getting dashboard data for student {StudentId}", studentId);
             return null;
         }
     }
