@@ -1,0 +1,234 @@
+@model CourseDetailsViewModel
+
+@{
+    ViewBag.Title = Model.PageTitle;
+}
+
+<!-- Course Hero Section -->
+<section class="course-hero">
+    <div class="course-hero-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="~/">Home</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="~/browse-courses">Courses</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>@Model.Course.MainCategory.Name</span>
+            <i class="fas fa-chevron-right"></i>
+            <span>@Model.Course.Title</span>
+        </div>
+
+        <div class="course-header">
+            <div class="course-info">
+                <div class="course-badge">
+                    <i class="fas fa-code"></i>
+                    <span>@Model.Course.MainCategory.Name</span>
+                </div>
+
+                <h1 class="course-title">@Model.Course.Title</h1>
+
+                <p class="course-description">
+                    @Model.Course.Description
+                </p>
+
+                <!-- Instructor Info -->
+                <div class="instructor-info">
+                    <div class="avatar avatar-md instructor-avatar">
+                        @Model.Course.InstructorName.Substring(0, 2).ToUpper()
+                    </div>
+                    <div class="instructor-details">
+                        <div class="instructor-label">Instructor</div>
+                        <div class="instructor-name">@Model.Course.InstructorName</div>
+                    </div>
+                </div>
+
+                <!-- Course Meta -->
+                <div class="course-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-star"></i>
+                        <span>@Model.Course.AverageRating (@Model.Course.NumberOfReviews reviews)</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-users"></i>
+                        <span>@Model.Course.TotalStudents students</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>@Model.Course.FormattedDuration total</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-signal"></i>
+                        <span>@Model.Course.Level</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Stats Card -->
+            <div class="course-stats">
+                <div class="progress-card">
+                    <h3>Course Stats</h3>
+                    <div class="stat-item">
+                        <i class="fas fa-book"></i>
+                        <span>@Model.Course.TotalModules Modules</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>@Model.Course.TotalLessons Lessons</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Certificate included</span>
+                    </div>
+                    
+                    @if (Model.IsEnrolled)
+                    {
+                        <a href="/student/course/@Model.Course.CourseId" class="btn btn-primary btn-block">
+                            <i class="fas fa-play"></i>
+                            Continue Learning
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary btn-block" onclick="enrollCourse(@Model.Course.CourseId)">
+                            <i class="fas fa-plus"></i>
+                            Enroll Now
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Content Section -->
+<section class="content-section">
+    <div class="tabs-container">
+        <!-- Tabs Navigation -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-tab="curriculum">
+                <i class="fas fa-list"></i>
+                Curriculum
+            </button>
+            <button class="tab-btn" data-tab="overview">
+                <i class="fas fa-info-circle"></i>
+                Overview
+            </button>
+            <button class="tab-btn" data-tab="instructor">
+                <i class="fas fa-chalkboard-teacher"></i>
+                Instructor
+            </button>
+        </div>
+
+        <!-- Curriculum Tab -->
+        <div class="tab-content active" id="curriculum">
+            <div class="modules-list">
+                @foreach (var module in Model.Course.Modules)
+                {
+                    <div class="module-item">
+                        <div class="module-header">
+                            <div class="module-number">@module.Order</div>
+                            <div class="module-info">
+                                <h3 class="module-title">@module.Title</h3>
+                                <div class="module-meta">
+                                    <span class="module-meta-item">
+                                        <i class="fas fa-play-circle"></i>
+                                        @module.Lessons.Count() lessons
+                                    </span>
+                                    <span class="module-meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        @module.DurationMinutes min
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="module-toggle">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+
+                        <div class="lessons-list">
+                            @foreach (var lesson in module.Lessons)
+                            {
+                                <div class="lesson-item">
+                                    <div class="lesson-icon @(lesson.ContentType.ToString().ToLower())">
+                                        <i class="fas fa-@(lesson.ContentType == Core.Entities.Enums.LessonContentType.Video ? "play" : "file-alt")"></i>
+                                    </div>
+                                    <div class="lesson-info">
+                                        <div class="lesson-title">@lesson.Title</div>
+                                        <div class="lesson-duration">@lesson.FormattedDuration</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="tab-content" id="overview">
+            <div class="overview-grid">
+                <div class="overview-content">
+                    <div class="overview-section">
+                        <h2 class="section-title">What You'll Learn</h2>
+                        <ul class="objectives-list">
+                            @foreach (var outcome in Model.Course.LearningOutcomes)
+                            {
+                                <li>
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>@outcome.Title</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div class="overview-section">
+                        <h2 class="section-title">Course Description</h2>
+                        <p class="section-text">@Model.Course.Description</p>
+                    </div>
+                </div>
+
+                <div class="overview-sidebar">
+                    <div class="overview-section">
+                        <h3 class="section-title">Categories</h3>
+                        @foreach (var category in Model.Course.Categories)
+                        {
+                            <span class="badge">@category.Name</span>
+                        }
+                    </div>
+
+                    <div class="overview-section">
+                        <h3 class="section-title">Languages</h3>
+                        @foreach (var language in Model.Course.Languages)
+                        {
+                            <span class="badge">@language.Name</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructor Tab -->
+        <div class="tab-content" id="instructor">
+            <div class="overview-section">
+                <div class="instructor-info" style="margin-bottom: 2rem;">
+                    <div class="avatar avatar-lg">
+                        @Model.Course.InstructorName.Substring(0, 2).ToUpper()
+                    </div>
+                    <div class="instructor-details">
+                        <h2>@Model.Course.InstructorName</h2>
+                        <p>@Model.Course.InstructorYearsOfExperience years of experience</p>
+                    </div>
+                </div>
+                <p class="section-text">@Model.Course.InstructorBio</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/course-details.css" />
+}
+
+@section Scripts {
+    <script src="~/js/course-details.js"></script>
+}

@@ -11,11 +11,13 @@ namespace Web.Controllers.Account
     {
         private readonly IAuthService _authService;
         private readonly SignInManager<User> _signInManager;
+        private readonly IEmailService _emailService;
 
-        public AccountController(IAuthService authService, SignInManager<User> signInManager)
+        public AccountController(IAuthService authService, SignInManager<User> signInManager, IEmailService emailService)
         {
             _authService = authService;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -116,10 +118,97 @@ namespace Web.Controllers.Account
         }
 
         [HttpGet]
-        [Route("/Account/Forgot-Password")]
+        [Route("/Account/ForgotPassword")]
         public IActionResult ForgotPassword()
         {
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var dto = new ForgotPasswordDto
+            {
+                Email = model.Email
+            };
+            var token = await _authService.GeneratePasswordResetTokenAsync(dto.Email);
+
+            if (token != null)
+            {
+                var link = Url.Action("ResetPassword", "Account", new { email = model.Email, token = token }, Request.Scheme);
+                await _emailService.SendEmailAsync(model.Email, "Reset Password", $"<a href='{link}'>Reset Password</a>");
+            }
+            return View("ForgotPasswordConfirmation");
+        }
+
+
+        [HttpGet]
+        public IActionResult ResetPassword(string email, string token)
+        {
+            if (email == null || token == null) return BadRequest();
+
+            var model = new ResetPasswordViewModel
+            {
+                Email = email,
+                Token = token
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+
+            var dto = new ResetPasswordDto
+            {
+                Email = model.Email,
+                Token = model.Token,
+                NewPassword = model.Password
+            };
+
+            var result = await _authService.ResetPasswordAsync(dto);
+
+            if (result.Succeeded)
+            {
+                return View("ResetPasswordConfirmation");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(model);
+        }
+
+
+
+
+
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            return View();
+        }
+
+
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
+
+
+        [Route("/Account/Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return View("Login");
         }
     }
 }

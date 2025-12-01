@@ -690,4 +690,87 @@ public class CourseService : ICourseService
                     .Count()
         };
     }
+
+    public async Task<CourseDetailsDto?> GetCourseDetailsByIdAsync(int courseId)
+    {
+        var course = await _courseRepo
+            .GetCourseByIdQueryable(courseId)
+            .Include(c => c.Instructor!)
+                .ThenInclude(i => i.User)
+            .Include(c => c.Categories)
+            .Include(c => c.Languages)
+            .Include(c => c.LearningOutcomes)
+            .Include(c => c.Modules!)
+                .ThenInclude(m => m.Lessons!)
+                    .ThenInclude(l => l.LessonContent)
+            .Include(c => c.Enrollments)
+            .FirstOrDefaultAsync();
+
+        if (course == null)
+            return null;
+
+        var totalDurationMinutes = course.Modules!
+            .SelectMany(m => m.Lessons!)
+            .Select(l => l.LessonContent)
+            .OfType<VideoContent>()
+            .Sum(vc => vc.DurationInSeconds) / 60;
+
+        return new CourseDetailsDto
+        {
+            CourseId = course.Id,
+            Title = course.Title,
+            Description = course.Description,
+            ThumbnailImageUrl = course.ThumbnailImageUrl,
+            Level = course.Level,
+            CreatedDate = course.CreatedDate,
+            
+            // Instructor
+            InstructorName = course.Instructor!.User!.FullName,
+            InstructorBio = course.Instructor.Bio ?? "No bio available",
+            InstructorYearsOfExperience = course.Instructor.YearsOfExperience ?? 0,
+            
+            // Categories & Languages
+            MainCategory = course.Categories!.FirstOrDefault()!,
+            Categories = course.Categories!,
+            Languages = course.Languages!,
+            
+            // Learning Outcomes
+            LearningOutcomes = course.LearningOutcomes,
+            
+            // Modules
+            Modules = course.Modules!
+                .OrderBy(m => m.Order)
+                .Select(m => new ModuleWithLessonsDto
+                {
+                    ModuleId = m.ModuleId,
+                    Title = m.Title,
+                    Description = m.Description,
+                    Order = m.Order,
+                    DurationMinutes = m.Lessons!
+                        .Select(l => l.LessonContent)
+                        .OfType<VideoContent>()
+                        .Sum(vc => vc.DurationInSeconds) / 60,
+                    Lessons = m.Lessons!
+                        .OrderBy(l => l.Order)
+                        .Select(l => new LessonSummaryDto
+                        {
+                            LessonId = l.LessonId,
+                            Title = l.Title,
+                            Order = l.Order,
+                            ContentType = l.ContentType,
+                            DurationSeconds = l.LessonContent is VideoContent 
+                                ? ((VideoContent)l.LessonContent).DurationInSeconds 
+                                : 0
+                        })
+                }),
+            
+            // Statistics
+            TotalStudents = course.Enrollments!.Count(),
+            TotalModules = course.Modules!.Count(),
+            TotalLessons = course.Modules!.SelectMany(m => m.Lessons!).Count(),
+            TotalDurationMinutes = totalDurationMinutes,
+            AverageRating = (float)Math.Round(new Random().NextDouble() * 5, 1), // TODO: Replace with actual rating
+            NumberOfReviews = new Random().Next(0, 5000) // TODO: Replace with actual reviews
+        };
+    }
 }
