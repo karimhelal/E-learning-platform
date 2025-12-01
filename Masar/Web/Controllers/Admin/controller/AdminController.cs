@@ -1,0 +1,43 @@
+﻿using BLL.Interfaces.Admin;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Web.ViewModels.Admin;
+
+namespace Web.Controllers.Admin.controller
+{
+    //[Authorize(Roles ="Admin")]
+    public class AdminController : Controller
+    {
+        private readonly IAdminService _adminService;
+
+        public AdminController(IAdminService adminService)
+        {
+            _adminService = adminService;
+        }
+
+        [HttpGet]
+        public IActionResult Users()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Courses()
+        {
+            var categories = await _adminService.GetAllCategoriesAsync();
+
+            var model = new ManageCoursesViewModel
+            {
+                Categories = categories.Select(c => new SelectListItem
+                {
+                    Text = c.Name,
+                    Value = c.Name 
+                }).ToList()
+            };
+
+            return View(model);
+        }
+    }
+}

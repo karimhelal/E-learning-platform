@@ -1,6 +1,6 @@
-/* ========================================
+﻿/* ========================================
    MASAR - Core Design System
-   Every Code is a Step Forward
+   Merged & Optimized Version
    ======================================== */
 
 * {
@@ -36,10 +36,8 @@
     --border-radius-md: 12px;
     --border-radius-lg: 16px;
     /* Typography */
-    --code-font: "Fira Code", monospace;
-    --ui-font: "Inter", sans-serif;
-    --ui-font: 'JetBrains Mono', monospace;
-
+    --code-font: 'Fira Code', monospace;
+    --ui-font: 'Inter', sans-serif; /* تم توحيد الخط ليكون Inter */
     /* Spacing */
     --spacing-xs: 0.5rem;
     --spacing-sm: 0.75rem;
@@ -57,7 +55,6 @@
     --transition-slow: 0.4s ease;
     /* Gradients */
     --primary-gradient: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
-    --primary-color: #7c3aed;
 }
 
 /* ========================================
@@ -73,7 +70,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Background Grid Effect */
+/* Background Grid Effect (With Animation) */
 .grid-background {
     position: fixed;
     top: 0;
@@ -81,18 +78,9 @@ body {
     width: 100%;
     height: 100%;
     z-index: -1;
-    background-image: 
-        linear-gradient(
-            rgba(124, 58, 237, 0.03) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg, 
-            rgba(124, 58, 237, 0.03) 1px, 
-            transparent 1px
-        );
+    background-image: linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
     background-size: 50px 50px;
-    animation: gridMove 20s linear infinite;
+    animation: gridMove 20s linear infinite; /* تم الحفاظ على الحركة */
     pointer-events: none;
 }
 
@@ -105,7 +93,6 @@ body {
         transform: translate(50px, 50px);
     }
 }
-
 
 /* ========================================
    LAYOUT
@@ -139,19 +126,14 @@ body {
     border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-cyan);
-}
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-cyan);
+    }
 
 /* ========================================
    TYPOGRAPHY
    ======================================== */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     line-height: 1.3;
     color: var(--text-primary);
@@ -160,18 +142,23 @@ h6 {
 h1 {
     font-size: 2.5rem;
 }
+
 h2 {
     font-size: 2rem;
 }
+
 h3 {
     font-size: 1.5rem;
 }
+
 h4 {
     font-size: 1.25rem;
 }
+
 h5 {
     font-size: 1.1rem;
 }
+
 h6 {
     font-size: 1rem;
 }
@@ -186,9 +173,9 @@ a {
     transition: color var(--transition-fast);
 }
 
-a:hover {
-    color: var(--accent-purple);
-}
+    a:hover {
+        color: var(--accent-purple);
+    }
 
 code {
     font-family: var(--code-font);
@@ -206,6 +193,7 @@ code {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -217,6 +205,7 @@ code {
         opacity: 0;
         transform: translateX(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -224,10 +213,10 @@ code {
 }
 
 @keyframes pulse {
-    0%,
-    100% {
+    0%, 100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }
@@ -245,11 +234,7 @@ code {
    UTILITY CLASSES
    ======================================== */
 .text-gradient {
-    background: linear-gradient(
-        135deg,
-        var(--accent-purple),
-        var(--accent-cyan)
-    );
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -257,105 +242,119 @@ code {
 
 .gradient-border {
     border: 1px solid transparent;
-    background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
-        linear-gradient(135deg, var(--accent-purple), var(--accent-cyan))
-            border-box;
+    background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box, linear-gradient(135deg, var(--accent-purple), var(--accent-cyan)) border-box;
 }
 
-/* Spacing Utilities */
+/* Spacing Utilities - Full Set (Preserved from File 1) */
 .mt-1 {
     margin-top: var(--spacing-sm);
 }
+
 .mt-2 {
     margin-top: var(--spacing-md);
 }
+
 .mt-3 {
     margin-top: var(--spacing-lg);
 }
+
 .mt-4 {
     margin-top: var(--spacing-xl);
 }
 
-
 .mb-1 {
     margin-bottom: var(--spacing-sm);
 }
+
 .mb-2 {
     margin-bottom: var(--spacing-md);
 }
+
 .mb-3 {
     margin-bottom: var(--spacing-lg);
 }
+
 .mb-4 {
     margin-bottom: var(--spacing-xl);
 }
 
-
 .p-1 {
     padding: var(--spacing-sm);
 }
+
 .p-2 {
     padding: var(--spacing-md);
 }
+
 .p-3 {
     padding: var(--spacing-lg);
 }
+
 .p-4 {
     padding: var(--spacing-xl);
 }
 
-
+/* Extended Spacing (From File 1 - kept for compatibility) */
 .p-lr-1 {
     padding: 0 var(--spacing-sm);
 }
+
 .p-lr-2 {
     padding: 0 var(--spacing-md);
 }
+
 .p-lr-3 {
     padding: 0 var(--spacing-lg);
 }
+
 .p-lr-4 {
     padding: 0 var(--spacing-xl);
 }
 
-
 .p-tb-1 {
     padding: var(--spacing-sm) 0;
 }
+
 .p-tb-2 {
     padding: var(--spacing-md) 0;
 }
+
 .p-tb-3 {
     padding: var(--spacing-lg) 0;
 }
+
 .p-tb-4 {
     padding: var(--spacing-xl) 0;
 }
 
-
 .p-t-1 {
     padding-top: var(--spacing-sm);
 }
+
 .p-t-2 {
     padding-top: var(--spacing-md);
 }
+
 .p-t-3 {
     padding-top: var(--spacing-lg);
 }
+
 .p-t-4 {
     padding-top: var(--spacing-xl);
 }
 
-
-.p-b-1{
+.p-b-1 {
     padding-bottom: var(--spacing-sm);
 }
+
 .p-b-2 {
     padding-bottom: var(--spacing-md);
 }
+
 .p-b-3 {
     padding-bottom: var(--spacing-lg);
 }
+
 .p-b-4 {
     padding-bottom: var(--spacing-xl);
 }
@@ -371,9 +370,11 @@ code {
     h1 {
         font-size: 2rem;
     }
+
     h2 {
         font-size: 1.75rem;
     }
+
     h3 {
         font-size: 1.3rem;
     }
@@ -383,9 +384,11 @@ code {
     h1 {
         font-size: 1.75rem;
     }
+
     h2 {
         font-size: 1.5rem;
     }
+
     h3 {
         font-size: 1.2rem;
     }
@@ -395,6 +398,7 @@ code {
     h1 {
         font-size: 1.5rem;
     }
+
     h2 {
         font-size: 1.25rem;
     }

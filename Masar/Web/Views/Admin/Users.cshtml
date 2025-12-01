@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Manage Users";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<header class="content-header">
+    <div class="header-left">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <div class="page-title">
+            <h1>Manage Users</h1>
+            <p class="page-subtitle">View and manage all platform users</p>
+        </div>
+    </div>
+</header>
+
+<section class="users-section">
+    <div class="section-header">
+        <div class="section-title">
+            <h2>All Users</h2>
+            <span class="users-count" id="usersCount">0 users</span>
+        </div>
+        <div class="section-actions">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchUsers" placeholder="Search..." onkeyup="loadUsers(1)">
+            </div>
+            <select class="filter-select" id="roleFilter" onchange="loadUsers(1)">
+                <option value="all">All Roles</option>
+                <option value="Student">Student</option>
+                <option value="Instructor">Instructor</option>
+                <option value="Admin">Admin</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Joined Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="pagination" id="pagination">
+        <button class="pagination-btn" id="prevBtn" onclick="changePage(-1)" disabled>Previous</button>
+        <div class="pagination-info" id="paginationInfo">Page 1</div>
+        <button class="pagination-btn" id="nextBtn" onclick="changePage(1)" disabled>Next</button>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/manage-users.js"></script>
+}

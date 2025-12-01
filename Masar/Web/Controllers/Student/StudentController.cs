@@ -14,7 +14,7 @@ public class StudentController : Controller
     private readonly ICurrentUserService _currentUserService;
     private readonly IStudentCourseDetailsService _courseDetailsService;
 
-    private readonly int userId = 1004;
+    private readonly int userId = 1001;
 
     public StudentController(
         IStudentDashboardService dashboardService,
@@ -35,8 +35,8 @@ public class StudentController : Controller
     {
         ViewBag.Title = "Student Dashboard | Masar";
 
-        //var userId = 2; // TODO : Replace with actual logged-in student ID retrieval
-        var userId = _currentUserService.GetUserId();
+        var userId = 1001; // TODO : Replace with actual logged-in student ID retrieval
+        //var userId = _currentUserService.GetUserId();
         var dashboardData = await _dashboardService.GetDashboardDataAsync(userId);
 
         if (dashboardData == null)
@@ -154,7 +154,7 @@ public class StudentController : Controller
     {
         ViewBag.Title = "My Courses | Masar";
 
-       // var studentId = 1001; // TODO: Replace with actual logged-in student ID retrieval
+        var studentId = 1001; // TODO: Replace with actual logged-in student ID retrieval
         var coursesData = await _coursesService.GetMyCoursesAsync(userId);
 
         if (coursesData == null)

@@ -2,9 +2,11 @@ using BLL.DTOs.Account;
 using BLL.Helpers;
 using BLL.Interfaces;
 using BLL.Interfaces.Account;
+using BLL.Interfaces.Admin;
 using BLL.Interfaces.Instructor;
 using BLL.Services;
 using BLL.Services.Account;
+using BLL.Services.Admin;
 using BLL.Services.Instructor;
 using Core.Entities;
 using Core.RepositoryInterfaces;
@@ -29,6 +31,7 @@ builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 // Current User Service
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 
 // ========================================
