@@ -21,6 +21,7 @@ public class InstructorController : Controller
     private readonly RazorViewToStringRenderer _razorRenderer;
     private readonly int instructorId = 1;     // TODO: Get from logged in user context
     private readonly UserManager<User> _userManager;
+    private readonly int instructorId = 1;     // TODO: Get from logged in user context
 
     public InstructorController(
         IInstructorDashboardService dashboardService, 
