@@ -22,5 +22,18 @@ namespace Web.Services
             }
             return 0;
         }
+
+
+        public int GetStudentId()
+        {
+            var idStr = _httpContextAccessor.HttpContext?.User?.FindFirstValue("StudentId");
+            return int.TryParse(idStr, out int id) ? id : 0;
+        }
+
+        public int GetInstructorId()
+        {
+            var idStr = _httpContextAccessor.HttpContext?.User?.FindFirstValue("InstructorId");
+            return int.TryParse(idStr, out int id) ? id : 0;
+        }
     }
 }
