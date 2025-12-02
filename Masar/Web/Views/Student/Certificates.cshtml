@@ -1,0 +1,169 @@
+@model Web.ViewModels.Student.StudentCertificatesViewModel
+
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <h1 class="page-title">
+                <i class="fas fa-certificate"></i>
+                My Certificates
+            </h1>
+            <p class="page-subtitle">View and download your earned certificates</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="certificates-stats">
+            <div class="cert-stat">
+                <div class="cert-stat-value">@Model.Data.TotalCertificates</div>
+                <div class="cert-stat-label">Total Earned</div>
+            </div>
+            <div class="cert-stat">
+                <div class="cert-stat-value">@Model.Data.CourseCertificatesCount</div>
+                <div class="cert-stat-label">Courses</div>
+            </div>
+            <div class="cert-stat">
+                <div class="cert-stat-value">@Model.Data.TrackCertificatesCount</div>
+                <div class="cert-stat-label">Tracks</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Certificates Content -->
+<section class="certificates-content">
+    @if (Model.Data.Certificates.Any())
+    {
+        <!-- Certificates Grid -->
+        <div class="certificates-grid">
+            @foreach (var cert in Model.Data.Certificates)
+            {
+                <div class="certificate-card @(cert.IsFeatured ? "featured" : "")">
+                    @if (cert.IsFeatured)
+                    {
+                        <div class="certificate-badge-overlay">
+                            <i class="fas fa-star"></i>
+                            <span>Track Certificate</span>
+                        </div>
+                    }
+
+                    <!-- Certificate Preview -->
+                    <div class="certificate-preview">
+                        <div class="certificate-header-design">
+                            <div class="cert-logo">
+                                <div class="logo-icon"></div>
+                                <span class="logo-text">Masar</span>
+                            </div>
+                        </div>
+
+                        <div class="certificate-content-design">
+                            <div class="cert-title-design">Certificate of Completion</div>
+                            <div class="cert-subtitle">This is to certify that</div>
+                            <div class="cert-name">@Model.Data.StudentName</div>
+                            <div class="cert-description">has successfully completed</div>
+                            <div class="cert-course">@cert.CourseName</div>
+                            
+                            <div class="cert-details">
+                                <div class="cert-detail-item">
+                                    <div class="detail-label">Date</div>
+                                    <div class="detail-value">@cert.IssuedDate</div>
+                                </div>
+                                <div class="cert-detail-item">
+                                    <div class="detail-label">ID</div>
+                                    <div class="detail-value">@cert.VerificationId</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certificate Actions -->
+                    <div class="certificate-actions">
+                        <!-- FIXED: Download button now uses the working endpoint -->
+                        <a href="/download-certificate/@cert.VerificationId" class="btn-small btn-primary" download>
+                            <i class="fas fa-download"></i>
+                            <span>Download</span>
+                        </a>
+                        <button class="btn-small btn-outline" onclick="shareCertificate('@cert.VerificationId')">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Share</span>
+                        </button>
+                        <button class="btn-small btn-outline" onclick="verifyCertificate('@cert.VerificationId')">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Verify</span>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Verification Info -->
+        <div class="verification-info">
+            <div class="verification-card">
+                <i class="fas fa-shield-check"></i>
+                <div class="verification-content">
+                    <h3>Certificate Verification</h3>
+                    <p>
+                        All certificates issued by Masar are digitally signed and can be verified using the unique certificate ID. 
+                        Share your achievements with confidence knowing they're backed by our verification system.
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-certificate"></i>
+            </div>
+            <h3 class="empty-state-title">No Certificates Yet</h3>
+            <p class="empty-state-text">
+                Complete courses and tracks to earn certificates that showcase your skills and achievements.
+            </p>
+            <div class="empty-state-actions">
+                <a href="~/student/my-courses" class="btn btn-primary">
+                    <i class="fas fa-book"></i>
+                    <span>View My Courses</span>
+                </a>
+                <a href="~/student/browse-courses" class="btn btn-outline">
+                    <i class="fas fa-search"></i>
+                    <span>Browse Courses</span>
+                </a>
+            </div>
+        </div>
+    }
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/certificates.css" />
+}
+
+@section Scripts {
+    <script src="~/js/certificates.js"></script>
+    <script>
+        function shareCertificate(certId) {
+            const url = `${window.location.origin}/verify-certificate/${certId}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Certificate',
+                    text: 'Check out my certificate from Masar!',
+                    url: url
+                }).catch(err => console.log('Share failed', err));
+            } else {
+                // Fallback: Copy to clipboard
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Certificate link copied to clipboard!');
+                });
+            }
+        }
+
+        function verifyCertificate(certId) {
+            window.open(`/verify-certificate/${certId}`, '_blank');
+        }
+    </script>
+}
