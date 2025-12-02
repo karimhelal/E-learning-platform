@@ -99,7 +99,15 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options => {
     options.Lockout.AllowedForNewUsers = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
+.AddDefaultTokenProviders()
+.AddClaimsPrincipalFactory<CustomUserClaimsPrincipalFactory>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
 
 builder.Services.AddSession(options =>
 {

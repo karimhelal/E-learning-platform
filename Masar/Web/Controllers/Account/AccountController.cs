@@ -52,6 +52,14 @@ namespace Web.Controllers.Account
                 
                 if (user != null)
                 {
+                    //when Admin Log In Redirect Him To His Dashboard Directly
+                    //We Add Admin To The DB Directly Without Registeration
+                    var role = await _userManager.GetRolesAsync(user);
+                    if(role.Contains("Admin"))
+                    {
+                        return RedirectToAction("Users","Admin");
+                    }
+                    
                     // Since all users have both roles, redirect to Student dashboard by default
                     // Users can switch to Instructor dashboard from the UI
                     return RedirectToAction("Dashboard", "Student");

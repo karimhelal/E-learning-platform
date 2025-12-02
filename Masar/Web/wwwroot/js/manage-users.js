@@ -51,7 +51,7 @@ async function loadUsers(page) {
 // ==================== 2. RENDER TABLE (New Design) ====================
 function renderTable(users) {
     const tbody = document.getElementById('usersTableBody');
-    if (!tbody) return; // حماية لو الجدول مش موجود
+    if (!tbody) return;
 
     tbody.innerHTML = '';
 
@@ -61,25 +61,26 @@ function renderTable(users) {
     }
 
     users.forEach(u => {
-        // قراءة البيانات بأمان (التعامل مع الحروف الكبيرة والصغيرة)
+        // 1. قراءة البيانات بأمان
         const id = u.id || u.Id;
         const fullName = u.fullName || u.FullName || "Unknown";
         const email = u.email || u.Email || "";
         const joinedDate = u.joinedDate || u.JoinedDate;
 
-        // التأكد من أن الرولز مصفوفة
+        // 2. تجهيز مصفوفة الرولز
         let rolesArray = [];
         if (Array.isArray(u.roles)) rolesArray = u.roles;
         else if (Array.isArray(u.Roles)) rolesArray = u.Roles;
         else if (typeof u.roles === 'string') rolesArray = [u.roles];
 
-        // تنسيق التاريخ
-        const dateDisplay = joinedDate ? new Date(joinedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-';
+        // 3. فحص هل المستخدم أدمن؟ (الخطوة الأهم) 🔥
+        // بنحول الكلام لحروف صغيرة عشان نضمن المقارنة (Admin = admin)
+        const isAdmin = rolesArray.some(r => r.toLowerCase() === 'admin');
 
-        // تنسيق الرولز (Badges)
+        // 4. تجهيز HTML الرولز (Badges)
         let rolesHtml = '';
         rolesArray.forEach(r => {
-            let badgeClass = 'student'; // Default styling class
+            let badgeClass = 'student';
             const lowerRole = r.toLowerCase();
 
             if (lowerRole === 'admin') badgeClass = 'admin';
@@ -88,7 +89,29 @@ function renderTable(users) {
             rolesHtml += `<span class="role-badge ${badgeClass} me-1">${r}</span>`;
         });
 
-        // رسم الصف (بالتصميم الجديد)
+        const dateDisplay = joinedDate ? new Date(joinedDate).toLocaleDateString() : '-';
+
+        // 5. تحديد شكل زرار الأكشن بناءً على هل هو أدمن ولا لأ 🔥
+        let actionHtml = '';
+
+        if (isAdmin) {
+            // لو أدمن: اظهر كلمة "محمي" مع أيقونة درع
+            actionHtml = `
+                <div style="color: #64748b; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-user-shield" style="color: #f59e0b;"></i> 
+                    <span>Protected</span>
+                </div>
+            `;
+        } else {
+            // لو مش أدمن: اظهر زر الحذف عادي
+            actionHtml = `
+                <button class="btn-delete-outline" onclick="deleteUser('${id}')">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
+            `;
+        }
+
+        // 6. رسم الصف
         tbody.innerHTML += `
             <tr>
                 <td><span class="user-id-text">U${id}</span></td>
@@ -96,16 +119,10 @@ function renderTable(users) {
                 <td style="color: #94a3b8;">${email}</td>
                 <td>${rolesHtml}</td>
                 <td>${dateDisplay}</td>
-                <td>
-                    <button class="btn-delete-outline" onclick="deleteUser('${id}')">
-                        <i class="fas fa-trash-alt"></i> Delete
-                    </button>
-                </td>
-            </tr>
+                <td>${actionHtml}</td> </tr>
         `;
     });
 }
-
 // ==================== 3. DELETE USER (With SweetAlert) ====================
 async function deleteUser(id) {
     const result = await Swal.fire({
