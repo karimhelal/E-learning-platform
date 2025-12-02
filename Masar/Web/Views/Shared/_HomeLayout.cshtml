@@ -57,6 +57,13 @@
                 <span class="logo-text">Masar</span>
             </a>
             <ul class="nav-links" id="navLinks">
+                @if(User.IsInRole("Admin")){
+                    <li><a asp-action="Users" asp-controller="Admin">Dashboard</a></li>
+                }
+                else
+                {
+                    <li><a asp-action="Dashboard" asp-controller="Student">Dashboard</a></li>
+                }
                 <li><a href="#tracks">Tracks</a></li>
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#testimonials">Reviews</a></li>

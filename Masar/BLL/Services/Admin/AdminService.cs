@@ -47,6 +47,11 @@ namespace BLL.Services.Admin
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
                 return false;
+
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return false; 
+            }
             var result = await _userManager.DeleteAsync(user);
             return result.Succeeded;
         }

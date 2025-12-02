@@ -7,7 +7,7 @@ using Web.ViewModels.Admin;
 
 namespace Web.Controllers.Admin.controller
 {
-    //[Authorize(Roles ="Admin")]
+    [Authorize(Roles ="Admin")]
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
@@ -38,6 +38,15 @@ namespace Web.Controllers.Admin.controller
             };
 
             return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("Account/AccessDenied")]
+        public IActionResult AccessDenied()
+        {
+            ViewData["Title"] = "Access Denied";
+            return View();
         }
     }
 }
