@@ -1,0 +1,655 @@
+/* ========================================
+   CERTIFICATE VERIFICATION - COMPACT DESIGN
+   ======================================== */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --dark-bg: #0f172a;
+    --card-bg: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--dark-bg);
+    color: var(--text-primary);
+    line-height: 1.4;
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* ========================================
+   ANIMATED BACKGROUND - COMPACT
+   ======================================== */
+.verification-page {
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    padding: 1.5rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    /* Animated gradient orbs - smaller */
+    .verification-page::before,
+    .verification-page::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.12;
+        animation: float 20s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .verification-page::before {
+        width: 350px;
+        height: 350px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        top: -150px;
+        right: -150px;
+    }
+
+    .verification-page::after {
+        width: 300px;
+        height: 300px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        bottom: -100px;
+        left: -100px;
+    }
+
+@keyframes float {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -30px) scale(1.05);
+    }
+
+    66% {
+        transform: translate(-30px, 30px) scale(0.95);
+    }
+}
+
+.verification-container {
+    max-width: 850px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* ========================================
+   BACK BUTTON - COMPACT
+   ======================================== */
+.back-button {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    color: #1e293b;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+    .back-button:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        color: #667eea;
+    }
+
+/* ADD DOWNLOAD BUTTON STYLES */
+.download-button {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.download-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    color: white;
+}
+
+.download-button i {
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* ========================================
+   SUCCESS BADGE - COMPACT
+   ======================================== */
+.verification-badge {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    animation: fadeInDown 0.6s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.badge-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 0.8rem;
+    background: var(--success-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0.1), 0 0 0 24px rgba(16, 185, 129, 0.05), 0 10px 30px rgba(16, 185, 129, 0.3);
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-ring {
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.03);
+    }
+}
+
+.badge-icon i {
+    font-size: 2.2rem;
+    color: white;
+    animation: checkmark 0.5s ease-out 0.2s both;
+}
+
+@keyframes checkmark {
+    0% {
+        transform: scale(0) rotate(-45deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.badge-title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.badge-subtitle {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 400;
+}
+
+/* ========================================
+   CERTIFICATE CARD - COMPACT
+   ======================================== */
+.verification-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    animation: fadeInUp 0.6s ease-out 0.15s both;
+    width: 100%;
+    max-height: 60vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.verification-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.3rem 1.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+    .verification-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+    }
+
+    .verification-header h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 800;
+        position: relative;
+        z-index: 1;
+    }
+
+.verification-id {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    padding: 0.6rem 1.1rem;
+    border-radius: 10px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+/* ========================================
+   CERTIFICATE DETAILS - COMPACT WITH SCROLL
+   ======================================== */
+.verification-body {
+    padding: 1.5rem 1.8rem;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+    /* Custom scrollbar */
+    .verification-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .verification-body::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+    }
+
+    .verification-body::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 10px;
+    }
+
+        .verification-body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 1.2rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    transition: background 0.2s ease;
+}
+
+    .detail-row:hover {
+        background: rgba(102, 126, 234, 0.03);
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
+        margin-left: -0.8rem;
+        margin-right: -0.8rem;
+        border-radius: 10px;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-row.description {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+    }
+
+.detail-label {
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+    .detail-label i {
+        font-size: 0.9rem;
+        color: #667eea;
+    }
+
+.detail-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.detail-row.description .detail-value {
+    font-weight: 400;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ========================================
+   VERIFICATION FOOTER - COMPACT
+   ======================================== */
+.verification-footer {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.08));
+    padding: 1rem 1.8rem;
+    display: flex;
+    justify-content: center;
+    border-top: 2px solid rgba(16, 185, 129, 0.15);
+    flex-shrink: 0;
+}
+
+.verification-seal {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #059669;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+    .verification-seal i {
+        font-size: 1.2rem;
+        animation: rotate-slow 20s linear infinite;
+    }
+
+@keyframes rotate-slow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   INFO BOX - COMPACT
+   ======================================== */
+.info-box {
+    margin-top: 1.2rem;
+    padding: 1rem 1.2rem;
+    background: rgba(255, 243, 205, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 12px;
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.15);
+    animation: fadeInUp 0.6s ease-out 0.3s both;
+    font-size: 0.85rem;
+}
+
+    .info-box i {
+        color: #f59e0b;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+
+    .info-box p {
+        margin: 0;
+        line-height: 1.5;
+        color: #92400e;
+    }
+
+    .info-box strong {
+        color: #78350f;
+        font-weight: 700;
+    }
+
+/* ========================================
+   RESPONSIVE - COMPACT
+   ======================================== */
+@media (max-width: 768px) {
+    .verification-page {
+        padding: 1rem;
+    }
+
+    .verification-container {
+        justify-content: flex-start;
+        padding-top: 3.5rem;
+    }
+
+    .badge-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 0.6rem;
+    }
+
+        .badge-icon i {
+            font-size: 1.8rem;
+        }
+
+    .badge-title {
+        font-size: 1.5rem;
+    }
+
+    .badge-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .verification-badge {
+        margin-bottom: 1rem;
+    }
+
+    .verification-card {
+        max-height: 65vh;
+    }
+
+    .verification-header {
+        padding: 1rem 1.2rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+        .verification-header h2 {
+            font-size: 1.2rem;
+        }
+
+    .verification-id {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.9rem;
+    }
+
+    .verification-body {
+        padding: 1.2rem;
+    }
+
+    .detail-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 0.7rem 0;
+    }
+
+    .detail-label {
+        font-size: 0.7rem;
+    }
+
+    .detail-value {
+        font-size: 0.85rem;
+    }
+
+    .verification-footer {
+        padding: 0.8rem;
+    }
+
+    .verification-seal {
+        font-size: 0.8rem;
+    }
+
+        .verification-seal i {
+            font-size: 1rem;
+        }
+
+    .info-box {
+        font-size: 0.8rem;
+        padding: 0.9rem;
+    }
+
+        .info-box i {
+            font-size: 1rem;
+        }
+
+    .back-button {
+        top: 0.6rem;
+        left: 0.6rem;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .badge-title {
+        font-size: 1.3rem;
+    }
+
+    .verification-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .verification-id {
+        font-size: 0.7rem;
+    }
+
+    .detail-row {
+        padding: 0.6rem 0;
+    }
+}
+
+/* ========================================
+   HEIGHT-CONSTRAINED SCREENS
+   ======================================== */
+@media (max-height: 700px) {
+    .verification-page {
+        padding: 0.8rem;
+    }
+
+    .badge-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+        .badge-icon i {
+            font-size: 1.5rem;
+        }
+
+    .badge-title {
+        font-size: 1.3rem;
+    }
+
+    .badge-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .verification-badge {
+        margin-bottom: 0.8rem;
+    }
+
+    .verification-card {
+        max-height: 70vh;
+    }
+
+    .verification-header {
+        padding: 1rem 1.3rem;
+    }
+
+    .verification-body {
+        padding: 1rem 1.3rem;
+    }
+
+    .detail-row {
+        padding: 0.7rem 0;
+    }
+
+    .verification-footer {
+        padding: 0.8rem 1.3rem;
+    }
+
+    .info-box {
+        margin-top: 0.8rem;
+        padding: 0.8rem 1rem;
+    }
+}

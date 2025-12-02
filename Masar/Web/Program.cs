@@ -47,6 +47,7 @@ builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>(
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
 builder.Services.AddScoped<BLL.Interfaces.Student.IStudentProfileService, BLL.Services.Student.StudentProfileService>();
 
+
 // ========================================
 // WEB SERVICES (Your simplified layer)
 // ========================================
@@ -57,6 +58,7 @@ builder.Services.AddScoped<IStudentTrackDetailsService, StudentTrackDetailsServi
 builder.Services.AddScoped<IStudentBrowseTrackService, StudentBrowseTrackService>();
 builder.Services.AddScoped<IStudentCourseDetailsService, StudentCourseDetailsService>(); // ADDED THIS LINE
 builder.Services.AddScoped<Web.Interfaces.IStudentBrowseCoursesService, Web.Services.StudentBrowseCoursesService>(); // ADDED THIS LINE
+builder.Services.AddScoped<Web.Interfaces.IStudentCertificatesService, Web.Services.StudentCertificatesService>();
 
 
 // Authentication Services

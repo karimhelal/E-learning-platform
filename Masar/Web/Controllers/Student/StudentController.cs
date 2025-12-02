@@ -29,6 +29,7 @@ public class StudentController : Controller
     private readonly IUserRepository _userRepository;
     private readonly AppDbContext _context;
     private readonly IStudentProfileService _studentProfileService;
+    private readonly Web.Interfaces.IStudentCertificatesService _certificatesService;
 
     public StudentController(
         Web.Interfaces.IStudentDashboardService dashboardService,
@@ -42,6 +43,7 @@ public class StudentController : Controller
         Web.Interfaces.IStudentCourseDetailsService courseDetailsService,
         IUserRepository userRepository,
         IStudentProfileService studentProfileService,
+        Web.Interfaces.IStudentCertificatesService certificatesService,
         AppDbContext context)
     {
         _dashboardService = dashboardService;
@@ -55,6 +57,7 @@ public class StudentController : Controller
         _courseDetailsService = courseDetailsService;
         _userRepository = userRepository;
         _studentProfileService = studentProfileService;
+        _certificatesService = certificatesService;
         _context = context;
     }
 
@@ -386,5 +389,31 @@ public class StudentController : Controller
         var vm = new StudentBrowseCoursesViewModel { Data = data };
 
         return View(vm);
+    }
+
+    [HttpGet("/student/certificates")]
+    public async Task<IActionResult> Certificates()
+    {
+        ViewBag.Title = "My Certificates | Masar";
+
+        var studentId = await GetStudentIdAsync();
+
+        if (studentId == 0)
+            return Unauthorized("Student profile not found");
+
+        var certificatesData = await _certificatesService.GetStudentCertificatesAsync(studentId);
+
+        if (certificatesData == null)
+        {
+            return NotFound("Student profile not found");
+        }
+
+        var viewModel = new StudentCertificatesViewModel
+        {
+            Data = certificatesData,
+            PageTitle = "My Certificates"
+        };
+
+        return View(viewModel);
     }
 }
