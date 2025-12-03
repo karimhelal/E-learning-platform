@@ -1,0 +1,114 @@
+﻿@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Access Denied | Masar</title>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="~/css/masar-core.css" />
+    <link rel="stylesheet" href="~/css/pages/access-denied.css" />
+  </head>
+  <body>
+    <!-- Background Grid -->
+    <div class="grid-background"></div>
+
+    <!-- Error Container -->
+    <div class="error-container">
+      <div class="error-content">
+        <!-- Error Icon -->
+        <div class="error-icon">
+          <i class="fas fa-shield-alt"></i>
+          <div class="icon-glow"></div>
+        </div>
+
+        <!-- Error Code -->
+        <div class="error-code">
+          <span class="code-number">403</span>
+          <span class="code-text">Access Denied</span>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message">
+          <h1>Permission Required</h1>
+          <p>
+            Sorry, you don't have permission to access this page. This area is
+            restricted to authorized users only.
+          </p>
+        </div>
+
+        <!-- Error Details -->
+        <div class="error-details">
+          <div class="detail-item">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>You may not have the required role or privileges</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-user-lock"></i>
+            <span>Please contact an administrator if you need access</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Try logging in with a different account</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="error-actions">
+          <a asp-action="Index" asp-controller="Home" class="btn btn-primary">
+            <i class="fas fa-home"></i>
+            Go to Homepage
+          </a>
+          <button onclick="history.back()" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Go Back
+          </button>
+        </div>
+
+        <!-- Additional Help -->
+        <div class="error-help">
+          <p>Need help?</p>
+          <a href="mailto:support@masar.com" class="help-link">
+            <i class="fas fa-envelope"></i>
+            Contact Support
+          </a>
+        </div>
+      </div>
+
+      <!-- Decorative Elements -->
+      <div class="decorative-lines">
+        <div class="line line-1"></div>
+        <div class="line line-2"></div>
+        <div class="line line-3"></div>
+      </div>
+    </div>
+
+    <!-- Animated Background Particles -->
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+  </body>
+</html>

@@ -13,7 +13,8 @@ namespace Web.ViewModels.Account
         public string Email { get; set; } = string.Empty;
         [Required]
         [DataType(DataType.Password)]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$", ErrorMessage = "The password must contain a capital letter, a lowercase letter, and a number.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$",
+        ErrorMessage = "Password Must Contain Small char , Capital Char , Special Char , Number")]
         public string Password { get; set; } = string.Empty;
         [Required]
         [DataType(DataType.Password)]

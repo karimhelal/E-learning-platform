@@ -1,0 +1,65 @@
+﻿@using Web.ViewModels.Admin
+@model ManageCoursesViewModel
+
+@{
+    ViewData["Title"] = "Manage Courses";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<header class="content-header">
+    <div class="header-left">
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+        <div class="page-title">
+            <h1>Manage Courses</h1>
+            <p class="page-subtitle">View and manage courses</p>
+        </div>
+    </div>
+</header>
+
+<section class="courses-section">
+    <div class="section-header">
+        <div class="section-title">
+            <h2>All Courses</h2>
+            <span class="courses-count" id="coursesCount">0 courses</span>
+        </div>
+        <div class="section-actions">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchCourses" placeholder="Search..." onkeyup="loadCourses(1)">
+            </div>
+            <select class="filter-select"
+                    id="categoryFilter"
+                    onchange="loadCourses(1)"
+                    asp-items="Model.Categories">
+                <option value="All Categories" selected>All Categories</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="courses-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Instructor</th>
+                    <th>Category</th>
+                    <th>Students</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="coursesTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="pagination" id="pagination">
+        <button class="pagination-btn" id="prevBtn" onclick="changePage(-1)" disabled>Previous</button>
+        <div class="pagination-info" id="paginationInfo">Page 1</div>
+        <button class="pagination-btn" id="nextBtn" onclick="changePage(1)" disabled>Next</button>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/manage-courses.js"></script>
+}

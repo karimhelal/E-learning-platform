@@ -232,15 +232,6 @@
         border: 1px solid var(--accent-green);
     }
 
-    .course-status-badge.not-started {
-        background: rgba(251, 191, 36, 0.15);
-        color: #f59e0b;
-    }
-
-    .course-status-badge.not-started i {
-        color: #f59e0b;
-    }
-
 /* Card Body */
 .course-card-body {
     padding: 1.5rem;

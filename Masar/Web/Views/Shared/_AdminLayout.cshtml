@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Masar Admin</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/masar-core.css" />
+    <link rel="stylesheet" href="~/css/components.css" />
+    <link rel="stylesheet" href="~/css/pages/manage-users.css" />
+    <link rel="stylesheet" href="~/css/pages/manage-courses.css" />
+</head>
+<body>
+    <div class="grid-background"></div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="logo">
+                    <div class="logo-icon"></div>
+                    <span class="logo-text">Masar</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3 class="nav-section-title">Admin Menu</h3>
+                    <ul class="nav-links">
+                        <li>
+                            <a asp-controller="Admin" asp-action="Users" class="nav-link @(ViewData["Title"] == "Manage Users" ? "active" : "")">
+                                <i class="fas fa-users"></i> <span>Manage Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="Admin" asp-action="Courses" class="nav-link @(ViewData["Title"] == "Manage Courses" ? "active" : "")">
+                                <i class="fas fa-book"></i> <span>Manage Courses</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="nav-section">
+                    <ul class="nav-links">
+                        <li>
+                            <a asp-controller="Account" asp-action="Logout" class="nav-link">
+                                <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/js/sidebar.js"></script> @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

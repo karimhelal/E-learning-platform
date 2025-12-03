@@ -1,9 +1,9 @@
-using Web.Interfaces;
+using BLL.DTOs.Student;
 
 namespace Web.ViewModels.Student;
 
 public class StudentCourseDetailsViewModel
 {
-    public StudentCourseDetailsData Data { get; set; } = new();
+    public StudentCourseDetailsDto Data { get; set; } = new();
     public string PageTitle { get; set; } = "Course Details";
 }

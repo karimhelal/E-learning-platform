@@ -61,31 +61,10 @@ public class UserRepository : IUserRepository
 
     public Task<StudentProfile?> GetStudentProfileForUserAsync(int userId, bool includeUserBase)
     {
-        var query = _context.StudentProfiles
-            .AsSplitQuery() // Better performance for complex includes
-            .AsQueryable();
+        var query = _context.StudentProfiles.AsQueryable();
 
         if (includeUserBase)
             query = query.Include(sp => sp.User);
-
-        // Include all necessary data for My Courses
-        query = query
-            // Include ALL enrollments first
-            .Include(sp => sp.Enrollments)
-                .ThenInclude(e => ((CourseEnrollment)e).Course!)
-                    .ThenInclude(c => c.Categories)
-            .Include(sp => sp.Enrollments)
-                .ThenInclude(e => ((CourseEnrollment)e).Course!)
-                    .ThenInclude(c => c.Languages)
-            .Include(sp => sp.Enrollments)
-                .ThenInclude(e => ((CourseEnrollment)e).Course!)
-                    .ThenInclude(c => c.Instructor!)
-                        .ThenInclude(i => i.User)
-            .Include(sp => sp.Enrollments)
-                .ThenInclude(e => ((CourseEnrollment)e).Course!)
-                    .ThenInclude(c => c.Modules!)
-                        .ThenInclude(m => m.Lessons!)
-                            .ThenInclude(l => l.LessonContent);
 
         return query.FirstOrDefaultAsync(sp => sp.UserId == userId);
     }
@@ -144,7 +123,10 @@ public class UserRepository : IUserRepository
             .Include(sp => sp.Enrollments)
                 .ThenInclude(e => (e as TrackEnrollment)!.Track!)
                     .ThenInclude(t => t.TrackCourses!)
-                        .ThenInclude(tc => tc.Course)
+                        .ThenInclude(tc => tc.Course!)
+                            .ThenInclude(c => c.Modules!)
+                                .ThenInclude(m => m.Lessons!)
+                                    .ThenInclude(l => l.LessonContent)
             .Include(sp => sp.Certificates);
 
         return query.FirstOrDefaultAsync(sp => sp.StudentId == studentId);

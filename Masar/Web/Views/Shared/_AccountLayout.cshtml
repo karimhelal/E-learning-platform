@@ -1,0 +1,58 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] | Masar</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="~/css/masar-core.css" />
+    <link rel="stylesheet" href="~/css/pages/auth.css">
+
+    <style>
+        .validation-error,
+        .field-validation-error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: block;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .field-validation-valid,
+        .validation-valid {
+            display: none;
+        }
+
+        .password-requirements ul li {
+            transition: all 0.3s ease;
+            margin-bottom: 2px;
+        }
+
+        .password-requirements .text-success {
+            color: #28a745 !important;
+        }
+
+        .password-requirements .text-danger {
+            color: #dc3545 !important;
+        }
+
+    </style>
+</head>
+<body>
+    @RenderBody()
+
+    <script src="~/js/auth.js"></script>
+</body>
+</html>

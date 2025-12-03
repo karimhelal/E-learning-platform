@@ -1,0 +1,129 @@
+﻿@using Web.ViewModels
+@model CertificateVerificationViewModel
+
+@{
+    ViewBag.Title = "Certificate Verification | Masar";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Certificate Verification Styles -->
+    <link rel="stylesheet" href="~/css/pages/certificate-verification.css" />
+</head>
+<body>
+
+    <!-- Optional Back Button -->
+    <a href="/" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Home</span>
+    </a>
+
+    <!-- Download Button -->
+    <a href="/download-certificate/@Model.VerificationId" class="download-button">
+        <i class="fas fa-download"></i>
+        <span>Download PDF</span>
+    </a>
+
+    <section class="verification-page">
+        <div class="verification-container">
+            <!-- Success Badge -->
+            <div class="verification-badge">
+                <div class="badge-icon">
+                    <i class="fas fa-shield-check"></i>
+                </div>
+                <h1 class="badge-title">Certificate Verified ✓</h1>
+                <p class="badge-subtitle">This certificate is authentic and was issued by Masar</p>
+            </div>
+
+            <!-- Certificate Details Card -->
+            <div class="verification-card">
+                <div class="verification-header">
+                    <h2>Certificate Details</h2>
+                    <span class="verification-id">
+                        <i class="fas fa-fingerprint"></i>
+                        @Model.VerificationId
+                    </span>
+                </div>
+
+                <div class="verification-body">
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="fas fa-certificate"></i>
+                            Certificate Type
+                        </span>
+                        <span class="detail-value">@Model.Type</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="fas fa-user-graduate"></i>
+                            Recipient
+                        </span>
+                        <span class="detail-value">@Model.StudentName</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="fas fa-book"></i>
+                            Course/Track
+                        </span>
+                        <span class="detail-value">@Model.CourseName</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            Instructor
+                        </span>
+                        <span class="detail-value">@Model.InstructorName</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <i class="fas fa-calendar-check"></i>
+                            Issued Date
+                        </span>
+                        <span class="detail-value">@Model.IssuedDate</span>
+                    </div>
+                    <div class="detail-row description">
+                        <span class="detail-label">
+                            <i class="fas fa-info-circle"></i>
+                            Description
+                        </span>
+                        <p class="detail-value">@Model.Description</p>
+                    </div>
+                </div>
+
+                <div class="verification-footer">
+                    <div class="verification-seal">
+                        <i class="fas fa-certificate"></i>
+                        <span>Digitally Signed by Masar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>
+                    This verification page confirms that the certificate with ID <strong>@Model.VerificationId</strong> 
+                    was issued by Masar and is authentic. For any inquiries, please contact our support team.
+                </p>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>
