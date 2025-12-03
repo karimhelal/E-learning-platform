@@ -12,11 +12,12 @@ using Core.Entities;
 using Core.RepositoryInterfaces;
 using DAL.Data;
 using DAL.Data.RepositoryServices;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Web.Hubs;
 using Web.Interfaces;
 using Web.Services;
-using Microsoft.AspNetCore.Antiforgery;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +37,8 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
-
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotifier, SignalRNotifier>();
 
 // ========================================
 // BLL SERVICES (Team's layer)
@@ -176,6 +178,8 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
+
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
 
