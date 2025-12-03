@@ -537,7 +537,6 @@ namespace DAL.Data
                 lessonContents.Add(new VideoContent
                 {
                     LessonId = lesson.LessonId,
-                    Content = $"https://example.com/videos/lesson{lesson.LessonId}.mp4",
                     VideoUrl = $"https://example.com/videos/lesson{lesson.LessonId}.mp4",
                     DurationInSeconds = 600 + (lesson.Order * 300)
                 });
@@ -851,17 +850,17 @@ namespace DAL.Data
                 new PdfResource
                 {
                     LessonId = lessons[0].LessonId,
-                    PdfUrl = "https://example.com/resources/web-dev-intro.pdf"
+                    Url = "https://example.com/resources/web-dev-intro.pdf"
                 },
                 new UrlResource
                 {
                     LessonId = lessons[1].LessonId,
-                    Link = "https://code.visualstudio.com/download"
+                    Url = "https://code.visualstudio.com/download"
                 },
                 new ZipResource
                 {
                     LessonId = lessons[2].LessonId,
-                    ZipUrl = "https://example.com/resources/html-templates.zip"
+                    Url = "https://example.com/resources/html-templates.zip"
                 },
             };
 

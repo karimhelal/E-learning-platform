@@ -763,8 +763,9 @@ body {
 /* Video Container - Fixed 75vh height, auto width */
 .video-container {
     position: relative;
-    /*    max-height: 76vh;*/
+    max-height: 76vh;
     width: auto;
+/*    height: auto;*/
     aspect-ratio: 16 / 9;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     max-width: 100%;
@@ -781,6 +782,10 @@ body {
     box-shadow: var(--theme-container-shadow);
     background: var(--theme-bg-color);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.plyr__video-embed {
+    aspect-ratio: 16/9;
 }
 
 

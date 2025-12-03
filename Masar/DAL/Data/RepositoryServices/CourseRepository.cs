@@ -17,7 +17,9 @@ public class CourseRepository : ICourseRepository
 
     public IQueryable<Course> GetAllQueryable()
     {
-        return _context.Courses;
+        return _context.Courses
+            .AsQueryable()
+            .AsNoTracking();
     }
 
     public async Task<IEnumerable<Course>> GetAllAsync()

@@ -1,8 +1,8 @@
 ﻿using BLL.Helpers;
 using BLL.Interfaces.CourseLearning;
 using BLL.Interfaces.Enrollment;
-using Core.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Web.Interfaces;
 using Web.ViewModels.Classroom;
 
 namespace Web.Controllers.CourseLearning;
@@ -11,17 +11,21 @@ public class CourseLearningController : Controller
 {
     private readonly IEnrollmentService _enrollmentService;
     private readonly ICourseLearningService _courseLearningService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly RazorViewToStringRenderer _razorRenderer;
-    private readonly int studentId = 1001;
+    //private readonly int studentId = 2;
+
     public CourseLearningController(
         IEnrollmentService enrollmentService, 
-        ICourseLearningService courseLearningService, 
+        ICourseLearningService courseLearningService,
+        ICurrentUserService currentUserService,
         RazorViewToStringRenderer razorRenderer
     )
     {
         _enrollmentService = enrollmentService;
         _courseLearningService = courseLearningService;
         _razorRenderer = razorRenderer;
+        _currentUserService = currentUserService;
     }
 
 
@@ -35,6 +39,8 @@ public class CourseLearningController : Controller
                 LessonId = ModelState["lessonId"]
             });
         }
+
+        var studentId = _currentUserService.GetStudentId();
 
         // If they didn't buy it, kick them to the sales page
         if (!await _enrollmentService.IsStudentEnrolledAsync(studentId, courseId))
@@ -159,7 +165,7 @@ public class CourseLearningController : Controller
     public async Task<IActionResult> GetLessonContentPartialAsync(int courseId, int lessonId)
     {
         // 1. Get Student ID (Assuming Helper Method)
-        //var studentId = GetStudentId();
+        var studentId = _currentUserService.GetStudentId();
 
         // 2. Security Gate: AJAX Friendly
         if (!await _enrollmentService.IsStudentEnrolledAsync(studentId, courseId))
@@ -230,6 +236,8 @@ public class CourseLearningController : Controller
     [HttpPost("~/Classroom/Course/UpdateLessonCompletionState/{courseId:int:required}/{lessonId:int:required}/{newCompletionState:bool=false}")]
     public async Task<IActionResult> UpdateLessonCompletionStatePartialAsync(int courseId, int lessonId, bool newCompletionState)
     {
+        var studentId = _currentUserService.GetStudentId();
+
         // 1. Fetch Data
         var newCourseProgressDto = await _courseLearningService.UpdateLessonCompletionState(studentId, lessonId, newCompletionState);
 
@@ -248,6 +256,8 @@ public class CourseLearningController : Controller
     [HttpPost("~/Classroom/Course/MarkLessonStarted/{lessonId:int:required}")]
     public async Task<IActionResult> MarkLessonStarted(int lessonId)
     {
+        var studentId = _currentUserService.GetStudentId();
+
         // 1. Security Gate: AJAX Friendly
         var courseId = await _enrollmentService.GetCourseIdIfEnrolled(studentId, lessonId);
         

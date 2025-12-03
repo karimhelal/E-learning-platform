@@ -280,6 +280,9 @@
                     // Seek time for rewind/fast-forward buttons
                     seekTime: 10,
 
+                    // FORCE the ratio via JS configuration
+                    ratio: '16:9',
+
                     // YouTube specific options
                     youtube: {
                         noCookie: true,
@@ -287,7 +290,9 @@
                         //showinfo: 0,
                         iv_load_policy: 3,
                         //modestbranding: 1,
-                        //controls = 0
+                        //controls = 0,
+                        showinfo: 0,
+                        modestbranding: 1
                     },
 
                     // Enable tooltips

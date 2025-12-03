@@ -1,16 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Core.RepositoryInterfaces;
 using Core.Entities;
 using DAL.Data;
 
 using Web.ViewModels;
 using Web.ViewModels.Student;
-using static System.Net.WebRequestMethods;
-using BLL.Interfaces.Student;  // Only for IStudentProfileService
+using Web.Interfaces;
 
 namespace Web.Controllers.Student;
 
@@ -23,27 +19,28 @@ public class StudentController : Controller
     private readonly IStudentTrackDetailsService _trackDetailsService;
     private readonly ICurrentUserService _currentUserService;
 
-    private readonly Web.Interfaces.IStudentBrowseCoursesService _browseCoursesService;
+    private readonly IStudentBrowseCoursesService _browseCoursesService;
+    private readonly IStudentBrowseTrackService _browseTrackService;
     private readonly IHttpContextAccessor _http;
-    private readonly Web.Interfaces.IStudentCourseDetailsService _courseDetailsService;
+    private readonly IStudentCourseDetailsService _courseDetailsService;
     private readonly IUserRepository _userRepository;
     private readonly AppDbContext _context;
-    private readonly IStudentProfileService _studentProfileService;
-    private readonly Web.Interfaces.IStudentCertificatesService _certificatesService;
+    private readonly BLL.Interfaces.Student.IStudentProfileService _studentProfileService;
+    private readonly IStudentCertificatesService _certificatesService;
 
     public StudentController(
-        Web.Interfaces.IStudentDashboardService dashboardService,
-        Web.Interfaces.IStudentCoursesService coursesService,
-        Web.Interfaces.IStudentTrackService tracksService,
-        Web.Interfaces.IStudentTrackDetailsService trackDetailsService,
-        Web.Interfaces.ICurrentUserService currentUserService,
-        Web.Interfaces.IStudentBrowseTrackService browseTrackService,
-        Web.Interfaces.IStudentBrowseCoursesService browseCoursesService, // ADD THIS
+        IStudentDashboardService dashboardService,
+        IStudentCoursesService coursesService,
+        IStudentTrackService tracksService,
+        IStudentTrackDetailsService trackDetailsService,
+        ICurrentUserService currentUserService,
+        IStudentBrowseTrackService browseTrackService,
+        IStudentBrowseCoursesService browseCoursesService, // ADD THIS
         IHttpContextAccessor http,
-        Web.Interfaces.IStudentCourseDetailsService courseDetailsService,
+        IStudentCourseDetailsService courseDetailsService,
         IUserRepository userRepository,
-        IStudentProfileService studentProfileService,
-        Web.Interfaces.IStudentCertificatesService certificatesService,
+        BLL.Interfaces.Student.IStudentProfileService studentProfileService,
+        IStudentCertificatesService certificatesService,
         AppDbContext context)
     {
         _dashboardService = dashboardService;

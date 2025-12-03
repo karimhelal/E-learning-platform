@@ -419,9 +419,9 @@ public class InstructorCoursesService : IInstructorCoursesService
                         videoContent.VideoUrl = lessonDto.VideoUrl ?? videoContent.VideoUrl;
                         videoContent.DurationInSeconds = lessonDto.DurationInSeconds ?? videoContent.DurationInSeconds;
                     }
-                    else if (lessonDto.ContentType == LessonContentType.Article && lesson.LessonContent is PdfContent pdfContent)
+                    else if (lessonDto.ContentType == LessonContentType.Article && lesson.LessonContent is ArticleContent pdfContent)
                     {
-                        pdfContent.PdfUrl = lessonDto.PdfUrl ?? pdfContent.PdfUrl;
+                        pdfContent.Content = lessonDto.PdfUrl ?? pdfContent.Content;
                     }
                 }
 
@@ -450,13 +450,13 @@ public class InstructorCoursesService : IInstructorCoursesService
                             switch (existingResource)
                             {
                                 case PdfResource pdfRes:
-                                    pdfRes.PdfUrl = resourceDto.Url;
+                                    pdfRes.Url = resourceDto.Url;
                                     break;
                                 case UrlResource urlRes:
-                                    urlRes.Link = resourceDto.Url;
+                                    urlRes.Url = resourceDto.Url;
                                     break;
                                 case ZipResource zipRes:
-                                    zipRes.ZipUrl = resourceDto.Url;
+                                    zipRes.Url = resourceDto.Url;
                                     break;
                             }
                         }
@@ -471,17 +471,17 @@ public class InstructorCoursesService : IInstructorCoursesService
                         LessonResourceType.PDF => new PdfResource
                         {
                             LessonId = lesson.LessonId,
-                            PdfUrl = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         LessonResourceType.URL => new UrlResource
                         {
                             LessonId = lesson.LessonId,
-                            Link = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         LessonResourceType.ZIP => new ZipResource
                         {
                             LessonId = lesson.LessonId,
-                            ZipUrl = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         _ => throw new ArgumentException("Invalid resource type")
                     };
@@ -510,18 +510,16 @@ public class InstructorCoursesService : IInstructorCoursesService
                     content = new VideoContent
                     {
                         LessonId = newLesson.LessonId,
-                        Content = lessonDto.Title,
                         VideoUrl = lessonDto.VideoUrl ?? string.Empty,
                         DurationInSeconds = lessonDto.DurationInSeconds ?? 0
                     };
                 }
                 else
                 {
-                    content = new PdfContent
+                    content = new ArticleContent
                     {
                         LessonId = newLesson.LessonId,
-                        Content = lessonDto.Title,
-                        PdfUrl = lessonDto.PdfUrl ?? string.Empty
+                        Content = lessonDto.Title
                     };
                 }
 
@@ -535,17 +533,17 @@ public class InstructorCoursesService : IInstructorCoursesService
                         LessonResourceType.PDF => new PdfResource
                         {
                             LessonId = newLesson.LessonId,
-                            PdfUrl = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         LessonResourceType.URL => new UrlResource
                         {
                             LessonId = newLesson.LessonId,
-                            Link = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         LessonResourceType.ZIP => new ZipResource
                         {
                             LessonId = newLesson.LessonId,
-                            ZipUrl = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         _ => throw new ArgumentException("Invalid resource type")
                     };

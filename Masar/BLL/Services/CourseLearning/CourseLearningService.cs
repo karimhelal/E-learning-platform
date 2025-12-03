@@ -342,7 +342,7 @@ public class CourseLearningService : ICourseLearningService
         // Default to the very first lesson (Review mode) or very last.
         if (activeLesson == null && classroomDto.Curriculum != null)
             activeLesson = classroomDto.Curriculum
-                .LastOrDefault(m => m.Lessons.Count() > 0).Lessons
+                .LastOrDefault(m => m.Lessons.Count() > 0).Lessons?
                 .LastOrDefault();
 
         if (activeLesson == null)
