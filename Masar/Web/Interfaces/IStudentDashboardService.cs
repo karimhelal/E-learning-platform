@@ -5,7 +5,7 @@ namespace Web.Interfaces;
 /// </summary>
 public interface IStudentDashboardService
 {
-    Task<StudentDashboardData?> GetDashboardDataAsync(int userId);
+    Task<StudentDashboardData?> GetDashboardDataAsync(int studentId); // Changed parameter name from userId to studentId
 }
 
 public class StudentDashboardData

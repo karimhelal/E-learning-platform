@@ -1,0 +1,54 @@
+﻿using BLL.Interfaces.Admin;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Web.Controllers.Admin.API
+{
+    [Route("api/admin")]
+    [ApiController]
+    public class AdminController : ControllerBase
+    {
+        private readonly IAdminService _adminService;
+
+        public AdminController(IAdminService adminService)
+        {
+            _adminService = adminService;
+        }
+
+
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers([FromQuery] string? search, [FromQuery] string role, [FromQuery] int page = 1)
+        {
+            var result = await _adminService.GetUsersAsync(search ?? "", role, page);
+            return Ok(result);
+        }
+
+        [HttpDelete("users/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var success = await _adminService.DeleteUserAsync(id);
+            if (!success)
+            {
+                return BadRequest(new { message = "Cannot delete this user. They might be enrolled in courses or have taught courses." });
+            }
+            return Ok(new { message = "Deleted successfully" });
+        }
+
+
+
+        [HttpGet("courses")]
+        public async Task<IActionResult> GetCourses([FromQuery] string? search, [FromQuery] string? category, [FromQuery] int page = 1)
+        {
+            var result = await _adminService.GetCoursesAsync(search ?? "", category ?? "", page);
+            return Ok(result);
+        }
+
+        [HttpDelete("courses/{id}")]
+        public async Task<IActionResult> DeleteCourse(int id)
+        {
+            var success = await _adminService.DeleteCourseAsync(id);
+            if (!success) return NotFound(new { message = "Course not found" });
+            return Ok(new { message = "Deleted successfully" });
+        }
+
+    }
+}

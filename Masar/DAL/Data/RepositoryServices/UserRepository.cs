@@ -123,7 +123,10 @@ public class UserRepository : IUserRepository
             .Include(sp => sp.Enrollments)
                 .ThenInclude(e => (e as TrackEnrollment)!.Track!)
                     .ThenInclude(t => t.TrackCourses!)
-                        .ThenInclude(tc => tc.Course)
+                        .ThenInclude(tc => tc.Course!)
+                            .ThenInclude(c => c.Modules!)
+                                .ThenInclude(m => m.Lessons!)
+                                    .ThenInclude(l => l.LessonContent)
             .Include(sp => sp.Certificates);
 
         return query.FirstOrDefaultAsync(sp => sp.StudentId == studentId);

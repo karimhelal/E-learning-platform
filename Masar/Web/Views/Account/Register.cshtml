@@ -1,49 +1,11 @@
 ﻿@using Web.ViewModels.Account
 @model RegisterViewModel
 @{
-    Layout = null;
+    Layout = Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register | Masar</title>
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="~/css/masar-core.css" />
-    <link rel="stylesheet" href="~/css/pages/auth.css">
-
-    <style>
-        .validation-error,
-        .field-validation-error {
-            color: #e74c3c;
-            font-size: 0.85rem;
-            margin-top: 6px;
-            display: block;
-            font-weight: 500;
-            letter-spacing: 0.2px;
-            animation: fadeIn 0.2s ease-in-out;
-        }
-
-        .field-validation-valid,
-        .validation-valid {
-            display: none;
-        }
-
-    </style>
-</head>
-<body>
-    <div class="grid-background"></div>
+<div class="grid-background"></div>
 
     <div class="auth-container">
 
@@ -142,6 +104,17 @@
                             </div>
                             <span class="strength-text">Password strength</span>
                         </div>
+
+                        <div class="password-requirements mt-2">
+                        <p class="text-muted small mb-1">Passwrod Must Contain:</p>
+                        <ul class="list-unstyled small">
+                            <li id="req-length" class="text-danger"><i class="fas fa-times-circle"></i> At Least 8 Characters</li>
+                            <li id="req-lower" class="text-danger"><i class="fas fa-times-circle"></i> Small Character(a-z)</li>
+                            <li id="req-upper" class="text-danger"><i class="fas fa-times-circle"></i> Capital Character(A-Z)</li>
+                            <li id="req-number" class="text-danger"><i class="fas fa-times-circle"></i> Number(0-9)</li>
+                            <li id="req-special" class="text-danger"><i class="fas fa-times-circle"></i> Special Character(#,*,&,^)</li>
+                        </ul>
+                        </div>
                     </div>
 
                     <!-- Confirm Password -->
@@ -206,7 +179,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
-    <script src="~/js/auth.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -231,5 +204,44 @@
             }
         });
     </script>
-</body>
-</html>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const passwordInput = document.getElementById('registerpassword');
+
+        // تعريف عناصر القائمة
+        const reqLength = document.getElementById('req-length');
+        const reqLower = document.getElementById('req-lower');
+        const reqUpper = document.getElementById('req-upper');
+        const reqNumber = document.getElementById('req-number');
+        const reqSpecial = document.getElementById('req-special');
+
+        passwordInput.addEventListener('input', function () {
+            const val = passwordInput.value;
+
+            validateRequirement(reqLength, val.length >= 8);
+
+            validateRequirement(reqLower, /[a-z]/.test(val));
+
+            validateRequirement(reqUpper, /[A-Z]/.test(val));
+
+            validateRequirement(reqNumber, /\d/.test(val));
+
+            validateRequirement(reqSpecial, /[\W_]/.test(val));
+        });
+
+        function validateRequirement(element, isValid) {
+            const icon = element.querySelector('i');
+            if (isValid) {
+                element.classList.remove('text-danger');
+                element.classList.add('text-success');
+                icon.classList.remove('fa-times-circle');
+                icon.classList.add('fa-check-circle');
+            } else {
+                element.classList.remove('text-success');
+                element.classList.add('text-danger');
+                icon.classList.remove('fa-check-circle');
+                icon.classList.add('fa-times-circle');
+            }
+        }
+    });
+</script>

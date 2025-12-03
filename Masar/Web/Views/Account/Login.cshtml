@@ -2,30 +2,10 @@
 @model LoginViewModel
 
 @{
-    Layout = null;
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Masar</title>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="~/css/masar-core.css" />
-    <link rel="stylesheet" href="~/css/components.css" />
-    <link rel="stylesheet" href="~/css/pages/auth.css" />
-</head>
-<body>
 
     <!-- Background Grid -->
     <div class="grid-background"></div>
@@ -36,7 +16,7 @@
         <!-- Left Side - Branding -->
         <div class="auth-branding">
             <div class="branding-content">
-                <a href="../../index.html" class="logo-large">
+                <a href="/" class="logo-large">
                     <div class="logo-icon-large"></div>
                     <span class="logo-text-large">Masar</span>
                 </a>
@@ -99,7 +79,7 @@
             <div class="auth-form-container">
 
                 <!-- Mobile Logo -->
-                <a href="../../index.html" class="logo-mobile">
+                <a href="/" class="logo-mobile">
                     <div class="logo-icon"></div>
                     <span class="logo-text">Masar</span>
                 </a>
@@ -111,42 +91,38 @@
                 </div>
 
                 <!-- Login Form -->
-                <form class="auth-form" id="loginForm" method="post">
+                <form asp-controller="Account" asp-action="Login" method="post" class="auth-form">
                     @Html.AntiForgeryToken()
 
                     <div asp-validation-summary="ModelOnly" class="text-danger" role="alert" style="color: red; font-weight: bold;"></div>
 
                     <div class="form-group">
-                        <label for="email" class="form-label">
+                        <label asp-for="Email" class="form-label">
                             <i class="fas fa-envelope"></i>
                             Email Address
                         </label>
                         <input asp-for="Email" type="email"
-                               id="email"
-                               name="email"
                                class="form-input"
                                placeholder="your.email@example.com"
-                               required
                                autocomplete="email">
+                        <span asp-validation-for="Email" class="validation-error"></span>
                     </div>
 
                     <div class="form-group">
-                        <label for="password" class="form-label">
+                        <label asp-for="Password" class="form-label">
                             <i class="fas fa-lock"></i>
                             Password
                         </label>
                         <div class="password-input-wrapper">
                             <input asp-for="Password" type="password"
-                                   id="password"
-                                   name="password"
                                    class="form-input"
                                    placeholder="Enter your password"
-                                   required
                                    autocomplete="current-password">
                             <button type="button" class="toggle-password" id="togglePassword">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
+                        <span asp-validation-for="Password" class="validation-error"></span>
                     </div>
 
 
@@ -156,7 +132,7 @@
                             <span class="checkbox-custom"></span>
                             <span class="checkbox-text">Remember me</span>
                         </label>
-                        <a asp-controller="Account" asp-action="Forgot-Password" class="link-text">Forgot Password?</a>
+                        <a asp-controller="Account" asp-action="ForgotPassword" class="link-text">Forgot Password?</a>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-block btn-large">
@@ -180,7 +156,6 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="~/js/auth.js"></script>
-</body>
-</html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
