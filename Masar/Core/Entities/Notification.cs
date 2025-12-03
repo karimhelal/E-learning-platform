@@ -6,32 +6,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Entities
+namespace Core.Entities;
+
+public class Notification
 {
-        public class Notification
-        {
-            public int Id { get; set; }
+    public int Id { get; set; }
 
-            [Required]
-            [MaxLength(150)]
-            public string Title { get; set; }
+    [Required]
+    [MaxLength(150)]
+    public string Title { get; set; }
 
-            [Required]
-            [MaxLength(600)]
-            public string Message { get; set; }
+    [Required]
+    [MaxLength(600)]
+    public string Message { get; set; }
 
-            [MaxLength(300)]
-            public string Url { get; set; }
+    [MaxLength(300)]
+    public string Url { get; set; }
 
-            public bool IsRead { get; set; } = false;
+    public bool IsRead { get; set; } = false;
 
-            public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-            // Relations (if UserId is null notification is for admins ,else it is for a specific user)
-            public int? UserId { get; set; }
 
-            // Navigation Property 
-            [ForeignKey(nameof(UserId))]
-            public virtual User? User { get; set; }
-        }
+    // Relations (if UserId is null notification is for admins ,else it is for a specific user)
+    public int? UserId { get; set; }
+
+    // Navigation Property 
+    [ForeignKey(nameof(UserId))]
+    public virtual User? User { get; set; }
+}
 }

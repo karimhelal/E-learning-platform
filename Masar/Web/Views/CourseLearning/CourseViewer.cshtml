@@ -1,0 +1,222 @@
+﻿@model CourseClassroomViewModel
+
+@{
+    ViewBag.PageTitle = "Course Viewer";
+
+    ViewBag.CourseId = Model.CourseId;
+    ViewBag.CourseTitle = Model.CourseTitle;
+    ViewBag.ModuleTitle = Model.MainContent.CurrentLesson.ModuleTitle;
+}
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <!-- Progress Section -->
+    <div class="sidebar-header">
+        <div class="course-progress">
+            <partial name="_ClassroomProgressSectionPartialView", model="@Model.Sidebar.SidebarStats.CourseProgress" />
+        </div>
+    </div>
+
+    <!-- Modules List -->
+    <div class="modules-list" id="modulesList">
+        <partial name="_ClassroomSidebarModulesPartialView", model="@Model.Sidebar.SidebarModules" />
+    </div>
+
+    <!-- Footer Stats -->
+    <div class="sidebar-footer">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-label">Duration</span>
+                <span class="stat-value"><i class="fas fa-clock"></i> @Model.Sidebar.SidebarStats.FormattedCourseDuration</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Rating</span>
+                <span class="stat-value rating"><i class="fas fa-star"></i> @Model.Sidebar.SidebarStats.FormattedRatingAndReviews</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Students</span>
+                <span class="stat-value"><i class="fas fa-comments"></i> @Model.Sidebar.SidebarStats.FormattedNumberOfStudents</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Lessons</span>
+                <span class="stat-value"><i class="fas fa-check-circle"></i> @Model.Sidebar.SidebarStats.TotalLessonsCount</span>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content" id="mainContent">
+    <div class="content-wrapper">
+        <!-- Video Player -->
+        <div class="video-section lesson-meta-data" id="lessonMetaDataContainer">
+            <partial name="_ClassroomLessonPlayerPartialView" model="@Model.MainContent.CurrentLesson.Metadata" />
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-action="switch-tab" data-tab="overview">
+                <i class="fas fa-book"></i> Overview
+            </button>
+            <button class="tab-btn" data-action="switch-tab" data-tab="resources">
+                <i class="fas fa-folder-open"></i> Resources
+                @* <span class="tab-badge">4</span> *@
+            </button>
+            <button class="tab-btn" data-action="switch-tab" data-tab="notes">
+                <i class="fas fa-sticky-note"></i> Notes
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="overviewTab" class="tab-content active">
+            <div class="content-card">
+                <h3>Course Information</h3>
+                <div class="course-stats">
+                    <div class="course-stat">
+                        <i class="fas fa-layer-group"></i>
+                        <span>@Model.MainContent.CourseOverviewStats.ModuleCount Modules</span>
+                    </div>
+                    <div class="course-stat">
+                        <i class="fas fa-book-open"></i>
+                        <span>@Model.MainContent.CourseOverviewStats.LessonsCount Lessons</span>
+                    </div>
+                    <div class="course-stat">
+                        <i class="fas fa-clock"></i>
+                        <span>@Model.MainContent.CourseOverviewStats.FormattedDuration</span>
+                    </div>
+                    <div class="course-stat">
+                        <i class="fas fa-signal"></i>
+                        <span>@Model.MainContent.CourseOverviewStats.Level</span>
+                    </div>
+                    <div class="course-stat rating">
+                        <i class="fas fa-star"></i>
+                        <span>@Model.MainContent.CourseOverviewStats.FormattedRatingAndReviews</span>
+                    </div>
+                    <div class="course-stat">
+                        <i class="fas fa-users"></i>
+                        <span>@Model.MainContent.CourseOverviewStats.FormattedStudentsEnrolledCount</span>
+                    </div>
+                    <div class="course-stat">
+                        <i class="fas fa-globe"></i>
+                        <span>@(Model.MainContent.CourseOverviewStats.Languages.FirstOrDefault() ?? "No Language Info")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructor Card -->
+            <div class="content-card">
+                <h3>Instructor</h3>
+                <div class="instructor-card">
+                    <div class="instructor-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="instructor-info">
+                        <div class="instructor-name">@Model.MainContent.CourseOverviewStats.InstructorStats.InstructorName</div>
+                        <div class="instructor-title">@Model.MainContent.CourseOverviewStats.InstructorStats.RoleTitle</div>
+                        <div class="instructor-stats">
+                            <span><i class="fas fa-star"></i> @Model.MainContent.CourseOverviewStats.InstructorStats.FormattedRating</span>
+                            <span><i class="fas fa-users"></i> @Model.MainContent.CourseOverviewStats.InstructorStats.FormattedStudentsTaughtCount</span>
+                            <span><i class="fas fa-play-circle"></i> @Model.MainContent.CourseOverviewStats.InstructorStats.FormattedCoursesCount</span>
+                        </div>
+                        <p class="instructor-bio">
+                            @Model.MainContent.CourseOverviewStats.InstructorStats.Bio
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="content-card">
+                <h3>Categories</h3>
+                <div class="category-tags">
+                    @foreach (var category in @Model.MainContent.CourseOverviewStats.Categories)
+                    {
+                        <span class="category-tag">@category</span>
+                    }
+                </div>
+            </div>
+
+
+            <div class="content-card">
+                <h3>Course Description</h3>
+                <div class="course-description">
+                    @Model.MainContent.CourseOverviewStats.CourseDescription
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3>What You'll Learn</h3>
+                <ul class="learning-list">
+                    @foreach(var learningOutcome in @Model.MainContent.CourseOverviewStats.LearningOutcomes)
+                    {
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>
+                                @learningOutcome
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div id="resourcesTab" class="tab-content">
+            <div class="content-card" id="lessonResourcesContainer">
+                <partial name="_ClassroomLessonResourcesPartialView" model="@Model.MainContent.CurrentLesson.Resources" />
+            </div>
+        </div>
+
+
+
+        <div id="notesTab" class="tab-content">
+            <div class="content-card">
+                <h3>My Notes</h3>
+                <textarea class="notes-textarea"
+                          id="notesArea"
+                          placeholder="Take notes while learning..."></textarea>
+                <div class="notes-footer">
+                    <div class="notes-status" id="notesStatus">
+                        <i class="fas fa-cloud"></i>
+                        <span>Auto-save enabled</span>
+                    </div>
+                    <button class="btn btn-primary"
+                            id="saveNotesBtn" 
+                            data-action="save-notes">
+                        <i class="fas fa-save"></i>
+                        Save Notes
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Navigation -->
+        <div class="lesson-nav">
+            <button class="nav-btn prev" id="prevBtn" data-action="navigate-back" data-id="@Model.MainContent.CurrentLesson.LessonId">
+                <i class="fas fa-chevron-left"></i>
+                <div class="nav-btn-text">
+                    <span class="nav-label">Previous</span>
+                    <span class="nav-title" id="prevTitle">Knowledge Check Quiz</span>
+                </div>
+            </button>
+            <button class="nav-btn next" id="nextBtn" data-action="navigate-forward" data-id="@Model.MainContent.CurrentLesson.LessonId">
+                <div class="nav-btn-text">
+                    <span class="nav-label">Next</span>
+                    <span class="nav-title" id="nextTitle">useState Deep Dive</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</main>
+
+<script>
+    // The Server dumps the ID here once when the page loads
+    window.courseState = {
+        courseId: @Model.CourseId,
+        progressPercentage: @Model.Sidebar.SidebarStats.CourseProgress.ProgressPercentage,
+        completedLessons: @Model.Sidebar.SidebarStats.CourseProgress.CompletedLessonsCount,
+        totalLessons: @Model.Sidebar.SidebarStats.CourseProgress.TotalLessonsCount
+    };
+</script>
+

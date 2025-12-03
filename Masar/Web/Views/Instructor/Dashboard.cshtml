@@ -190,6 +190,69 @@
 
         <!-- Right Sidebar -->
         <aside class="dashboard-sidebar">
+            <!-- Quick Stats -->
+            <div class="sidebar-widget">
+                <h3 class="widget-title">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>This Month</span>
+                </h3>
+                <div class="quick-stats">
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value">
+                                @Model.Data.CurrentMonthStats.NewStudents
+                            </div>
+                            <div class="quick-stat-label">
+                                New Students
+                            </div>
+                        </div>
+                        <div class="quick-stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>12%</span>
+                        </div>
+                    </div>
+
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value">
+                                @Model.Data.CurrentMonthStats.Completions
+                            </div>
+                            <div class="quick-stat-label">
+                                Completions
+                            </div>
+                        </div>
+                        <div class="quick-stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>8%</span>
+                        </div>
+                    </div>
+
+                    <div class="quick-stat-item">
+                        <div class="quick-stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value">
+                                @Model.Data.CurrentMonthStats.NewReviews
+                            </div>
+                            <div class="quick-stat-label">
+                                New Reviews
+                            </div>
+                        </div>
+                        <div class="quick-stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>15%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Top Performing Courses -->
             <div class="sidebar-widget">
                 <h3 class="widget-title">

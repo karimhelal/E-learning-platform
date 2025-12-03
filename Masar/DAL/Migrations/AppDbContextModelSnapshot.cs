@@ -274,6 +274,12 @@ namespace DAL.Migrations
                         .HasColumnType("date")
                         .HasColumnName("created_date");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
                     b.HasKey("Id");
 
                     b.ToTable("LearningEntities", (string)null);
@@ -365,11 +371,6 @@ namespace DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LessonContentId"));
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("content");
-
                     b.Property<int>("LessonId")
                         .HasColumnType("int")
                         .HasColumnName("lesson_id");
@@ -443,6 +444,17 @@ namespace DAL.Migrations
                     b.Property<int>("LessonId")
                         .HasColumnType("int")
                         .HasColumnName("lesson_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("resource_title");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("resource_url");
 
                     b.Property<string>("resource_type")
                         .IsRequired()
@@ -919,15 +931,14 @@ namespace DAL.Migrations
                     b.ToTable("Tracks", (string)null);
                 });
 
-            modelBuilder.Entity("Core.Entities.PdfContent", b =>
+            modelBuilder.Entity("Core.Entities.ArticleContent", b =>
                 {
                     b.HasBaseType("Core.Entities.LessonContent");
 
-                    b.Property<string>("PdfUrl")
+                    b.Property<string>("Content")
                         .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("pdf_url");
+                        .HasColumnName("article_content");
 
                     b.HasDiscriminator().HasValue("Article");
                 });
@@ -942,9 +953,8 @@ namespace DAL.Migrations
 
                     b.Property<string>("VideoUrl")
                         .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("pdf_url");
+                        .HasColumnName("video_url");
 
                     b.HasDiscriminator().HasValue("Video");
                 });
@@ -953,11 +963,6 @@ namespace DAL.Migrations
                 {
                     b.HasBaseType("Core.Entities.LessonResource");
 
-                    b.Property<string>("PdfUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("pdf_url");
-
                     b.HasDiscriminator().HasValue("PDF");
                 });
 
@@ -965,24 +970,14 @@ namespace DAL.Migrations
                 {
                     b.HasBaseType("Core.Entities.LessonResource");
 
-                    b.Property<string>("Link")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("link_url");
-
-                    b.HasDiscriminator().HasValue("Url");
+                    b.HasDiscriminator().HasValue("URL");
                 });
 
             modelBuilder.Entity("Core.Entities.ZipResource", b =>
                 {
                     b.HasBaseType("Core.Entities.LessonResource");
 
-                    b.Property<string>("ZipUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("zip_url");
-
-                    b.HasDiscriminator().HasValue("Zip");
+                    b.HasDiscriminator().HasValue("ZIP");
                 });
 
             modelBuilder.Entity("Core.Entities.Assignment", b =>

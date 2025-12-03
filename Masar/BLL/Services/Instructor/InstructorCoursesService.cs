@@ -36,26 +36,20 @@ public class InstructorCoursesService : IInstructorCoursesService
         bool isASC = request.SortOrder.ToUpper() == "ASC";
         string sortBy = request.SortBy?.ToLower() ?? "createddate";
 
-        IQueryable<Course> sortedQuery = sortBy switch
+        query = sortBy switch
         {
             "createddate" => isASC ? query.OrderBy(c => c.CreatedDate)
                                    : query.OrderByDescending(c => c.CreatedDate),
+
             "students" => isASC ? query.OrderBy(c => c.Enrollments!.Count())
                                 : query.OrderByDescending(c => c.Enrollments!.Count()),
+
             _ => query.OrderByDescending(c => c.CreatedDate)
         };
 
-        // Now apply includes to the sorted query
-        var finalQuery = sortedQuery
-            .Include(c => c.Categories)
-            .Include(c => c.Modules)
-                .ThenInclude(m => m.Lessons)
-                    .ThenInclude(l => l.LessonContent)
-            .Include(c => c.Enrollments);
+        var totalCount = await query.CountAsync();
 
-        var totalCount = await finalQuery.CountAsync();
-
-        var items = await finalQuery
+        var items = await query
             .Skip((request.CurrentPage - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(c => new InstructorCourseDto
@@ -66,23 +60,20 @@ public class InstructorCoursesService : IInstructorCoursesService
                 ThumbnailImageUrl = c.ThumbnailImageUrl,
                 CreatedDate = c.CreatedDate,
                 LastUpdatedDate = c.CreatedDate,
-                Status = "Published",
+                Status = c.Status.ToString(),
                 Level = c.Level,
-                MainCategory = c.Categories != null && c.Categories.Any() 
-                    ? c.Categories.FirstOrDefault() 
-                    : null,
-                NumberOfModules = c.Modules != null ? c.Modules.Count() : 0,
-                NumberOfStudents = c.Enrollments != null ? c.Enrollments.Count() : 0,
-                NumberOfMinutes = c.Modules != null 
-                    ? (int)(c.Modules
-                        .Where(m => m.Lessons != null)  // CHANGED: Use Where instead of SelectMany with ??
-                        .SelectMany(m => m.Lessons!)
-                        .Where(l => l.LessonContent != null)
-                        .Select(l => l.LessonContent)
-                        .OfType<VideoContent>()
-                        .Sum(l => l.DurationInSeconds) / 60.0)
-                    : 0,
-                AverageRating = 4.8f
+                MainCategory = c.Categories.FirstOrDefault(),
+
+                // calculated fields
+                NumberOfModules = c.Modules.Count(),
+                NumberOfStudents = c.Enrollments!.Count(),
+                NumberOfMinutes = (int)(
+                                c.Modules
+                                    .SelectMany(m => m.Lessons)
+                                    .Select(l => l.LessonContent)
+                                    .OfType<VideoContent>()
+                                    .Sum(l => l.DurationInSeconds) / 60.0),
+                AverageRating = 4.7f
             })
             .ToListAsync();
 
@@ -94,9 +85,9 @@ public class InstructorCoursesService : IInstructorCoursesService
             Settings = new PaginationSettingsDto
             {
                 TotalPages = totalPages,
+                TotalCount = totalCount,
                 CurrentPage = request.CurrentPage,
-                PageSize = request.PageSize,
-                TotalCount = totalCount
+                PageSize = request.PageSize
             }
         };
     }
@@ -171,26 +162,14 @@ public class InstructorCoursesService : IInstructorCoursesService
                                 ? vc.DurationInSeconds 
                                 : 0,
                             VideoUrl = l.LessonContent is VideoContent video ? video.VideoUrl : null,
-                            PdfUrl = l.LessonContent is PdfContent pdf ? pdf.PdfUrl : null,
+                            ArticleContent = l.LessonContent is ArticleContent pdf ? pdf.Content : null,
                             Resources = l.LessonResources?
                                 .Select(r => new LessonResourceEditDto
                                 {
                                     LessonResourceId = r.LessonResourceId,
                                     ResourceType = r.ResourceKind,
-                                    Url = r switch
-                                    {
-                                        PdfResource pdf => pdf.PdfUrl,
-                                        UrlResource url => url.Link,
-                                        ZipResource zip => zip.ZipUrl,
-                                        _ => string.Empty
-                                    },
-                                    Title = r switch
-                                    {
-                                        PdfResource => "PDF Resource",
-                                        UrlResource => "URL Resource",
-                                        ZipResource => "ZIP Resource",
-                                        _ => "Unknown"
-                                    }
+                                    Url = r.Url,
+                                    Title = r.Title,
                                 })
                                 .ToList() ?? new List<LessonResourceEditDto>()
                         })
@@ -440,9 +419,9 @@ public class InstructorCoursesService : IInstructorCoursesService
                         videoContent.VideoUrl = lessonDto.VideoUrl ?? videoContent.VideoUrl;
                         videoContent.DurationInSeconds = lessonDto.DurationInSeconds ?? videoContent.DurationInSeconds;
                     }
-                    else if (lessonDto.ContentType == LessonContentType.Article && lesson.LessonContent is PdfContent pdfContent)
+                    else if (lessonDto.ContentType == LessonContentType.Article && lesson.LessonContent is ArticleContent pdfContent)
                     {
-                        pdfContent.PdfUrl = lessonDto.PdfUrl ?? pdfContent.PdfUrl;
+                        pdfContent.Content = lessonDto.PdfUrl ?? pdfContent.Content;
                     }
                 }
 
@@ -471,13 +450,13 @@ public class InstructorCoursesService : IInstructorCoursesService
                             switch (existingResource)
                             {
                                 case PdfResource pdfRes:
-                                    pdfRes.PdfUrl = resourceDto.Url;
+                                    pdfRes.Url = resourceDto.Url;
                                     break;
                                 case UrlResource urlRes:
-                                    urlRes.Link = resourceDto.Url;
+                                    urlRes.Url = resourceDto.Url;
                                     break;
                                 case ZipResource zipRes:
-                                    zipRes.ZipUrl = resourceDto.Url;
+                                    zipRes.Url = resourceDto.Url;
                                     break;
                             }
                         }
@@ -492,17 +471,17 @@ public class InstructorCoursesService : IInstructorCoursesService
                         LessonResourceType.PDF => new PdfResource
                         {
                             LessonId = lesson.LessonId,
-                            PdfUrl = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         LessonResourceType.URL => new UrlResource
                         {
                             LessonId = lesson.LessonId,
-                            Link = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         LessonResourceType.ZIP => new ZipResource
                         {
                             LessonId = lesson.LessonId,
-                            ZipUrl = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         _ => throw new ArgumentException("Invalid resource type")
                     };
@@ -531,18 +510,16 @@ public class InstructorCoursesService : IInstructorCoursesService
                     content = new VideoContent
                     {
                         LessonId = newLesson.LessonId,
-                        Content = lessonDto.Title,
                         VideoUrl = lessonDto.VideoUrl ?? string.Empty,
                         DurationInSeconds = lessonDto.DurationInSeconds ?? 0
                     };
                 }
                 else
                 {
-                    content = new PdfContent
+                    content = new ArticleContent
                     {
                         LessonId = newLesson.LessonId,
-                        Content = lessonDto.Title,
-                        PdfUrl = lessonDto.PdfUrl ?? string.Empty
+                        Content = lessonDto.Title
                     };
                 }
 
@@ -556,17 +533,17 @@ public class InstructorCoursesService : IInstructorCoursesService
                         LessonResourceType.PDF => new PdfResource
                         {
                             LessonId = newLesson.LessonId,
-                            PdfUrl = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         LessonResourceType.URL => new UrlResource
                         {
                             LessonId = newLesson.LessonId,
-                            Link = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         LessonResourceType.ZIP => new ZipResource
                         {
                             LessonId = newLesson.LessonId,
-                            ZipUrl = resourceDto.Url
+                            Url = resourceDto.Url
                         },
                         _ => throw new ArgumentException("Invalid resource type")
                     };

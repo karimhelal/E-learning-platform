@@ -1,5 +1,4 @@
 using Core.Entities;
-using Core.Entities.Enums;
 using Core.RepositoryInterfaces;
 using Web.Interfaces;
 
