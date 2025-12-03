@@ -77,4 +77,9 @@ public class CourseRepository : ICourseRepository
             .AsNoTracking();
     }
 
+    public async Task<bool> HasCourseAsync(int courseId)
+    {
+        return await _context.Courses
+            .AnyAsync(c => c.Id == courseId);
+    }
 }

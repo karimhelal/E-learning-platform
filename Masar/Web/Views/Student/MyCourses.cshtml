@@ -111,11 +111,11 @@
                     <div class="course-card-footer">
                         @if (course.Status == "InProgress")
                         {
-                            <a href="/student/course/@course.CourseId" class="btn btn-primary">
+                            <a href="~/Classroom/Course/@course.CourseId" class="btn btn-primary">
                                 <span>Continue Learning</span>
                                 <i class="fas fa-arrow-right"></i>
                             </a>
-                            <a href="/student/course/@course.CourseId/details" class="btn btn-outline">
+                            <a href="~/Classroom/Course/@course.CourseId/details" class="btn btn-outline">
                                 <span>View Details</span>
                             </a>
                         }

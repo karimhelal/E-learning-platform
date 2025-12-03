@@ -1,5 +1,4 @@
 using Core.Entities;
-using Core.Entities.Enums;
 using Core.RepositoryInterfaces;
 using Web.Interfaces;
 
@@ -27,7 +26,7 @@ public class StudentCoursesService : IStudentCoursesService
         {
             _logger.LogInformation("Fetching courses for student ID: {StudentId}", userId);
             
-            var studentProfile = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
+            var studentProfile = await _userRepo.GetStudentProfileAsync(userId, includeUserBase: true);
 
             if (studentProfile == null || studentProfile.User == null)
             {

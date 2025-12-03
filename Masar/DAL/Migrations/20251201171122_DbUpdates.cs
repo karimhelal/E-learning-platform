@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class DbInit : Migration
+    public partial class DbUpdates : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -531,10 +531,10 @@ namespace DAL.Migrations
                     lesson_content_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     lesson_id = table.Column<int>(type: "int", nullable: false),
-                    content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     content_type = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
-                    pdf_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    duration_seconds = table.Column<int>(type: "int", nullable: true)
+                    article_content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    duration_seconds = table.Column<int>(type: "int", nullable: true),
+                    video_url = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -583,10 +583,9 @@ namespace DAL.Migrations
                     lesson_resource_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     lesson_id = table.Column<int>(type: "int", nullable: false),
-                    resource_type = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
-                    pdf_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    link_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    zip_url = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    resource_url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    resource_title = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    resource_type = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false)
                 },
                 constraints: table =>
                 {

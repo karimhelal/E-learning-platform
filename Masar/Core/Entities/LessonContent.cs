@@ -25,12 +25,6 @@ public abstract class LessonContent
 
 
 
-    [Column("content")]
-    [DataType(DataType.MultilineText)]
-    [Display(Name = "Content")]
-    public string Content { get; set; }
-
-
     public abstract LessonContentType ContentType { get; }
 
 

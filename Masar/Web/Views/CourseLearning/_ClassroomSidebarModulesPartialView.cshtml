@@ -1,0 +1,42 @@
+﻿@model IEnumerable<ModuleSidebarViewModel>
+
+@foreach (var module in Model)
+{
+    if (module.IsActive)
+    {
+        ViewBag.ModuleTitle = module.ModuleTitle;
+    }
+
+    <div class="module-item">
+        <div class="module-header @module.ActiveCssClass" data-module-order="@module.ModuleOrder" data-action="toggle-module">
+            <div class="module-indicator @module.CompletedCssClass">
+                <span class="module-num">@module.ModuleOrder</span>
+            </div>
+            <div class="module-content">
+                <div class="module-title">@module.ModuleTitle</div>
+                <div class="module-meta">
+                    <span>@module.LessonsCount lessons</span>
+                    <span>@module.FormattedModuleDuration</span>
+                </div>
+            </div>
+            <i class="fas fa-chevron-down module-chevron"></i>
+        </div>
+        <div class="lessons-list @module.ActiveCssClass">
+            @foreach (var lesson in module.Lessons)
+            {
+                <div class="lesson-item @lesson.ActiveCssClass" data-action="navigate-lesson" data-id="@lesson.LessonId">
+                    <div class="lesson-check @lesson.CompletedCssClass" data-action="toggle-complete" data-id="@lesson.LessonId" data-complete-state="@lesson.IsCompleted">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="lesson-icon @lesson.IconColorCssClass">
+                        <i class="@lesson.IconTypeCssClass"></i>
+                    </div>
+                    <div class="lesson-details">
+                        <div class="lesson-name">@lesson.LessonTitle</div>
+                        <div class="lesson-time">@lesson.FormattedLessonDuration</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

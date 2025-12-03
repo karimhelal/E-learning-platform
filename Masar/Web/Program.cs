@@ -1,14 +1,19 @@
 using BLL.Helpers;
 using BLL.Interfaces;
 using BLL.Interfaces.Account;
+using BLL.Interfaces.CourseLearning;
+using BLL.Interfaces.Enrollment;
 using BLL.Interfaces.Instructor;
 using BLL.Services;
 using BLL.Services.Account;
+using BLL.Services.CourseLearning;
+using BLL.Services.Enrollment;
 using BLL.Services.Instructor;
 using Core.Entities;
 using Core.RepositoryInterfaces;
 using DAL.Data;
 using DAL.Data.RepositoryServices;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Interfaces;
@@ -19,10 +24,15 @@ var builder = WebApplication.CreateBuilder(args);
 // ========================================
 // REPOSITORIES (Team's layer)
 // ========================================
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+builder.Services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
+builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
 
 
 // Current User Service
@@ -34,9 +44,12 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 // BLL SERVICES (Team's layer)
 // ========================================
 builder.Services.AddScoped<ICourseService, CourseService>();
-builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<ICourseLearningService, CourseLearningService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
+builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
+
 
 // ========================================
 // WEB SERVICES (Your simplified layer)
