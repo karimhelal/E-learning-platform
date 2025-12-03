@@ -18,7 +18,6 @@ using Core.Entities;
 using Core.RepositoryInterfaces;
 using DAL.Data;
 using DAL.Data.RepositoryServices;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Hubs;
@@ -39,6 +38,7 @@ builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
 builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
+
 
 // Add generic repositories for LessonProgress and CourseEnrollment
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

@@ -1,7 +1,6 @@
 ﻿using Core.RepositoryInterfaces;
-using DAL.Data;
 
-namespace Infrastructure.Repositories;
+namespace DAL.Data.RepositoryServices;
 
 public class UnitOfWork : IUnitOfWork
 {
