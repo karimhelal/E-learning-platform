@@ -1,4 +1,6 @@
-﻿@{
+﻿@model HomeIndexViewModel
+
+@{
     ViewBag.Title = "Masar | Every Code is a Step Forward";
 }
 
@@ -23,7 +25,7 @@
                 Build real projects, earn certificates, and accelerate
                 your tech career with industry-focused courses.
             </p>
-            <a href="~/browse-courses" class="cta-button">
+            <a href="/Account/Login" class="cta-button">
                 <span>Start Your Journey Now</span>
                 <i class="fas fa-rocket"></i>
             </a>
@@ -33,7 +35,7 @@
                     <span class="stat-label">Active Students</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number">100+</span>
+                    <span class="stat-number">@Model.FeaturedTracks.Sum(t => t.CoursesCount)+</span>
                     <span class="stat-label">Courses</span>
                 </div>
                 <div class="stat-item">
@@ -136,7 +138,7 @@
                     </div>
                     <div class="code-line">
                         <div class="line-number">15</div>
-                        <div class="line-content">
+                        <div class="line-content>
                             <span class="function">startJourney</span>();<span class="typing-cursor"></span>
                         </div>
                     </div>

@@ -13,8 +13,11 @@
             <i class="fas fa-chevron-right"></i>
             <a href="~/browse-courses">Courses</a>
             <i class="fas fa-chevron-right"></i>
-            <span>@Model.Course.MainCategory.Name</span>
-            <i class="fas fa-chevron-right"></i>
+            @if (Model.Course.MainCategory != null)
+            {
+                <span>@Model.Course.MainCategory.Name</span>
+                <i class="fas fa-chevron-right"></i>
+            }
             <span>@Model.Course.Title</span>
         </div>
 
@@ -22,7 +25,7 @@
             <div class="course-info">
                 <div class="course-badge">
                     <i class="fas fa-code"></i>
-                    <span>@Model.Course.MainCategory.Name</span>
+                    <span>@(Model.Course.MainCategory?.Name ?? "Uncategorized")</span>
                 </div>
 
                 <h1 class="course-title">@Model.Course.Title</h1>
