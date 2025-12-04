@@ -1,0 +1,37 @@
+﻿@model CourseProgressViewModel
+
+<div class="progress-circle" title="Course Progress">
+    <svg viewBox="0 0 36 36">
+        <defs>
+            <linearGradient id="progressGrad"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%">
+                <stop offset="0%"
+                      style="stop-color: #7c3aed" />
+                <stop offset="100%"
+                      style="stop-color: #06b6d4" />
+            </linearGradient>
+        </defs>
+        <circle class="bg"
+                cx="18"
+                cy="18"
+                r="15.9"></circle>
+        <circle class="progress"
+                cx="18"
+                cy="18"
+                r="15.9"
+                stroke-dasharray="@Model.ProgressPercentage, 100"
+                id="progressRing"></circle>
+    </svg>
+    <span class="progress-value" id="progressValue">@Model.ProgressPercentage%</span>
+</div>
+<div class="progress-info">
+    <div class="progress-title">Course Progress</div>
+    <div class="progress-subtitle" id="progressSubtitle">@Model.CompletedLessonsCount of @Model.TotalLessonsCount lessons</div>
+    <div class="time-remaining" id="timeRemaining">
+        <i class="fas fa-clock"></i>
+        <span>~4.5 hrs remaining</span>
+    </div>
+</div>

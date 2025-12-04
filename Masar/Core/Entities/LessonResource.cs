@@ -24,6 +24,19 @@ public abstract class LessonResource
     public int LessonId { get; set; }
 
 
+    [Url(ErrorMessage = "{0} should be a valid URL")]
+    [Display(Name = "Resource URL")]
+    [Column("resource_url")]
+    [Required]
+    public string Url { get; set; }
+
+    
+    [StringLength(50)]
+    [Display(Name = "Resource Title")]
+    [Column("resource_title")]
+    public string Title { get; set; }
+
+
     [NotMapped]
     public LessonResourceType ResourceKind =>
         this switch
