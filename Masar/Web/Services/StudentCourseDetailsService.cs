@@ -14,17 +14,20 @@ public class StudentCourseDetailsService : IStudentCourseDetailsService
     private readonly IGenericRepository<CourseEnrollment> _enrollmentRepo;
     private readonly IGenericRepository<LessonProgress> _progressRepo;
     private readonly AppDbContext _context;
+    private readonly ICertificateGenerationService _certificateService;
 
     public StudentCourseDetailsService(
         ICourseRepository courseRepo,
         IGenericRepository<CourseEnrollment> enrollmentRepo,
         IGenericRepository<LessonProgress> progressRepo,
-        AppDbContext context)
+        AppDbContext context,
+        ICertificateGenerationService certificateService)
     {
         _courseRepo = courseRepo;
         _enrollmentRepo = enrollmentRepo;
         _progressRepo = progressRepo;
         _context = context;
+        _certificateService = certificateService;
     }
 
     public async Task<StudentCourseDetailsDto?> GetCourseDetailsAsync(int studentId, int courseId)
@@ -260,14 +263,42 @@ public class StudentCourseDetailsService : IStudentCourseDetailsService
             if (progressPercentage >= 100)
             {
                 enrollment.Status = EnrollmentStatus.Completed;
+                
+                // AUTOMATIC CERTIFICATE GENERATION
+                await _certificateService.GenerateCourseCertificateAsync(studentId, courseId);
+                
+                // Also check if this completes any track
+                await CheckAndGenerateTrackCertificatesAsync(studentId, courseId);
             }
             else if (progressPercentage > 0)
             {
-                enrollment.Status = EnrollmentStatus.Active; // FIXED: Changed from InProgress to Active
+                enrollment.Status = EnrollmentStatus.Active;
             }
 
             _context.Update(enrollment);
             await _context.SaveChangesAsync();
+        }
+    }
+
+    private async Task CheckAndGenerateTrackCertificatesAsync(int studentId, int courseId)
+    {
+        // Find all tracks that include this course
+        var trackIds = await _context.Set<Track_Course>()
+            .Where(tc => tc.CourseId == courseId)
+            .Select(tc => tc.TrackId)
+            .ToListAsync();
+
+        foreach (var trackId in trackIds)
+        {
+            // Check if student is enrolled in this track
+            var trackEnrollment = await _context.TrackEnrollments
+                .FirstOrDefaultAsync(te => te.StudentId == studentId && te.TrackId == trackId);
+
+            if (trackEnrollment != null)
+            {
+                // Try to generate track certificate (service will check if all courses are complete)
+                await _certificateService.GenerateTrackCertificateAsync(studentId, trackId);
+            }
         }
     }
 

@@ -139,6 +139,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICertificateGenerationService, CertificateGenerationService>();
 
 var app = builder.Build();
 app.UseAuthentication();
