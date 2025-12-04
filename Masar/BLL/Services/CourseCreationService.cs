@@ -54,7 +54,6 @@ namespace BLL.Services
                     var category = await _categoryRepo.GetByIdAsync(dto.CategoryId);
                     if (category != null)
                     {
-                        // Load the course with its navigation properties
                         var courseWithNav = await _context.Courses
                             .Include(c => c.Categories)
                             .FirstOrDefaultAsync(c => c.Id == course.Id);
@@ -77,7 +76,6 @@ namespace BLL.Services
                     var language = await _languageRepo.GetByIdAsync(dto.LanguageId);
                     if (language != null)
                     {
-                        // Load the course with its navigation properties
                         var courseWithNav = await _context.Courses
                             .Include(c => c.Languages)
                             .FirstOrDefaultAsync(c => c.Id == course.Id);
@@ -153,18 +151,17 @@ namespace BLL.Services
                                     content = new VideoContent
                                     {
                                         LessonId = lesson.LessonId,
-                                        Content = lessonDto.VideoUrl ?? "",
                                         VideoUrl = lessonDto.VideoUrl ?? "",
                                         DurationInSeconds = lessonDto.DurationInSeconds ?? 0
                                     };
                                 }
                                 else
                                 {
-                                    content = new PdfContent
+                                    // Article content - use PdfUrl as the article content/HTML
+                                    content = new ArticleContent
                                     {
                                         LessonId = lesson.LessonId,
-                                        Content = lessonDto.PdfUrl ?? "",
-                                        PdfUrl = lessonDto.PdfUrl ?? ""
+                                        Content = lessonDto.PdfUrl ?? "Article content goes here..."
                                     };
                                 }
 
@@ -182,22 +179,26 @@ namespace BLL.Services
                                             LessonResourceType.PDF => new PdfResource
                                             {
                                                 LessonId = lesson.LessonId,
-                                                PdfUrl = resourceDto.Url
+                                                Url = resourceDto.Url,
+                                                Title = resourceDto.Title ?? "PDF Resource"
                                             },
                                             LessonResourceType.ZIP => new ZipResource
                                             {
                                                 LessonId = lesson.LessonId,
-                                                ZipUrl = resourceDto.Url
+                                                Url = resourceDto.Url,
+                                                Title = resourceDto.Title ?? "ZIP Resource"
                                             },
                                             LessonResourceType.URL => new UrlResource
                                             {
                                                 LessonId = lesson.LessonId,
-                                                Link = resourceDto.Url
+                                                Url = resourceDto.Url,
+                                                Title = resourceDto.Title ?? "URL Resource"
                                             },
                                             _ => new UrlResource
                                             {
                                                 LessonId = lesson.LessonId,
-                                                Link = resourceDto.Url
+                                                Url = resourceDto.Url,
+                                                Title = resourceDto.Title ?? "Resource"
                                             }
                                         };
 

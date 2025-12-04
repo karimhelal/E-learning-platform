@@ -93,7 +93,7 @@ public class InstructorCoursesService : IInstructorCoursesService
     }
 
     // Update the GetCourseForEditAsync method to include the new fields
-    public async Task<BLL.DTOs.Instructor.InstructorCourseEditDto?> GetCourseForEditAsync(int instructorId, int courseId)
+    public async Task<InstructorCourseEditDto?> GetCourseForEditAsync(int instructorId, int courseId)
     {
         var course = await _courseRepo.GetCourseByIdQueryable(courseId)
             .Where(c => c.InstructorId == instructorId)
@@ -272,7 +272,7 @@ public class InstructorCoursesService : IInstructorCoursesService
         }
     }
 
-    public async Task<bool> UpdateModuleAsync(int instructorId, int courseId, UpdateModuleDto moduleDto)
+    public async Task<UpdateResultDto> UpdateModuleAsync(int instructorId, int courseId, UpdateModuleDto moduleDto)
     {
         try
         {
@@ -283,8 +283,10 @@ public class InstructorCoursesService : IInstructorCoursesService
             if (!courseExists)
             {
                 Console.WriteLine($"❌ Course {courseId} not found for instructor {instructorId}");
-                return false;
+                return new UpdateResultDto { Success = false, Message = "Course not found" };
             }
+
+            int moduleId;
 
             if (moduleDto.ModuleId.HasValue)
             {
@@ -295,26 +297,13 @@ public class InstructorCoursesService : IInstructorCoursesService
                 if (module == null)
                 {
                     Console.WriteLine($"❌ Module {moduleDto.ModuleId} not found");
-                    return false;
-                }
-
-                // Check if the new order conflicts with another module (excluding current)
-                var orderConflict = await _context.Modules
-                    .AnyAsync(m => m.CourseId == courseId && 
-                                  m.Order == moduleDto.Order && 
-                                  m.ModuleId != moduleDto.ModuleId.Value);
-
-                if (orderConflict)
-                {
-                    // Shift other modules to make room
-                    await _context.Modules
-                        .Where(m => m.CourseId == courseId && m.Order >= moduleDto.Order && m.ModuleId != moduleDto.ModuleId.Value)
-                        .ExecuteUpdateAsync(s => s.SetProperty(m => m.Order, m => m.Order + 1));
+                    return new UpdateResultDto { Success = false, Message = "Module not found" };
                 }
 
                 module.Title = moduleDto.Title;
                 module.Description = moduleDto.Description;
                 module.Order = moduleDto.Order;
+                moduleId = module.ModuleId;
             }
             else
             {
@@ -328,21 +317,23 @@ public class InstructorCoursesService : IInstructorCoursesService
                     CourseId = courseId,
                     Title = moduleDto.Title,
                     Description = moduleDto.Description,
-                    Order = maxOrder + 1  // Use max + 1 to avoid conflicts
+                    Order = maxOrder + 1
                 };
 
                 await _context.Modules.AddAsync(newModule);
+                await _context.SaveChangesAsync();
+                moduleId = newModule.ModuleId;
             }
 
             await _context.SaveChangesAsync();
-            Console.WriteLine($"✅ Module saved successfully");
-            return true;
+            Console.WriteLine($"✅ Module saved successfully with ID: {moduleId}");
+            return new UpdateResultDto { Success = true, ModuleId = moduleId };
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Error updating module: {ex.Message}");
             Console.WriteLine($"❌ Inner: {ex.InnerException?.Message}");
-            return false;
+            return new UpdateResultDto { Success = false, Message = ex.Message };
         }
     }
 
@@ -371,7 +362,7 @@ public class InstructorCoursesService : IInstructorCoursesService
         }
     }
 
-    public async Task<bool> UpdateLessonAsync(int instructorId, int courseId, UpdateLessonDto lessonDto)
+    public async Task<UpdateResultDto> UpdateLessonAsync(int instructorId, int courseId, UpdateLessonDto lessonDto)
     {
         try
         {
@@ -379,27 +370,30 @@ public class InstructorCoursesService : IInstructorCoursesService
             var moduleExists = await _context.Modules
                 .Include(m => m.Course)
                 .AnyAsync(m => m.ModuleId == lessonDto.ModuleId && 
-                              m.CourseId == courseId && 
-                              m.Course!.InstructorId == instructorId);
+                      m.CourseId == courseId && 
+                      m.Course!.InstructorId == instructorId);
 
             if (!moduleExists)
-                return false;
+                return new UpdateResultDto { Success = false, Message = "Module not found or access denied" };
+
+            int lessonId;
 
             if (lessonDto.LessonId.HasValue)
             {
                 // Update existing lesson
                 var lesson = await _context.Lessons
                     .Include(l => l.LessonContent)
-                    .Include(l => l.LessonResources)  // ADD THIS
+                    .Include(l => l.LessonResources)
                     .FirstOrDefaultAsync(l => l.LessonId == lessonDto.LessonId.Value && 
-                                             l.ModuleId == lessonDto.ModuleId);
+                                     l.ModuleId == lessonDto.ModuleId);
 
                 if (lesson == null)
-                    return false;
+                    return new UpdateResultDto { Success = false, Message = "Lesson not found" };
 
                 lesson.Title = lessonDto.Title;
                 lesson.ContentType = lessonDto.ContentType;
                 lesson.Order = lessonDto.Order;
+                lessonId = lesson.LessonId;
 
                 // Update lesson content
                 if (lesson.LessonContent != null)
@@ -416,11 +410,12 @@ public class InstructorCoursesService : IInstructorCoursesService
                 }
 
                 // UPDATE RESOURCES
+                var resources = lessonDto.Resources ?? new List<UpdateLessonResourceDto>();
+                
                 if (lesson.LessonResources != null)
                 {
-                    // Remove resources that are not in the update list
                     var resourcesToRemove = lesson.LessonResources
-                        .Where(r => !lessonDto.Resources.Any(ur => ur.LessonResourceId == r.LessonResourceId))
+                        .Where(r => !resources.Any(ur => ur.LessonResourceId == r.LessonResourceId))
                         .ToList();
                     
                     foreach (var resource in resourcesToRemove)
@@ -428,50 +423,41 @@ public class InstructorCoursesService : IInstructorCoursesService
                         _context.LessonResources.Remove(resource);
                     }
 
-                    // Update existing resources
-                    foreach (var resourceDto in lessonDto.Resources.Where(r => r.LessonResourceId.HasValue))
+                    foreach (var resourceDto in resources.Where(r => r.LessonResourceId.HasValue))
                     {
                         var existingResource = lesson.LessonResources
                             .FirstOrDefault(r => r.LessonResourceId == resourceDto.LessonResourceId.Value);
                         
                         if (existingResource != null)
                         {
-                            // Update URL based on resource type
-                            switch (existingResource)
-                            {
-                                case PdfResource pdfRes:
-                                    pdfRes.Url = resourceDto.Url;
-                                    break;
-                                case UrlResource urlRes:
-                                    urlRes.Url = resourceDto.Url;
-                                    break;
-                                case ZipResource zipRes:
-                                    zipRes.Url = resourceDto.Url;
-                                    break;
-                            }
+                            existingResource.Url = resourceDto.Url;
+                            existingResource.Title = resourceDto.Title ?? existingResource.Title;
                         }
                     }
                 }
 
                 // Add new resources
-                foreach (var resourceDto in lessonDto.Resources.Where(r => !r.LessonResourceId.HasValue))
+                foreach (var resourceDto in resources.Where(r => !r.LessonResourceId.HasValue))
                 {
                     LessonResource newResource = resourceDto.ResourceType switch
                     {
                         LessonResourceType.PDF => new PdfResource
                         {
                             LessonId = lesson.LessonId,
-                            Url = resourceDto.Url
+                            Url = resourceDto.Url,
+                            Title = resourceDto.Title ?? "PDF Resource"
                         },
                         LessonResourceType.URL => new UrlResource
                         {
                             LessonId = lesson.LessonId,
-                            Url = resourceDto.Url
+                            Url = resourceDto.Url,
+                            Title = resourceDto.Title ?? "URL Resource"
                         },
                         LessonResourceType.ZIP => new ZipResource
                         {
                             LessonId = lesson.LessonId,
-                            Url = resourceDto.Url
+                            Url = resourceDto.Url,
+                            Title = resourceDto.Title ?? "ZIP Resource"
                         },
                         _ => throw new ArgumentException("Invalid resource type")
                     };
@@ -482,16 +468,21 @@ public class InstructorCoursesService : IInstructorCoursesService
             else
             {
                 // Create new lesson
+                var maxOrder = await _context.Lessons
+                    .Where(l => l.ModuleId == lessonDto.ModuleId)
+                    .MaxAsync(l => (int?)l.Order) ?? 0;
+
                 var newLesson = new Lesson
                 {
                     ModuleId = lessonDto.ModuleId,
                     Title = lessonDto.Title,
                     ContentType = lessonDto.ContentType,
-                    Order = lessonDto.Order
+                    Order = maxOrder + 1
                 };
 
                 await _context.Lessons.AddAsync(newLesson);
-                await _context.SaveChangesAsync(); // Save to get the LessonId
+                await _context.SaveChangesAsync();
+                lessonId = newLesson.LessonId;
 
                 // Create lesson content
                 LessonContent content;
@@ -509,31 +500,35 @@ public class InstructorCoursesService : IInstructorCoursesService
                     content = new ArticleContent
                     {
                         LessonId = newLesson.LessonId,
-                        Content = lessonDto.Title
+                        Content = lessonDto.PdfUrl ?? lessonDto.Title
                     };
                 }
 
                 await _context.LessonContents.AddAsync(content);
 
                 // Add resources for new lesson
-                foreach (var resourceDto in lessonDto.Resources)
+                var resources = lessonDto.Resources ?? new List<UpdateLessonResourceDto>();
+                foreach (var resourceDto in resources)
                 {
                     LessonResource newResource = resourceDto.ResourceType switch
                     {
                         LessonResourceType.PDF => new PdfResource
                         {
                             LessonId = newLesson.LessonId,
-                            Url = resourceDto.Url
+                            Url = resourceDto.Url,
+                            Title = resourceDto.Title ?? "PDF Resource"
                         },
                         LessonResourceType.URL => new UrlResource
                         {
                             LessonId = newLesson.LessonId,
-                            Url = resourceDto.Url
+                            Url = resourceDto.Url,
+                            Title = resourceDto.Title ?? "URL Resource"
                         },
                         LessonResourceType.ZIP => new ZipResource
                         {
                             LessonId = newLesson.LessonId,
-                            Url = resourceDto.Url
+                            Url = resourceDto.Url,
+                            Title = resourceDto.Title ?? "ZIP Resource"
                         },
                         _ => throw new ArgumentException("Invalid resource type")
                     };
@@ -543,13 +538,13 @@ public class InstructorCoursesService : IInstructorCoursesService
             }
 
             await _context.SaveChangesAsync();
-            return true;
+            return new UpdateResultDto { Success = true, LessonId = lessonId };
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error updating lesson: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            return false;
+            Console.WriteLine($"Inner exception: {ex.InnerException?.Message}");
+            return new UpdateResultDto { Success = false, Message = ex.Message };
         }
     }
 

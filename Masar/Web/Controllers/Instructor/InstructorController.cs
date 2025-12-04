@@ -7,13 +7,14 @@ using Web.ViewModels.Instructor.Dashboard;
 using Web.ViewModels.Misc;
 using Core.Entities.Enums;
 using BLL.DTOs.Instructor;
-using BLL.DTOs.Course;
 using Microsoft.AspNetCore.Identity;
 using Core.Entities;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Core.RepositoryInterfaces;
 using Web.Interfaces;
+
+using InstructorCourseEditDto = BLL.DTOs.Instructor.InstructorCourseEditDto;
 
 namespace Web.Controllers.Instructor;
 
@@ -27,7 +28,7 @@ public class InstructorController : Controller
     private readonly UserManager<User> _userManager;
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
-    private readonly ICategoryRepository _categoryRepository;  // ADD THIS
+    private readonly ICategoryRepository _categoryRepository;
 
     public InstructorController(
         IInstructorDashboardService dashboardService, 
@@ -37,7 +38,7 @@ public class InstructorController : Controller
         UserManager<User> userManager,
         IUserRepository userRepository,
         ICurrentUserService currentUserService,
-        ICategoryRepository categoryRepository)  // ADD THIS PARAMETER
+        ICategoryRepository categoryRepository)
     {
         _dashboardService = dashboardService;
         _coursesService = courseService;
@@ -46,7 +47,7 @@ public class InstructorController : Controller
         _userManager = userManager;
         _userRepository = userRepository;
         _currentUserService = currentUserService;
-        _categoryRepository = categoryRepository;  // ADD THIS
+        _categoryRepository = categoryRepository;
     }
 
     private async Task<int> GetInstructorIdAsync()
@@ -386,105 +387,6 @@ public class InstructorController : Controller
         }
         catch (Exception ex)
         {
-            Data = new EditCourseDataViewModel
-            {
-                CourseId = courseData.CourseId,
-                CourseTitle = courseData.Title,
-                Description = courseData.Description,
-                ThumbnailUrl = courseData.ThumbnailImageUrl,
-                
-                SelectedCategoryId = courseData.MainCategory?.CategoryId.ToString() ?? "5",
-                SelectedLevel = courseData.Level.ToString().ToLower(),
-                
-                AvailableCategories = new List<SelectOption>
-                {
-                    new SelectOption { Value = "5", Text = "Web Development" },
-                    new SelectOption { Value = "6", Text = "Mobile Development" },
-                    new SelectOption { Value = "2", Text = "Data Science" },
-                    new SelectOption { Value = "8", Text = "Programming Languages" },
-                    new SelectOption { Value = "3", Text = "Design" },
-                    new SelectOption { Value = "9", Text = "Frontend" },
-                    new SelectOption { Value = "10", Text = "Backend" },
-                    new SelectOption { Value = "12", Text = "Machine Learning" }
-                },
-                
-                AvailableLevels = new List<SelectOption>
-                {
-                    new SelectOption { Value = "beginner", Text = "Beginner" },
-                    new SelectOption { Value = "intermediate", Text = "Intermediate" },
-                    new SelectOption { Value = "advanced", Text = "Advanced" }
-                },
-                
-                LearningOutcomes = courseData.LearningOutcomes
-                    .Select(lo => lo.Title)
-                    .ToList(),
-                
-                Stats = new EditCourseStatsViewModel
-                {
-                    EnrolledStudents = courseData.EnrolledStudents,
-                    AverageRating = courseData.AverageRating,
-                    Completions = courseData.Completions,
-                    AverageProgress = courseData.AverageProgress
-                },
-                
-                Modules = courseData.Modules.Select(m => new EditModuleViewModel
-                {
-                    ModuleId = m.ModuleId,
-                    Title = m.Title,
-                    Description = m.Description,
-                    Order = m.Order,
-                    LessonsCount = m.LessonsCount,
-                    DurationFormatted = FormatDuration(m.TotalDurationSeconds),
-                    Lessons = m.Lessons.Select(l =>
-                    {
-                        var lessonTypeInfo = GetLessonTypeInfo(l.ContentType);
-                        return new EditLessonViewModel
-                        {
-                            LessonId = l.LessonId,
-                            Title = l.Title,
-                            Order = l.Order,
-                            ContentType = (int)l.ContentType,
-                            VideoUrl = l.VideoUrl,
-                            PdfUrl = l.ArticleContent,
-                            DurationInSeconds = l.DurationInSeconds,
-                            TypeLabel = lessonTypeInfo.label,
-                            TypeClass = lessonTypeInfo.cssClass,
-                            TypeIcon = lessonTypeInfo.icon,
-                            DurationFormatted = l.ContentType == LessonContentType.Video 
-                                ? FormatDuration(l.DurationInSeconds)
-                                : "N/A",
-                            Resources = l.Resources.Select(r => new EditLessonResourceViewModel
-                            {
-                                LessonResourceId = r.LessonResourceId,
-                                ResourceType = (int)r.ResourceType,
-                                ResourceTypeName = r.ResourceType.ToString(),
-                                Url = r.Url,
-                                Title = r.Title
-                            }).ToList()
-                        };
-                    }).ToList()
-                }).ToList(), // <-- THIS IS THE FIX: Added closing brace and comma here
-            
-                EnrolledStudents = courseData.Students.Select(s => new EnrolledStudentViewModel
-                {
-                    StudentId = s.StudentId,
-                    Name = $"{s.FirstName} {s.LastName}",
-                    Email = s.Email,
-                    Initials = $"{s.FirstName.FirstOrDefault()}{s.LastName.FirstOrDefault()}".ToUpper(),
-                    EnrolledDate = s.EnrollmentDate?.ToString("MMM dd, yyyy") ?? "N/A",
-                    ProgressPercentage = (int)s.ProgressPercentage,
-                    LastActivity = GetRelativeTime(s.LastAccessDate),
-                    Status = s.ProgressPercentage >= 100 ? "Completed" : "Active",
-                    StatusClass = s.ProgressPercentage >= 100 ? "completed" : "active"
-                }).ToList(),
-                
-                TotalStudentPages = (int)Math.Ceiling(courseData.EnrolledStudents / 25.0)
-            },
-            
-            PageTitle = "Edit Course"
-        };
-
-        return View(viewModel);
             Console.WriteLine($"❌ Error in EditCourse GET: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
             return StatusCode(500, "An error occurred while loading the course");
@@ -498,7 +400,6 @@ public class InstructorController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditCourse(int courseId, [FromForm] EditCourseFormModel formModel)
     {
-        // Add debugging
         Console.WriteLine($"📝 Form Data Received:");
         Console.WriteLine($"CourseTitle: {formModel.CourseTitle}");
         Console.WriteLine($"Description: {formModel.Description}");
@@ -513,7 +414,6 @@ public class InstructorController : Controller
             
         if (!ModelState.IsValid)
         {
-            // Reload the course data
             var courseData = await _coursesService.GetCourseForEditAsync(instructorId, courseId);
             if (courseData == null)
                 return NotFound();
@@ -523,7 +423,6 @@ public class InstructorController : Controller
             return View(viewModel);
         }
 
-        // Save the changes
         var result = await _coursesService.UpdateCourseAsync(instructorId, courseId, new UpdateCourseDto
         {
             Title = formModel.CourseTitle,
@@ -552,9 +451,9 @@ public class InstructorController : Controller
         }
     }
 
-    // Updated helper method to load categories from database
+    // Helper method to build the EditCourseViewModel
     private Task<EditCourseViewModel> BuildEditCourseViewModelAsync(
-        BLL.DTOs.Instructor.InstructorCourseEditDto courseData,
+        InstructorCourseEditDto courseData,
         IEnumerable<Category> categories,
         EditCourseFormModel? formModel = null)
     {
@@ -620,7 +519,6 @@ public class InstructorController : Controller
                 SelectedCategoryId = selectedCategoryId,
                 SelectedLevel = formModel?.Level ?? ((int)courseData.Level).ToString(),
                 
-                // Load categories from database instead of hardcoded values
                 AvailableCategories = categories
                     .Select(c => new SelectOption 
                     { 
@@ -649,56 +547,6 @@ public class InstructorController : Controller
                     AverageProgress = courseData.AverageProgress
                 },
                 
-                Modules = courseData.Modules.Select(m => new EditModuleViewModel
-                {
-                    ModuleId = m.ModuleId,
-                    Title = m.Title,
-                    Description = m.Description,
-                    Order = m.Order,
-                    LessonsCount = m.LessonsCount,
-                    DurationFormatted = FormatDuration(m.TotalDurationSeconds),
-                    Lessons = m.Lessons.Select(l =>
-                    {
-                        var lessonTypeInfo = GetLessonTypeInfo(l.ContentType);
-                        return new EditLessonViewModel
-                        {
-                            LessonId = l.LessonId,
-                            Title = l.Title,
-                            Order = l.Order,
-                            ContentType = (int)l.ContentType,
-                            VideoUrl = l.VideoUrl,
-                            PdfUrl = l.ArticleContent,
-                            DurationInSeconds = l.DurationInSeconds,
-                            TypeLabel = lessonTypeInfo.label,
-                            TypeClass = lessonTypeInfo.cssClass,
-                            TypeIcon = lessonTypeInfo.icon,
-                            DurationFormatted = l.ContentType == LessonContentType.Video 
-                                ? FormatDuration(l.DurationInSeconds)
-                                : "N/A",
-                            Resources = l.Resources.Select(r => new EditLessonResourceViewModel
-                            {
-                                LessonResourceId = r.LessonResourceId,
-                                ResourceType = (int)r.ResourceType,
-                                ResourceTypeName = r.ResourceType.ToString(),
-                                Url = r.Url,
-                                Title = r.Title
-                            }).ToList()
-                        };
-                    }).ToList()
-                }).ToList(),
-                
-                EnrolledStudents = courseData.Students.Select(s => new EnrolledStudentViewModel
-                {
-                    StudentId = s.StudentId,
-                    Name = $"{s.FirstName} {s.LastName}",
-                    Email = s.Email,
-                    Initials = $"{s.FirstName.FirstOrDefault()}{s.LastName.FirstOrDefault()}".ToUpper(),
-                    EnrolledDate = s.EnrollmentDate?.ToString("MMM dd, yyyy") ?? "N/A",
-                    ProgressPercentage = (int)s.ProgressPercentage,
-                    LastActivity = GetRelativeTime(s.LastAccessDate),
-                    Status = s.ProgressPercentage >= 100 ? "Completed" : "Active",
-                    StatusClass = s.ProgressPercentage >= 100 ? "completed" : "active"
-                }).ToList(),
                 Modules = courseData.Modules?
                     .Select(m => new EditModuleViewModel
                     {
@@ -719,7 +567,7 @@ public class InstructorController : Controller
                                     Order = l.Order,
                                     ContentType = (int)l.ContentType,
                                     VideoUrl = l.VideoUrl,
-                                    PdfUrl = l.PdfUrl,
+                                    PdfUrl = l.ArticleContent,
                                     DurationInSeconds = l.DurationInSeconds,
                                     TypeLabel = lessonTypeInfo.label,
                                     TypeClass = lessonTypeInfo.cssClass,
@@ -742,7 +590,7 @@ public class InstructorController : Controller
                             .ToList() ?? new List<EditLessonViewModel>()
                     })
                     .ToList() ?? new List<EditModuleViewModel>(),
-            
+                
                 EnrolledStudents = courseData.Students?
                     .Select(s => new EnrolledStudentViewModel
                     {
@@ -773,14 +621,14 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized("Instructor profile not found");
+            return Json(new { success = false, message = "Instructor profile not found" });
 
         var result = await _coursesService.UpdateModuleAsync(instructorId, courseId, moduleDto);
 
-        if (result)
-            return Json(new { success = true, message = "Module updated successfully" });
+        if (result.Success)
+            return Json(new { success = true, message = "Module saved successfully", moduleId = result.ModuleId });
         else
-            return Json(new { success = false, message = "Failed to update module" });
+            return Json(new { success = false, message = result.Message ?? "Failed to save module" });
     }
 
     [HttpDelete("/instructor/edit-course/{courseId}/module/{moduleId}")]
@@ -789,7 +637,7 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized("Instructor profile not found");
+            return Json(new { success = false, message = "Instructor profile not found" });
 
         var result = await _coursesService.DeleteModuleAsync(instructorId, courseId, moduleId);
 
@@ -805,14 +653,14 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized("Instructor profile not found");
+            return Json(new { success = false, message = "Instructor profile not found" });
 
         var result = await _coursesService.UpdateLessonAsync(instructorId, courseId, lessonDto);
 
-        if (result)
-            return Json(new { success = true, message = "Lesson updated successfully" });
+        if (result.Success)
+            return Json(new { success = true, message = "Lesson saved successfully", lessonId = result.LessonId });
         else
-            return Json(new { success = false, message = "Failed to update lesson" });
+            return Json(new { success = false, message = result.Message ?? "Failed to save lesson" });
     }
 
     [HttpDelete("/instructor/edit-course/{courseId}/lesson/{lessonId}")]
@@ -821,7 +669,7 @@ public class InstructorController : Controller
     {
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
-            return Unauthorized("Instructor profile not found");
+            return Json(new { success = false, message = "Instructor profile not found" });
 
         var result = await _coursesService.DeleteLessonAsync(instructorId, courseId, lessonId);
 
@@ -831,9 +679,6 @@ public class InstructorController : Controller
             return Json(new { success = false, message = "Failed to delete lesson" });
     }
 
-    /// <summary>
-    /// UploadCourseThumbnail - AJAX endpoint to upload course thumbnail images.
-    /// </summary>
     [HttpPost("/instructor/upload-course-thumbnail")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadCourseThumbnail(IFormFile file)
