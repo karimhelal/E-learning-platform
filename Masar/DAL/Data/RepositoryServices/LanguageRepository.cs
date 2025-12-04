@@ -7,24 +7,30 @@ namespace DAL.Data.RepositoryServices;
 public class LanguageRepository : ILanguageRepository
 {
     private readonly AppDbContext _context;
-    public LanguageRepository(AppDbContext context) {
+    
+    public LanguageRepository(AppDbContext context)
+    {
         _context = context;
     }
 
-
-    public Task AddAsync(Language entity)
+    public async Task AddAsync(Language entity)
     {
-        throw new NotImplementedException();
+        await _context.Languages.AddAsync(entity);
     }
 
     public bool Delete(int id)
     {
-        throw new NotImplementedException();
+        var language = _context.Languages.Find(id);
+        if (language == null) return false;
+        
+        _context.Languages.Remove(language);
+        return true;
     }
 
     public bool Delete(Language entity)
     {
-        throw new NotImplementedException();
+        _context.Languages.Remove(entity);
+        return true;
     }
 
     public async Task<IEnumerable<Language>> GetAllAsync()
@@ -39,13 +45,15 @@ public class LanguageRepository : ILanguageRepository
             .AsNoTracking();
     }
 
-    public Task<Language?> GetByIdAsync(int id)
+    public async Task<Language?> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.Languages
+            .FirstOrDefaultAsync(l => l.LanguageId == id);
     }
 
     public bool Update(Language entity)
     {
-        throw new NotImplementedException();
+        _context.Languages.Update(entity);
+        return true;
     }
 }

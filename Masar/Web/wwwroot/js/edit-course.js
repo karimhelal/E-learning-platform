@@ -134,6 +134,13 @@
                 // Submit the form
                 const form = document.getElementById('editCourseForm');
                 if (form) {
+                    // ? ADD DEBUGGING - Log form data before submission
+                    const formData = new FormData(form);
+                    console.log('?? Form Data Being Submitted:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`  ${key}: ${value}`);
+                    }
+                    
                     form.submit();
                 }
             });

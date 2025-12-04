@@ -7,29 +7,35 @@ namespace DAL.Data.RepositoryServices;
 public class CategoryRepository : ICategoryRepository
 {
     private readonly AppDbContext _context;
-    public CategoryRepository (AppDbContext context) {
+    
+    public CategoryRepository(AppDbContext context)
+    {
         _context = context;
     }
 
-
-    public Task AddAsync(Category entity)
+    public async Task AddAsync(Category entity)
     {
-        throw new NotImplementedException();
+        await _context.Categories.AddAsync(entity);
     }
 
     public bool Delete(int id)
     {
-        throw new NotImplementedException();
+        var category = _context.Categories.Find(id);
+        if (category == null) return false;
+        
+        _context.Categories.Remove(category);
+        return true;
     }
 
     public bool Delete(Category entity)
     {
-        throw new NotImplementedException();
+        _context.Categories.Remove(entity);
+        return true;
     }
 
     public async Task<IEnumerable<Category>> GetAllAsync()
     {
-       return await _context.Categories.ToListAsync();
+        return await _context.Categories.ToListAsync();
     }
 
     public IQueryable<Category> GetAllQueryable()
@@ -39,13 +45,15 @@ public class CategoryRepository : ICategoryRepository
             .AsNoTracking();
     }
 
-    public Task<Category?> GetByIdAsync(int id)
+    public async Task<Category?> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.Categories
+            .FirstOrDefaultAsync(c => c.CategoryId == id);
     }
 
     public bool Update(Category entity)
     {
-        throw new NotImplementedException();
+        _context.Categories.Update(entity);
+        return true;
     }
 }

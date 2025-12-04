@@ -117,6 +117,8 @@ public class InstructorCoursesService : IInstructorCoursesService
             .Include(c => c.Enrollments!)
                 .ThenInclude(e => e.Student!)
                 .ThenInclude(s => s.User)
+            .AsNoTracking()
+            .AsSplitQuery()
             .FirstOrDefaultAsync();
 
         if (course == null)
@@ -222,109 +224,71 @@ public class InstructorCoursesService : IInstructorCoursesService
     {
         try
         {
-            // Get the course WITH TRACKING (don't use the repository's queryable method)
+            Console.WriteLine($"🔍 UpdateCourseAsync called for courseId: {courseId}");
+            
+            // Load the course WITH tracking enabled
             var course = await _context.Courses
                 .Where(c => c.Id == courseId && c.InstructorId == instructorId)
-                .Include(c => c.LearningOutcomes)
-                .Include(c => c.Categories)
                 .FirstOrDefaultAsync();
 
             if (course == null)
             {
-                Console.WriteLine($"Course not found. CourseId: {courseId}, InstructorId: {instructorId}");
+                Console.WriteLine($"❌ Course not found");
                 return false;
             }
 
-            Console.WriteLine($"Found course: {course.Title}");
-
-            // Update basic properties
-            course.Title = updateDto.Title;
-            course.Description = updateDto.Description;
+            // Update only the specific properties (EF Core tracks changes automatically)
+            course.Title = updateDto.Title?.Trim() ?? course.Title;
+            course.Description = updateDto.Description ?? course.Description;
             course.Level = updateDto.Level;
-            course.ThumbnailImageUrl = updateDto.ThumbnailUrl;
+            course.ThumbnailImageUrl = updateDto.ThumbnailUrl ?? course.ThumbnailImageUrl;
 
-            Console.WriteLine("Updated basic properties");
+            // Remove existing learning outcomes using raw SQL (composite key issue)
+            await _context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM CourseLearningOutcomes WHERE course_id = {0}",
+                courseId
+            );
 
-            // Update learning outcomes - Remove existing ones
-            if (course.LearningOutcomes != null && course.LearningOutcomes.Any())
-            {
-                var outcomesToRemove = course.LearningOutcomes.ToList();
-                foreach (var outcome in outcomesToRemove)
-                {
-                    _context.CourseLearningOutcomes.Remove(outcome);
-                }
-                Console.WriteLine($"Removed {outcomesToRemove.Count} existing outcomes");
-            }
-
-            // Add new learning outcomes
+            // Add new learning outcomes - need to get max Id for the course to avoid PK conflicts
             if (updateDto.LearningOutcomes != null && updateDto.LearningOutcomes.Any())
             {
-                int outcomeId = 1;
-                foreach (var outcomeTitle in updateDto.LearningOutcomes)
+                // Get the max Id from the table to generate new Ids manually
+                var maxId = await _context.CourseLearningOutcomes
+                    .MaxAsync(o => (int?)o.Id) ?? 0;
+
+                int newId = maxId + 1;
+                foreach (var outcomeTitle in updateDto.LearningOutcomes.Where(o => !string.IsNullOrWhiteSpace(o)))
                 {
-                    var newOutcome = new CourseLearningOutcome
-                    {
-                        Id = outcomeId++,
-                        Title = outcomeTitle,
-                        Description = outcomeTitle,
-                        CourseId = courseId
-                    };
-                    _context.CourseLearningOutcomes.Add(newOutcome);
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "INSERT INTO CourseLearningOutcomes (course_outcome_id, title, description, course_id) VALUES ({0}, {1}, {2}, {3})",
+                        newId++, outcomeTitle.Trim(), outcomeTitle.Trim(), courseId
+                    );
                 }
-                Console.WriteLine($"Added {updateDto.LearningOutcomes.Count} new outcomes");
             }
 
-            // Update categories - Remove all existing
-            if (course.Categories != null && course.Categories.Any())
+            // Handle category using raw SQL to avoid tracking issues
+            await _context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM LearningEntity_Category WHERE learning_entity_id = {0}",
+                courseId
+            );
+
+            if (updateDto.CategoryId > 0)
             {
-                course.Categories.Clear();
-                Console.WriteLine("Cleared existing categories");
+                await _context.Database.ExecuteSqlRawAsync(
+                    "INSERT INTO LearningEntity_Category (learning_entity_id, category_id) VALUES ({0}, {1})",
+                    courseId, updateDto.CategoryId
+                );
             }
 
-            // Add new category
-            var category = await _context.Categories
-                .Where(c => c.CategoryId == updateDto.CategoryId)
-                .FirstOrDefaultAsync();
-                
-            if (category != null)
-            {
-                if (course.Categories == null)
-                    course.Categories = new List<Category>();
-                    
-                course.Categories.Add(category);
-                Console.WriteLine($"Added category: {category.Name}");
-            }
-            else
-            {
-                Console.WriteLine($"Category not found with ID: {updateDto.CategoryId}");
-            }
-
-            Console.WriteLine("About to save changes...");
-            
-            // Save changes to database
-            var changeCount = await _context.SaveChangesAsync();
-            
-            Console.WriteLine($"Save completed. Changes saved: {changeCount}");
-            
+            await _context.SaveChangesAsync();
+            Console.WriteLine($"✅ SUCCESS!");
             return true;
-        }
-        catch (DbUpdateException dbEx)
-        {
-            Console.WriteLine($"Database update error: {dbEx.Message}");
-            Console.WriteLine($"Inner exception: {dbEx.InnerException?.Message}");
-            Console.WriteLine($"Stack trace: {dbEx.StackTrace}");
-            return false;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error updating course: {ex.Message}");
-            Console.WriteLine($"Exception type: {ex.GetType().Name}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            if (ex.InnerException != null)
-            {
-                Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
-                Console.WriteLine($"Inner exception type: {ex.InnerException.GetType().Name}");
-            }
+            Console.WriteLine($"❌ ERROR: {ex.Message}");
+            Console.WriteLine($"❌ INNER: {ex.InnerException?.Message}");
+            Console.WriteLine($"❌ STACK: {ex.StackTrace}");
             return false;
         }
     }
@@ -338,7 +302,10 @@ public class InstructorCoursesService : IInstructorCoursesService
                 .AnyAsync(c => c.Id == courseId && c.InstructorId == instructorId);
 
             if (!courseExists)
+            {
+                Console.WriteLine($"❌ Course {courseId} not found for instructor {instructorId}");
                 return false;
+            }
 
             if (moduleDto.ModuleId.HasValue)
             {
@@ -347,7 +314,24 @@ public class InstructorCoursesService : IInstructorCoursesService
                     .FirstOrDefaultAsync(m => m.ModuleId == moduleDto.ModuleId.Value && m.CourseId == courseId);
 
                 if (module == null)
+                {
+                    Console.WriteLine($"❌ Module {moduleDto.ModuleId} not found");
                     return false;
+                }
+
+                // Check if the new order conflicts with another module (excluding current)
+                var orderConflict = await _context.Modules
+                    .AnyAsync(m => m.CourseId == courseId && 
+                                  m.Order == moduleDto.Order && 
+                                  m.ModuleId != moduleDto.ModuleId.Value);
+
+                if (orderConflict)
+                {
+                    // Shift other modules to make room
+                    await _context.Modules
+                        .Where(m => m.CourseId == courseId && m.Order >= moduleDto.Order && m.ModuleId != moduleDto.ModuleId.Value)
+                        .ExecuteUpdateAsync(s => s.SetProperty(m => m.Order, m => m.Order + 1));
+                }
 
                 module.Title = moduleDto.Title;
                 module.Description = moduleDto.Description;
@@ -355,24 +339,30 @@ public class InstructorCoursesService : IInstructorCoursesService
             }
             else
             {
-                // Create new module
+                // Create new module - get the next available order
+                var maxOrder = await _context.Modules
+                    .Where(m => m.CourseId == courseId)
+                    .MaxAsync(m => (int?)m.Order) ?? 0;
+
                 var newModule = new Module
                 {
                     CourseId = courseId,
                     Title = moduleDto.Title,
                     Description = moduleDto.Description,
-                    Order = moduleDto.Order
+                    Order = maxOrder + 1  // Use max + 1 to avoid conflicts
                 };
 
                 await _context.Modules.AddAsync(newModule);
             }
 
             await _context.SaveChangesAsync();
+            Console.WriteLine($"✅ Module saved successfully");
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error updating module: {ex.Message}");
+            Console.WriteLine($"❌ Error updating module: {ex.Message}");
+            Console.WriteLine($"❌ Inner: {ex.InnerException?.Message}");
             return false;
         }
     }

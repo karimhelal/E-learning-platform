@@ -1,0 +1,715 @@
+@page "/instructor/create-course"
+@model Web.Pages.Instructor.CreateCourseModel
+@{
+    ViewData["Title"] = "Create New Course | Masar";
+    Layout = "~/Views/Shared/_InstructorLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/create-course.css" />
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <h1 class="page-title">Create New Course</h1>
+            <p class="page-subtitle">
+                Build an amazing learning experience and publish it directly
+            </p>
+        </div>
+        <div class="page-actions">
+            <button type="button" class="btn btn-primary" id="publishBtn">
+                <i class="fas fa-check-circle"></i>
+                <span>Publish Course</span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Course Creation Form -->
+<section class="course-form-section">
+    <form id="createCourseForm" class="course-form" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="InstructorId" value="@Model.InstructorId" />
+        <input type="hidden" name="CourseId" id="currentCourseId" value="" />
+        
+        <!-- Progress Tracker -->
+        <div class="form-progress">
+            <div class="progress-steps">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Basic Info</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Curriculum</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Review</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: Basic Information -->
+        <div class="form-step active" data-step="1">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h2 class="form-card-title">
+                        <i class="fas fa-info-circle"></i>
+                        Basic Information
+                    </h2>
+                    <p class="form-card-subtitle">Tell us about your course</p>
+                </div>
+
+                <div class="form-card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="courseTitle" class="form-label">Course Title *</label>
+                            <input type="text" id="courseTitle" name="Title" class="form-input"
+                                   placeholder="e.g., Advanced React Development" required />
+                            <span class="form-hint">Choose a clear, descriptive title</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="courseDescription" class="form-label">Course Description *</label>
+                            <textarea id="courseDescription" name="Description" class="form-textarea" rows="6"
+                                      placeholder="Describe what students will learn in this course..." required></textarea>
+                            <span class="form-hint">Minimum 100 characters</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="courseCategory" class="form-label">Category *</label>
+                            <select id="courseCategory" name="CategoryId" class="form-select" required>
+                                <option value="">Select a category</option>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.CategoryId">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="courseLevel" class="form-label">Level *</label>
+                            <select id="courseLevel" name="Level" class="form-select" required>
+                                <option value="">Select level</option>
+                                <option value="2">Beginner</option>
+                                <option value="3">Intermediate</option>
+                                <option value="4">Advanced</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="courseLanguage" class="form-label">Language *</label>
+                            <select id="courseLanguage" name="LanguageId" class="form-select" required>
+                                <option value="">Select language</option>
+                                @foreach (var language in Model.Languages)
+                                {
+                                    <option value="@language.LanguageId">@language.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="courseThumbnail" class="form-label">Course Thumbnail</label>
+                            <div class="file-upload-area" id="thumbnailUpload">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click to upload or drag and drop</p>
+                                <span>PNG, JPG up to 5MB</span>
+                                <input type="file" id="courseThumbnail" name="ThumbnailFile" accept="image/*" hidden />
+                            </div>
+                            <div class="thumbnail-preview" id="thumbnailPreview" style="display: none">
+                                <img src="" alt="Thumbnail preview" id="thumbnailImage" />
+                                <button type="button" class="remove-thumbnail" id="removeThumbnail">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <input type="hidden" id="thumbnailUrl" name="ThumbnailImageUrl" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">What will students learn? *</label>
+                            <div class="learning-outcomes" id="learningOutcomes">
+                                <div class="outcome-item">
+                                    <input type="text" class="form-input" name="LearningOutcomes[]"
+                                           placeholder="e.g., Build modern web applications with React" />
+                                    <button type="button" class="btn-remove-outcome">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-small" id="addOutcome">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Outcome</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card-footer">
+                    <button type="button" class="btn btn-primary" data-next-step="2">
+                        <span>Next: Curriculum</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Curriculum -->
+        <div class="form-step" data-step="2">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h2 class="form-card-title">
+                        <i class="fas fa-book"></i>
+                        Course Curriculum
+                    </h2>
+                    <p class="form-card-subtitle">
+                        Organize your course content into modules and lessons
+                    </p>
+                </div>
+
+                <div class="form-card-body">
+                    <div class="curriculum-builder" id="curriculumBuilder">
+                        <!-- Module Template -->
+                        <div class="module-container">
+                            <div class="module-header">
+                                <div class="module-title-section">
+                                    <i class="fas fa-grip-vertical module-drag-handle"></i>
+                                    <input type="text" class="module-title-input" name="Modules[0].Title"
+                                           placeholder="Module Title (e.g., Getting Started)" />
+                                </div>
+                                <div class="module-actions">
+                                    <button type="button" class="btn-icon" title="Add Lesson">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button type="button" class="btn-icon btn-collapse" title="Collapse">
+                                        <i class="fas fa-chevron-up"></i>
+                                    </button>
+                                    <button type="button" class="btn-icon btn-delete" title="Delete Module">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="module-body">
+                                <div class="lessons-container">
+                                    <!-- Lesson Item -->
+                                    <div class="lesson-item" data-lesson-index="0">
+                                        <i class="fas fa-grip-vertical lesson-drag-handle"></i>
+                                        <div class="lesson-icon">
+                                            <i class="fas fa-play-circle"></i>
+                                        </div>
+                                        <input type="text" class="lesson-title-input" name="Modules[0].Lessons[0].Title"
+                                               placeholder="Lesson title" />
+                                        <select class="lesson-type-select" name="Modules[0].Lessons[0].ContentType">
+                                            <option value="Video">Video</option>
+                                            <option value="Article">Article</option>
+                                        </select>
+                                        <button type="button" class="btn-icon btn-edit-lesson-details" title="Edit Lesson Details">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn-icon btn-delete-lesson" title="Delete Lesson">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <!-- Hidden fields for lesson details -->
+                                        <input type="hidden" class="lesson-video-url" value="" />
+                                        <input type="hidden" class="lesson-pdf-url" value="" />
+                                        <input type="hidden" class="lesson-duration" value="" />
+                                        <input type="hidden" class="lesson-resources" value="[]" />
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn-add-lesson">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Lesson</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" id="addModule">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Module</span>
+                    </button>
+                </div>
+
+                <div class="form-card-footer">
+                    <button type="button" class="btn btn-secondary" data-prev-step="1">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Previous</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" data-next-step="3">
+                        <span>Next: Review</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Review & Submit -->
+        <div class="form-step" data-step="3">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h2 class="form-card-title">
+                        <i class="fas fa-check-circle"></i>
+                        Review & Submit
+                    </h2>
+                    <p class="form-card-subtitle">
+                        Review your course and submit for admin approval
+                    </p>
+                </div>
+
+                <div class="form-card-body">
+                    <div class="review-section">
+                        <h3 class="review-section-title">Course Workflow</h3>
+                        <div class="workflow-steps">
+                            <div class="workflow-step">
+                                <div class="workflow-icon">
+                                    <i class="fas fa-save"></i>
+                                </div>
+                                <div class="workflow-content">
+                                    <h4>1. Save as Draft</h4>
+                                    <p>
+                                        Click "Save Draft" to save your course information
+                                        to the database. You can come back and edit it
+                                        later.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="workflow-step">
+                                <div class="workflow-icon">
+                                    <i class="fas fa-list"></i>
+                                </div>
+                                <div class="workflow-content">
+                                    <h4>2. Complete All Sections</h4>
+                                    <p>
+                                        Fill in all modules, lessons, lesson content
+                                        (videos/articles), and resources (PDFs, links, ZIP
+                                        files).
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="workflow-step">
+                                <div class="workflow-icon">
+                                    <i class="fas fa-paper-plane"></i>
+                                </div>
+                                <div class="workflow-content">
+                                    <h4>3. Submit for Review</h4>
+                                    <p>
+                                        Click "Submit for Review" to send your course to
+                                        admin for approval. The course status will change to
+                                        "Pending Review".
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="workflow-step">
+                                <div class="workflow-icon">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="workflow-content">
+                                    <h4>4. Admin Approval</h4>
+                                    <p>
+                                        Admin will review your course. Once approved, it
+                                        will be published and available to students.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="workflow-step">
+                                <div class="workflow-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="workflow-content">
+                                    <h4>Publish Your Course</h4>
+                                    <p>
+                                        Once you complete all sections, click "Publish Course" to make 
+                                        it available to students immediately.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-section">
+                        <h3 class="review-section-title">
+                            Database Tables Updated
+                        </h3>
+                        <ul class="database-tables-list">
+                            <li>
+                                <i class="fas fa-database"></i>
+                                <strong>Courses</strong> - Basic course information
+                            </li>
+                            <li>
+                                <i class="fas fa-database"></i>
+                                <strong>Modules</strong> - Course modules structure
+                            </li>
+                            <li>
+                                <i class="fas fa-database"></i>
+                                <strong>Lessons</strong> - Individual lessons within
+                                modules
+                            </li>
+                            <li>
+                                <i class="fas fa-database"></i>
+                                <strong>LessonContents</strong> - Video/Article content
+                                for each lesson
+                            </li>
+                            <li>
+                                <i class="fas fa-database"></i>
+                                <strong>LessonResources</strong> - PDFs, Links, and ZIP
+                                files
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="review-section">
+                        <h3 class="review-section-title">Important Notes</h3>
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <p>
+                                    <strong>Draft Status:</strong> Your course is saved
+                                    but not visible to students.
+                                </p>
+                                <p>
+                                    <strong>Pending Review:</strong> Course is submitted
+                                    and waiting for admin approval.
+                                </p>
+                                <p>
+                                    <strong>Approved:</strong> Course is live and
+                                    accessible to students.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card-footer">
+                    <button type="button" class="btn btn-secondary" data-prev-step="2">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Previous</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="submitReviewBtn">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Publish Course</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- Edit Lesson Modal -->
+<div id="createLessonModal" class="modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Lesson Details</h3>
+            <button type="button" class="modal-close" onclick="closeCreateLessonModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="createLessonForm">
+                <input type="hidden" id="createLessonIndex" />
+                <input type="hidden" id="createModuleIndex" />
+                
+                <div class="form-group">
+                    <label for="createLessonTitle" class="form-label">Lesson Title *</label>
+                    <input type="text" id="createLessonTitle" class="form-input" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="createLessonContentType" class="form-label">Content Type *</label>
+                    <select id="createLessonContentType" class="form-select" required onchange="toggleCreateContentFields()">
+                        <option value="1">Video</option>
+                        <option value="0">Article (PDF)</option>
+                    </select>
+                </div>
+                
+                <!-- Video Fields -->
+                <div id="createVideoFields">
+                    <div class="form-group">
+                        <label for="createLessonVideoUrl" class="form-label">Video URL *</label>
+                        <input type="url" id="createLessonVideoUrl" class="form-input" placeholder="https://www.youtube.com/watch?v=..." />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="createLessonDuration" class="form-label">Duration (minutes) *</label>
+                        <input type="number" id="createLessonDuration" class="form-input" min="0" step="0.1" placeholder="10" />
+                        <small class="form-hint">Enter duration in minutes (e.g., 10 for 10 minutes)</small>
+                    </div>
+                </div>
+                
+                <!-- PDF Fields -->
+                <div id="createPdfFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="createLessonPdfUrl" class="form-label">PDF URL *</label>
+                        <input type="url" id="createLessonPdfUrl" class="form-input" placeholder="https://example.com/file.pdf" />
+                    </div>
+                </div>
+
+                <!-- Lesson Resources Section -->
+                <div class="form-section-resources">
+                    <div class="section-header-resources">
+                        <h4 class="section-heading-resources">
+                            <i class="fas fa-paperclip"></i>
+                            Lesson Resources
+                        </h4>
+                        <p class="section-description-resources">Add downloadable resources, external links, or files for students</p>
+                    </div>
+                    
+                    <div id="createLessonResourcesList" class="resources-list">
+                        <div class="empty-resources">
+                            <i class="fas fa-link"></i>
+                            <p>No resources added yet. Click "Add Resource" to get started.</p>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary btn-small" id="addCreateLessonResource">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Resource</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeCreateLessonModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="saveCreateLessonDetails()">Save Lesson</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Styles -->
+<style>
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+    }
+    
+    .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+        position: relative;
+        max-width: 600px;
+        margin: 50px auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    .modal-lg {
+        max-width: 800px;
+    }
+    
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    
+    .modal-close:hover {
+        background: #f3f4f6;
+        color: #1f2937;
+    }
+    
+    .modal-body {
+        padding: 24px;
+        max-height: calc(100vh - 250px);
+        overflow-y: auto;
+    }
+    
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 16px 24px;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    /* Modal Form Styles */
+    .modal .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .modal .form-label {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.6rem;
+    }
+    
+    .modal .form-input,
+    .modal .form-textarea,
+    .modal .form-select {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        color: #1f2937;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+    
+    .modal .form-input:focus,
+    .modal .form-textarea:focus,
+    .modal .form-select:focus {
+        outline: none;
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .modal .form-hint {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 0.4rem;
+        display: block;
+    }
+
+    .btn-edit-lesson-details {
+        background: rgba(124, 58, 237, 0.1);
+        color: #7c3aed;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-edit-lesson-details:hover {
+        background: rgba(124, 58, 237, 0.2);
+    }
+
+    .lesson-item.has-details {
+        border-left: 3px solid #10b981;
+    }
+
+    /* Resources styles */
+    .form-section-resources {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .section-header-resources {
+        margin-bottom: 1rem;
+    }
+
+    .section-heading-resources {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .section-description-resources {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    .resources-list {
+        margin-bottom: 1rem;
+    }
+
+    .empty-resources {
+        text-align: center;
+        padding: 2rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        color: #6b7280;
+    }
+
+    .empty-resources i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+
+    .resource-item {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+
+    .btn-remove-resource {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-remove-resource:hover {
+        background: #dc2626;
+    }
+</style>
+
+@section Scripts {
+    <script src="~/js/create-course.js" asp-append-version="true"></script>
+}

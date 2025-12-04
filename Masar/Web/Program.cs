@@ -27,6 +27,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+builder.Services.AddScoped<IModuleRepository, ModuleRepository>(); // ADD THIS
+builder.Services.AddScoped<ILessonRepository, LessonRepository>(); // ADD THIS
 
 // Add generic repositories for LessonProgress and CourseEnrollment
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -46,6 +48,7 @@ builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardServi
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
 builder.Services.AddScoped<BLL.Interfaces.Student.IStudentProfileService, BLL.Services.Student.StudentProfileService>();
+builder.Services.AddScoped<ICourseCreationService, CourseCreationService>(); // ADDED THIS LINE
 
 
 // ========================================
@@ -73,6 +76,7 @@ builder.Services.AddAntiforgery(options =>
     options.HeaderName = "RequestVerificationToken";
 });
 
+builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 // Configure DbContext with SQL Server
@@ -139,6 +143,9 @@ app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add this BEFORE MapControllerRoute
+app.MapRazorPages(); // ADD THIS LINE
 
 app.MapControllerRoute(
     name: "default",
