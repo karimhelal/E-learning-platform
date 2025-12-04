@@ -17,7 +17,9 @@ public class CourseRepository : ICourseRepository
 
     public IQueryable<Course> GetAllQueryable()
     {
-        return _context.Courses;
+        return _context.Courses
+            .AsQueryable()
+            .AsNoTracking();
     }
 
     public async Task<IEnumerable<Course>> GetAllAsync()
@@ -77,4 +79,9 @@ public class CourseRepository : ICourseRepository
             .AsNoTracking();
     }
 
+    public async Task<bool> HasCourseAsync(int courseId)
+    {
+        return await _context.Courses
+            .AnyAsync(c => c.Id == courseId);
+    }
 }

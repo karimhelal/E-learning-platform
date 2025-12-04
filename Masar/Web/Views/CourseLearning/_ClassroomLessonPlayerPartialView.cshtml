@@ -1,0 +1,52 @@
+﻿@model LessonMetaDataViewModel
+
+<div class="lesson-content-wrapper fade-in">
+
+    @if (Model.ContentType == "Video")
+    {
+        <div class="video-container size-large" id="videoContainer">
+            <div class="plyr__video-embed" id="player">
+                <iframe src=@($"https://www.youtube.com/embed/{Model.YouTubeId}?origin=https://plyr.io&amp;iv_load_policy=3&amp;modestbranding=1&amp;playsinline=1&amp;showinfo=0&amp;rel=0&amp;enablejsapi=1")
+                        allowfullscreen
+                        allowtransparency
+                        allow="autoplay">
+                </iframe>
+            </div>
+        </div>
+    }
+
+    else if (Model.ContentType == "Article")
+    {
+        <div class="article-reader">
+            <div class="article-header">
+                <div class="article-meta">
+                    <span><i class="fas fa-book-open"></i> Read Mode</span>
+                    <span><i class="fas fa-clock"></i> 5 min read</span>
+                </div>
+                <div class="article-actions">
+                    <!-- Action buttons here -->
+                </div>
+            </div>
+            <div class="reading-progress">
+                <div class="reading-progress-bar"></div>
+            </div>
+            <div class="article-body">
+                @Html.Raw(Model.ArticleContent)
+            </div>
+            <div class="article-footer">
+                <!-- Footer with helpful/share buttons -->
+            </div>
+        </div>
+    }
+
+</div>
+
+<!-- Lesson Header -->
+<div class="lesson-header">
+    <h1 class="lesson-title" id="lessonTitle">
+        @Model.LessonTitle
+    </h1>
+</div>
+
+
+

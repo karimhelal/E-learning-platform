@@ -121,13 +121,13 @@ public class InstructorController : Controller
                 ),
 
                 CourseCards = dashboardData.CourseCards.Select(c => 
-                    new CourseCardViewModel
+                    new InstructorCourseCardViewModel
                     {
                         CourseId = c.CourseId,
                         Title = c.Title,
                         Description = c.Description,
                         
-                        MainCategory = c.MainCategory?.Name ??  "Undefined",
+                        MainCategory = c.MainCategory,
                         Level = c.Level.ToString(),
 
                         ModulesCount = c.ModulesCount,
@@ -386,6 +386,105 @@ public class InstructorController : Controller
         }
         catch (Exception ex)
         {
+            Data = new EditCourseDataViewModel
+            {
+                CourseId = courseData.CourseId,
+                CourseTitle = courseData.Title,
+                Description = courseData.Description,
+                ThumbnailUrl = courseData.ThumbnailImageUrl,
+                
+                SelectedCategoryId = courseData.MainCategory?.CategoryId.ToString() ?? "5",
+                SelectedLevel = courseData.Level.ToString().ToLower(),
+                
+                AvailableCategories = new List<SelectOption>
+                {
+                    new SelectOption { Value = "5", Text = "Web Development" },
+                    new SelectOption { Value = "6", Text = "Mobile Development" },
+                    new SelectOption { Value = "2", Text = "Data Science" },
+                    new SelectOption { Value = "8", Text = "Programming Languages" },
+                    new SelectOption { Value = "3", Text = "Design" },
+                    new SelectOption { Value = "9", Text = "Frontend" },
+                    new SelectOption { Value = "10", Text = "Backend" },
+                    new SelectOption { Value = "12", Text = "Machine Learning" }
+                },
+                
+                AvailableLevels = new List<SelectOption>
+                {
+                    new SelectOption { Value = "beginner", Text = "Beginner" },
+                    new SelectOption { Value = "intermediate", Text = "Intermediate" },
+                    new SelectOption { Value = "advanced", Text = "Advanced" }
+                },
+                
+                LearningOutcomes = courseData.LearningOutcomes
+                    .Select(lo => lo.Title)
+                    .ToList(),
+                
+                Stats = new EditCourseStatsViewModel
+                {
+                    EnrolledStudents = courseData.EnrolledStudents,
+                    AverageRating = courseData.AverageRating,
+                    Completions = courseData.Completions,
+                    AverageProgress = courseData.AverageProgress
+                },
+                
+                Modules = courseData.Modules.Select(m => new EditModuleViewModel
+                {
+                    ModuleId = m.ModuleId,
+                    Title = m.Title,
+                    Description = m.Description,
+                    Order = m.Order,
+                    LessonsCount = m.LessonsCount,
+                    DurationFormatted = FormatDuration(m.TotalDurationSeconds),
+                    Lessons = m.Lessons.Select(l =>
+                    {
+                        var lessonTypeInfo = GetLessonTypeInfo(l.ContentType);
+                        return new EditLessonViewModel
+                        {
+                            LessonId = l.LessonId,
+                            Title = l.Title,
+                            Order = l.Order,
+                            ContentType = (int)l.ContentType,
+                            VideoUrl = l.VideoUrl,
+                            PdfUrl = l.ArticleContent,
+                            DurationInSeconds = l.DurationInSeconds,
+                            TypeLabel = lessonTypeInfo.label,
+                            TypeClass = lessonTypeInfo.cssClass,
+                            TypeIcon = lessonTypeInfo.icon,
+                            DurationFormatted = l.ContentType == LessonContentType.Video 
+                                ? FormatDuration(l.DurationInSeconds)
+                                : "N/A",
+                            Resources = l.Resources.Select(r => new EditLessonResourceViewModel
+                            {
+                                LessonResourceId = r.LessonResourceId,
+                                ResourceType = (int)r.ResourceType,
+                                ResourceTypeName = r.ResourceType.ToString(),
+                                Url = r.Url,
+                                Title = r.Title
+                            }).ToList()
+                        };
+                    }).ToList()
+                }).ToList(), // <-- THIS IS THE FIX: Added closing brace and comma here
+            
+                EnrolledStudents = courseData.Students.Select(s => new EnrolledStudentViewModel
+                {
+                    StudentId = s.StudentId,
+                    Name = $"{s.FirstName} {s.LastName}",
+                    Email = s.Email,
+                    Initials = $"{s.FirstName.FirstOrDefault()}{s.LastName.FirstOrDefault()}".ToUpper(),
+                    EnrolledDate = s.EnrollmentDate?.ToString("MMM dd, yyyy") ?? "N/A",
+                    ProgressPercentage = (int)s.ProgressPercentage,
+                    LastActivity = GetRelativeTime(s.LastAccessDate),
+                    Status = s.ProgressPercentage >= 100 ? "Completed" : "Active",
+                    StatusClass = s.ProgressPercentage >= 100 ? "completed" : "active"
+                }).ToList(),
+                
+                TotalStudentPages = (int)Math.Ceiling(courseData.EnrolledStudents / 25.0)
+            },
+            
+            PageTitle = "Edit Course"
+        };
+
+        return View(viewModel);
             Console.WriteLine($"❌ Error in EditCourse GET: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
             return StatusCode(500, "An error occurred while loading the course");
@@ -550,6 +649,56 @@ public class InstructorController : Controller
                     AverageProgress = courseData.AverageProgress
                 },
                 
+                Modules = courseData.Modules.Select(m => new EditModuleViewModel
+                {
+                    ModuleId = m.ModuleId,
+                    Title = m.Title,
+                    Description = m.Description,
+                    Order = m.Order,
+                    LessonsCount = m.LessonsCount,
+                    DurationFormatted = FormatDuration(m.TotalDurationSeconds),
+                    Lessons = m.Lessons.Select(l =>
+                    {
+                        var lessonTypeInfo = GetLessonTypeInfo(l.ContentType);
+                        return new EditLessonViewModel
+                        {
+                            LessonId = l.LessonId,
+                            Title = l.Title,
+                            Order = l.Order,
+                            ContentType = (int)l.ContentType,
+                            VideoUrl = l.VideoUrl,
+                            PdfUrl = l.ArticleContent,
+                            DurationInSeconds = l.DurationInSeconds,
+                            TypeLabel = lessonTypeInfo.label,
+                            TypeClass = lessonTypeInfo.cssClass,
+                            TypeIcon = lessonTypeInfo.icon,
+                            DurationFormatted = l.ContentType == LessonContentType.Video 
+                                ? FormatDuration(l.DurationInSeconds)
+                                : "N/A",
+                            Resources = l.Resources.Select(r => new EditLessonResourceViewModel
+                            {
+                                LessonResourceId = r.LessonResourceId,
+                                ResourceType = (int)r.ResourceType,
+                                ResourceTypeName = r.ResourceType.ToString(),
+                                Url = r.Url,
+                                Title = r.Title
+                            }).ToList()
+                        };
+                    }).ToList()
+                }).ToList(),
+                
+                EnrolledStudents = courseData.Students.Select(s => new EnrolledStudentViewModel
+                {
+                    StudentId = s.StudentId,
+                    Name = $"{s.FirstName} {s.LastName}",
+                    Email = s.Email,
+                    Initials = $"{s.FirstName.FirstOrDefault()}{s.LastName.FirstOrDefault()}".ToUpper(),
+                    EnrolledDate = s.EnrollmentDate?.ToString("MMM dd, yyyy") ?? "N/A",
+                    ProgressPercentage = (int)s.ProgressPercentage,
+                    LastActivity = GetRelativeTime(s.LastAccessDate),
+                    Status = s.ProgressPercentage >= 100 ? "Completed" : "Active",
+                    StatusClass = s.ProgressPercentage >= 100 ? "completed" : "active"
+                }).ToList(),
                 Modules = courseData.Modules?
                     .Select(m => new EditModuleViewModel
                     {

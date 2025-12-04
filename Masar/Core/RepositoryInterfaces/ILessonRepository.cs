@@ -1,9 +1,10 @@
 using Core.Entities;
 
-namespace Core.RepositoryInterfaces
+namespace Core.RepositoryInterfaces;
+
+public interface ILessonRepository : IGenericRepository<Lesson>
 {
-    public interface ILessonRepository : IGenericRepository<Lesson>
-    {
-        // Add any lesson-specific methods here if needed
-    }
+    IQueryable<Lesson> GetByIdQueryable(int lessonId);
+    IQueryable<Course?> GetContainingCourseQueryable(int lessonId);
+    Task<Course?> GetContainingCourseAsync(int lessonId);
 }

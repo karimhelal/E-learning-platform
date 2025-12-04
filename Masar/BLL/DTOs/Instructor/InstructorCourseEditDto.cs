@@ -46,7 +46,7 @@ public class LessonEditDto
     public Core.Entities.Enums.LessonContentType ContentType { get; set; }
     public int DurationInSeconds { get; set; }
     public string? VideoUrl { get; set; }
-    public string? PdfUrl { get; set; }
+    public string? ArticleContent { get; set; }
     public List<LessonResourceEditDto> Resources { get; set; } = new(); // ADDED THIS
 }
 

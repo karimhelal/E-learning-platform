@@ -221,8 +221,8 @@ public class CourseService : ICourseService
                 Level = course.Level,
 
                 // calculated fields
-                AverageRating = (float)Math.Round(((new Random()).NextDouble() * 5), 1),            // HARD CODED
-                NumberOfReviews = (new Random()).Next(0, 10001),                          // HARD CODED
+                AverageRating = 3.7f,// (float)Math.Round(((new Random()).NextDouble() * 5), 1),            // HARD CODED
+                NumberOfReviews = 2141,// (new Random()).Next(0, 10001),                          // HARD CODED
                 NumberOfStudents = course.Enrollments!.Count(),
                 NumberOfMinutes = (int)(
                                 course.Modules!
@@ -250,7 +250,7 @@ public class CourseService : ICourseService
 
         return new BrowseResultDto<CourseBrowseCardDto>
         {
-            Items = items,
+            Items = items ?? new List<CourseBrowseCardDto>(),
             Settings = new BrowseSettingsDto
             {
                 FilterGroups = null,
@@ -398,8 +398,8 @@ public class CourseService : ICourseService
                 Level = course.Level,
 
                 // calculated fields
-                AverageRating = (float)Math.Round(((new Random()).NextDouble() * 5), 1),            // HARD CODED
-                NumberOfReviews = (new Random()).Next(0, 10001),                          // HARD CODED
+                AverageRating = 4.7f, // (float)Math.Round(((new Random()).NextDouble() * 5), 1),            // HARD CODED
+                NumberOfReviews = 2156, //(new Random()).Next(0, 10001),                          // HARD CODED
                 NumberOfStudents = course.Enrollments!.Count(),
                 NumberOfMinutes = (int)(
                                 course.Modules!

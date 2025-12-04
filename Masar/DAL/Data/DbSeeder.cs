@@ -537,7 +537,6 @@ namespace DAL.Data
                 lessonContents.Add(new VideoContent
                 {
                     LessonId = lesson.LessonId,
-                    Content = $"https://example.com/videos/lesson{lesson.LessonId}.mp4",
                     VideoUrl = $"https://example.com/videos/lesson{lesson.LessonId}.mp4",
                     DurationInSeconds = 600 + (lesson.Order * 300)
                 });
@@ -615,7 +614,7 @@ namespace DAL.Data
                         StudentId = students[0].StudentId,
                         CourseId = courses[0].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 75.50m
                     },
                     new CourseEnrollment
@@ -623,7 +622,7 @@ namespace DAL.Data
                         StudentId = students[0].StudentId,
                         CourseId = courses[1].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-2),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 30.00m
                     },
                     new CourseEnrollment
@@ -631,7 +630,7 @@ namespace DAL.Data
                         StudentId = students[1].StudentId,
                         CourseId = courses[0].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-2),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 45.25m
                     },
                     new CourseEnrollment
@@ -639,7 +638,7 @@ namespace DAL.Data
                         StudentId = students[1].StudentId,
                         CourseId = courses[2].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 80.00m
                     },
                     new CourseEnrollment
@@ -655,7 +654,7 @@ namespace DAL.Data
                         StudentId = students[2].StudentId,
                         CourseId = courses[2].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-1),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 65.50m
                     }
                 });
@@ -670,7 +669,7 @@ namespace DAL.Data
                         StudentId = students[0].StudentId,
                         TrackId = tracks[0].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 55.00m
                     },
                     new TrackEnrollment
@@ -678,7 +677,7 @@ namespace DAL.Data
                         StudentId = students[1].StudentId,
                         TrackId = tracks[1].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 70.50m
                     }
                 });
@@ -851,17 +850,17 @@ namespace DAL.Data
                 new PdfResource
                 {
                     LessonId = lessons[0].LessonId,
-                    PdfUrl = "https://example.com/resources/web-dev-intro.pdf"
+                    Url = "https://example.com/resources/web-dev-intro.pdf"
                 },
                 new UrlResource
                 {
                     LessonId = lessons[1].LessonId,
-                    Link = "https://code.visualstudio.com/download"
+                    Url = "https://code.visualstudio.com/download"
                 },
                 new ZipResource
                 {
                     LessonId = lessons[2].LessonId,
-                    ZipUrl = "https://example.com/resources/html-templates.zip"
+                    Url = "https://example.com/resources/html-templates.zip"
                 },
             };
 

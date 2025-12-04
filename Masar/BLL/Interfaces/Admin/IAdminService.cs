@@ -17,5 +17,10 @@ namespace BLL.Interfaces.Admin
         Task<bool> DeleteCourseAsync(int courseId);
 
         Task<List<CategoryDto>> GetAllCategoriesAsync();
+
+        // Pending Courses
+        Task<List<AdminPendingCourseDto>> GetPendingCoursesAsync();
+        Task ApproveCourseAsync(int courseId);
+        Task RejectCourseAsync(int courseId);
     }
 }

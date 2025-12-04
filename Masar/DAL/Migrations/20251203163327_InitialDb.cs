@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreate : Migration
+    public partial class InitialDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,7 +51,8 @@ namespace DAL.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    created_date = table.Column<DateOnly>(type: "date", nullable: false)
+                    created_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -206,6 +207,30 @@ namespace DAL.Migrations
                     table.ForeignKey(
                         name: "FK_InstructorProfiles_Users_user_id",
                         column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(600)", maxLength: 600, nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "user_id",
                         onDelete: ReferentialAction.Cascade);
@@ -531,10 +556,10 @@ namespace DAL.Migrations
                     lesson_content_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     lesson_id = table.Column<int>(type: "int", nullable: false),
-                    content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     content_type = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
-                    pdf_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    duration_seconds = table.Column<int>(type: "int", nullable: true)
+                    article_content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    duration_seconds = table.Column<int>(type: "int", nullable: true),
+                    video_url = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -583,10 +608,9 @@ namespace DAL.Migrations
                     lesson_resource_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     lesson_id = table.Column<int>(type: "int", nullable: false),
-                    resource_type = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
-                    pdf_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    link_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    zip_url = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    resource_url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    resource_title = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    resource_type = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -716,6 +740,11 @@ namespace DAL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
                 table: "RoleClaims",
                 column: "RoleId");
@@ -801,6 +830,9 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "LessonResources");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "RoleClaims");

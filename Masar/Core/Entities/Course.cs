@@ -49,7 +49,7 @@ public class Course : LearningEntity
     public virtual ICollection<Track>? Tracks { get; set; }
     public virtual ICollection<CourseEnrollment>? Enrollments { get; set; }
     public virtual ICollection<CourseCertificate>? Certificates { get; set; }
-    public virtual ICollection<CourseLearningOutcome> LearningOutcomes { get; set; }
+    public virtual ICollection<CourseLearningOutcome>? LearningOutcomes { get; set; }
 
     public Course()
     {
