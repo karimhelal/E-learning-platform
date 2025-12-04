@@ -614,7 +614,7 @@ namespace DAL.Data
                         StudentId = students[0].StudentId,
                         CourseId = courses[0].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.InProgress,
+                        Status = EnrollmentStatus.Active,
                         ProgressPercentage = 75.50m
                     },
                     new CourseEnrollment
@@ -622,7 +622,7 @@ namespace DAL.Data
                         StudentId = students[0].StudentId,
                         CourseId = courses[1].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-2),
-                        Status = EnrollmentStatus.InProgress,
+                        Status = EnrollmentStatus.Active,
                         ProgressPercentage = 30.00m
                     },
                     new CourseEnrollment
@@ -630,7 +630,7 @@ namespace DAL.Data
                         StudentId = students[1].StudentId,
                         CourseId = courses[0].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-2),
-                        Status = EnrollmentStatus.InProgress,
+                        Status = EnrollmentStatus.Active,
                         ProgressPercentage = 45.25m
                     },
                     new CourseEnrollment
@@ -638,7 +638,7 @@ namespace DAL.Data
                         StudentId = students[1].StudentId,
                         CourseId = courses[2].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.InProgress,
+                        Status = EnrollmentStatus.Active,
                         ProgressPercentage = 80.00m
                     },
                     new CourseEnrollment
@@ -654,7 +654,7 @@ namespace DAL.Data
                         StudentId = students[2].StudentId,
                         CourseId = courses[2].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-1),
-                        Status = EnrollmentStatus.InProgress,
+                        Status = EnrollmentStatus.Active   ,
                         ProgressPercentage = 65.50m
                     }
                 });
@@ -669,7 +669,7 @@ namespace DAL.Data
                         StudentId = students[0].StudentId,
                         TrackId = tracks[0].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.InProgress,
+                        Status = EnrollmentStatus.Active,
                         ProgressPercentage = 55.00m
                     },
                     new TrackEnrollment
@@ -677,7 +677,7 @@ namespace DAL.Data
                         StudentId = students[1].StudentId,
                         TrackId = tracks[1].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.InProgress,
+                        Status = EnrollmentStatus.  Active,
                         ProgressPercentage = 70.50m
                     }
                 });
