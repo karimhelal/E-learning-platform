@@ -2,11 +2,17 @@ using BLL.DTOs.Account;
 using BLL.Helpers;
 using BLL.Interfaces;
 using BLL.Interfaces.Account;
+using BLL.Interfaces.CourseLearning;
+using BLL.Interfaces.Enrollment;
 using BLL.Interfaces.Admin;
+using BLL.Interfaces.Student;
 using BLL.Interfaces.Instructor;
 using BLL.Services;
 using BLL.Services.Account;
+using BLL.Services.CourseLearning;
+using BLL.Services.Enrollment;
 using BLL.Services.Admin;
+using BLL.Services.Student;
 using BLL.Services.Instructor;
 using Core.Entities;
 using Core.RepositoryInterfaces;
@@ -14,6 +20,7 @@ using DAL.Data;
 using DAL.Data.RepositoryServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Web.Hubs;
 using Web.Interfaces;
 using Web.Services;
 using Microsoft.AspNetCore.Antiforgery;
@@ -23,10 +30,19 @@ var builder = WebApplication.CreateBuilder(args);
 // ========================================
 // REPOSITORIES (Team's layer)
 // ========================================
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+builder.Services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
+builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
+
+
+// Add generic repositories for LessonProgress and CourseEnrollment
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 // Add generic repositories for LessonProgress and CourseEnrollment
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -36,23 +52,29 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
-
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotifier, SignalRNotifier>();
 
 // ========================================
 // BLL SERVICES (Team's layer)
 // ========================================
 builder.Services.AddScoped<ICourseService, CourseService>();
-builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<ICourseLearningService, CourseLearningService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
 builder.Services.AddScoped<BLL.Interfaces.Student.IStudentProfileService, BLL.Services.Student.StudentProfileService>();
+builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
+builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
+
 
 
 // ========================================
 // WEB SERVICES (Your simplified layer)
 // ========================================
-builder.Services.AddScoped<IStudentDashboardService, StudentDashboardService>();
-builder.Services.AddScoped<IStudentCoursesService, StudentCoursesService>();
+builder.Services.AddScoped<BLL.Interfaces.Student.IStudentDashboardService, BLL.Services.Student.StudentDashboardService>();
+builder.Services.AddScoped<Web.Interfaces.IStudentDashboardService, Web.Services.StudentDashboardService>();
+builder.Services.AddScoped<Web.Interfaces.IStudentCoursesService, Web.Services.StudentCoursesService>();
 builder.Services.AddScoped<IStudentTrackService, StudentTracksService>();
 builder.Services.AddScoped<IStudentTrackDetailsService, StudentTrackDetailsService>();
 builder.Services.AddScoped<IStudentBrowseTrackService, StudentBrowseTrackService>();
@@ -176,6 +198,8 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
+
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
 

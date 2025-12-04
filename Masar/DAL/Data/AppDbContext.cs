@@ -2,6 +2,7 @@
 using Core.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Core.Entities.Enums;
 
 namespace DAL.Data
 {
@@ -38,6 +39,8 @@ namespace DAL.Data
         public DbSet<TrackCertificate> TrackCertificates { get; set; }
 
 
+        public DbSet<Notification> Notifications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -47,6 +50,13 @@ namespace DAL.Data
             modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
             modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
             modelBuilder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasOne(n => n.User)
+                      .WithMany()
+                      .HasForeignKey(n => n.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
 
 
             modelBuilder.Entity<IdentityUserRole<int>>(entity =>
@@ -240,6 +250,11 @@ namespace DAL.Data
                     .WithMany()
                     .UsingEntity<LearningEntity_Language>();
 
+                entity
+                    .Property(l => l.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(20);
+
                 //entity
                 //    .HasDiscriminator<string>("learning_entity_type")
                 //    .HasValue<Course>("Course")
@@ -344,7 +359,7 @@ namespace DAL.Data
                 entity
                     .HasDiscriminator<string>("content_type")
                     .HasValue<VideoContent>("Video")
-                    .HasValue<PdfContent>("Article");
+                    .HasValue<ArticleContent>("Article");
             });
 
             modelBuilder.Entity<LessonResource>(entity =>
@@ -366,9 +381,9 @@ namespace DAL.Data
                 // TPH (One table for all the derived types)
                 entity
                     .HasDiscriminator<string>("resource_type")
-                    .HasValue<PdfResource>("PDF")
-                    .HasValue<ZipResource>("Zip")
-                    .HasValue<UrlResource>("Url");
+                    .HasValue<PdfResource>(LessonResourceType.PDF.ToString())
+                    .HasValue<ZipResource>(LessonResourceType.ZIP.ToString())
+                    .HasValue<UrlResource>(LessonResourceType.URL.ToString());
             });
 
             modelBuilder.Entity<LessonProgress>(entity =>

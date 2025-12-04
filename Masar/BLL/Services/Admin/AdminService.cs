@@ -179,5 +179,31 @@ namespace BLL.Services.Admin
                 PageSize = pageSize
             };
         }
+
+
+        
+        // Pending Courses Methodss
+        public async Task<List<AdminPendingCourseDto>> GetPendingCoursesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task ApproveCourseAsync(int courseId)
+        {
+            var course = await _context.Courses.FindAsync(courseId);
+            if(course != null)
+            {
+                //change status
+            }
+        }
+
+        public async Task RejectCourseAsync(int courseId)
+        {
+            var course = await _context.Courses.FindAsync(courseId);
+            if (course != null)
+            {
+                //change status
+            }
+        }
     }
 }

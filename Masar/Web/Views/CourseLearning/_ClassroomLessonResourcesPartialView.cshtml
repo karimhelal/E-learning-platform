@@ -1,0 +1,22 @@
+﻿@model IEnumerable<LessonResourceViewModel>
+
+<h3>Lesson Resources</h3>
+<div class="resources-list">
+    @foreach (var resource in Model)
+    {
+        <a href="@resource.ResourceUrl" class="resource-item" target="_blank">
+            <div class="resource-icon @resource.IconColorCssClass">
+                <i class="@resource.IconTypeCssClass"></i>
+            </div>
+            <div class="resource-info">
+                <div class="resource-name">
+                    @resource.ResourceTitle
+                </div>
+                <div class="resource-desc">
+                    @resource.ResourceType · 2.4 MB
+                </div>
+            </div>
+            <i class="@resource.ActionIconTypeCssClass resource-action"></i>
+        </a>
+    }
+</div>

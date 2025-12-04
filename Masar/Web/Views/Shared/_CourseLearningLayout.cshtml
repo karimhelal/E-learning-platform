@@ -1,0 +1,67 @@
+﻿@{
+    var PageTitle = @ViewBag.PageTitle;
+
+    var CourseId = ViewBag.CourseId;
+    var CourseTitle = ViewBag.CourseTitle;
+    var ModuleTitle = ViewBag.ModuleTitle; // change dynamically using JS
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@PageTitle</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+
+    <link rel="stylesheet" href="~/css/pages/CourseLearning/course-view.css" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="grid-background"></div>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">Masar</span>
+            </a>
+            <div class="header-divider"></div>
+            <nav class="breadcrumb" id="breadcrumb">
+                <a href="~/student/my-courses" class="breadcrumb-item">My Learning</a>
+                <i class="fas fa-chevron-right breadcrumb-sep"></i>
+                <a href="~/course/details/@CourseId" class="breadcrumb-item" id="breadcrumbCourse">@CourseTitle</a>
+                <i class="fas fa-chevron-right breadcrumb-sep"></i>
+                <span class="breadcrumb-item active" id="breadcrumbModule">@ModuleTitle</span>
+            </nav>
+        </div>
+    </header>
+
+
+    <div class="app-container">
+        @RenderBody()
+    </div>
+
+    <button class="mobile-toggle" id="mobileToggle" data-action="toggle-sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.plyr.io/3.8.3/plyr.js"></script>
+    <script src="~/js/CourseLearning/course-view.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

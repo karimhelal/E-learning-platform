@@ -1,0 +1,201 @@
+@model TrackDetailsViewModel
+
+@{
+    ViewBag.Title = Model.PageTitle;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/Home/track-details.css" />
+}
+
+<!-- Hero Section -->
+<section class="track-hero">
+    <div class="track-hero-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="~/">Home</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="~/browse-tracks">Tracks</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>@Model.CategoryName</span>
+            <i class="fas fa-chevron-right"></i>
+            <span>@Model.Title</span>
+        </div>
+
+        <div class="track-header">
+            <div class="track-info">
+                <div class="track-badge">
+                    <i class="fas @Model.CategoryIcon"></i>
+                    <span>@Model.CategoryName</span>
+                </div>
+
+                <h1 class="track-title">@Model.Title</h1>
+
+                <p class="track-description">@Model.Description</p>
+
+                <!-- Track Meta -->
+                <div class="track-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-book"></i>
+                        <span>@Model.CoursesCount Courses</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>@Model.DurationHours Hours Total</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-star"></i>
+                        <span>@Model.Rating.ToString("0.0") Rating</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-users"></i>
+                        <span>@Model.StudentsCount Students</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-signal"></i>
+                        <span class="level-badge @Model.LevelBadgeClass">@Model.Level</span>
+                    </div>
+                </div>
+
+                <!-- Skills -->
+                @if (Model.Skills.Any())
+                {
+                    <div class="track-skills">
+                        <h3>Skills You'll Gain</h3>
+                        <div class="skills-list">
+                            @foreach (var skill in Model.Skills)
+                            {
+                                <span class="skill-tag">@skill</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Stats Card -->
+            <div class="track-stats-card">
+                <h3>Track Overview</h3>
+                <div class="stat-item">
+                    <i class="fas fa-book-open"></i>
+                    <span>@Model.CoursesCount Structured Courses</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-certificate"></i>
+                    <span>Certificate Included</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-infinity"></i>
+                    <span>Lifetime Access</span>
+                </div>
+
+                @if (Model.IsEnrolled)
+                {
+                    <a href="/student/track/@Model.TrackId" class="btn btn-primary btn-block">
+                        <i class="fas fa-play"></i>
+                        Continue Learning
+                    </a>
+                }
+                else
+                {
+                    <button class="btn btn-primary btn-block" onclick="enrollTrack(@Model.TrackId)">
+                        <i class="fas fa-route"></i>
+                        Start Track
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Courses Section -->
+<section class="track-courses-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Courses in This Track</h2>
+            <p>Complete all @Model.CoursesCount courses to master this track</p>
+        </div>
+
+        <div class="courses-list">
+            @for (int i = 0; i < Model.Courses.Count; i++)
+            {
+                var course = Model.Courses[i];
+                <div class="track-course-card">
+                    <div class="course-number">
+                        <span>@(i + 1)</span>
+                    </div>
+
+                    <div class="course-thumbnail">
+                        @if (!string.IsNullOrEmpty(course.ThumbnailImageUrl))
+                        {
+                            <img src="@course.ThumbnailImageUrl" alt="@course.Title" />
+                        }
+                        else
+                        {
+                            <div class="thumbnail-placeholder">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        }
+                        <span class="course-level-badge @course.LevelBadgeClass">@course.Level</span>
+                    </div>
+
+                    <div class="course-details">
+                        <h3 class="course-title">@course.Title</h3>
+                        <p class="course-description">@course.Description</p>
+
+                        <div class="course-instructor">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <span>@course.InstructorName</span>
+                        </div>
+
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-book"></i>
+                                <span>@course.ModulesCount Modules</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-play-circle"></i>
+                                <span>@course.LessonsCount Lessons</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>@course.DurationHours Hours</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-star"></i>
+                                <span>@course.Rating.ToString("0.0")</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="course-actions">
+                        <a href="/course/@course.CourseId" class="btn btn-outline">
+                            <i class="fas fa-info-circle"></i>
+                            View Course
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (!Model.IsEnrolled)
+        {
+            <div class="enroll-cta">
+                <h2>Ready to Start Your Learning Journey?</h2>
+                <p>Enroll in this track and gain access to all @Model.CoursesCount courses</p>
+                <button class="btn btn-primary btn-large" onclick="enrollTrack(@Model.TrackId)">
+                    <i class="fas fa-route"></i>
+                    Start Track Now
+                </button>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function enrollTrack(trackId) {
+            // TODO: Implement enrollment logic
+            alert('Enrollment functionality will be implemented soon!');
+        }
+    </script>
+}
