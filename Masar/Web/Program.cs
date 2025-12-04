@@ -23,6 +23,7 @@ using Microsoft.EntityFrameworkCore;
 using Web.Hubs;
 using Web.Interfaces;
 using Web.Services;
+using Microsoft.AspNetCore.Antiforgery;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,9 @@ builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
 // Add generic repositories for LessonProgress and CourseEnrollment
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+// Add generic repositories for LessonProgress and CourseEnrollment
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
 
 // Current User Service
 builder.Services.AddHttpContextAccessor();
@@ -59,6 +63,7 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICourseLearningService, CourseLearningService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
+builder.Services.AddScoped<BLL.Interfaces.Student.IStudentProfileService, BLL.Services.Student.StudentProfileService>();
 builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
 

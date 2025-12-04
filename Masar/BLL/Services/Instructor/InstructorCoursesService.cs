@@ -36,20 +36,26 @@ public class InstructorCoursesService : IInstructorCoursesService
         bool isASC = request.SortOrder.ToUpper() == "ASC";
         string sortBy = request.SortBy?.ToLower() ?? "createddate";
 
-        query = sortBy switch
+        IQueryable<Course> sortedQuery = sortBy switch
         {
             "createddate" => isASC ? query.OrderBy(c => c.CreatedDate)
                                    : query.OrderByDescending(c => c.CreatedDate),
-
             "students" => isASC ? query.OrderBy(c => c.Enrollments!.Count())
                                 : query.OrderByDescending(c => c.Enrollments!.Count()),
-
             _ => query.OrderByDescending(c => c.CreatedDate)
         };
 
-        var totalCount = await query.CountAsync();
+        // Now apply includes to the sorted query
+        var finalQuery = sortedQuery
+            .Include(c => c.Categories)
+            .Include(c => c.Modules)
+                .ThenInclude(m => m.Lessons)
+                    .ThenInclude(l => l.LessonContent)
+            .Include(c => c.Enrollments);
 
-        var items = await query
+        var totalCount = await finalQuery.CountAsync();
+
+        var items = await finalQuery
             .Skip((request.CurrentPage - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(c => new InstructorCourseDto
@@ -62,18 +68,21 @@ public class InstructorCoursesService : IInstructorCoursesService
                 LastUpdatedDate = c.CreatedDate,
                 Status = c.Status.ToString(),
                 Level = c.Level,
-                MainCategory = c.Categories.FirstOrDefault(),
-
-                // calculated fields
-                NumberOfModules = c.Modules.Count(),
-                NumberOfStudents = c.Enrollments!.Count(),
-                NumberOfMinutes = (int)(
-                                c.Modules
-                                    .SelectMany(m => m.Lessons)
-                                    .Select(l => l.LessonContent)
-                                    .OfType<VideoContent>()
-                                    .Sum(l => l.DurationInSeconds) / 60.0),
-                AverageRating = 4.7f
+                MainCategory = c.Categories != null && c.Categories.Any() 
+                    ? c.Categories.FirstOrDefault() 
+                    : null,
+                NumberOfModules = c.Modules != null ? c.Modules.Count() : 0,
+                NumberOfStudents = c.Enrollments != null ? c.Enrollments.Count() : 0,
+                NumberOfMinutes = c.Modules != null 
+                    ? (int)(c.Modules
+                        .Where(m => m.Lessons != null)  // CHANGED: Use Where instead of SelectMany with ??
+                        .SelectMany(m => m.Lessons!)
+                        .Where(l => l.LessonContent != null)
+                        .Select(l => l.LessonContent)
+                        .OfType<VideoContent>()
+                        .Sum(l => l.DurationInSeconds) / 60.0)
+                    : 0,
+                AverageRating = 4.8f
             })
             .ToListAsync();
 
@@ -85,9 +94,9 @@ public class InstructorCoursesService : IInstructorCoursesService
             Settings = new PaginationSettingsDto
             {
                 TotalPages = totalPages,
-                TotalCount = totalCount,
                 CurrentPage = request.CurrentPage,
-                PageSize = request.PageSize
+                PageSize = request.PageSize,
+                TotalCount = totalCount
             }
         };
     }
