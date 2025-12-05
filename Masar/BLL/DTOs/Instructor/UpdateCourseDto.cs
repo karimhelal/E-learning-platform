@@ -30,12 +30,9 @@ public class UpdateLessonDto
     public string? VideoUrl { get; set; }
     public string? PdfUrl { get; set; }
     public int? DurationInSeconds { get; set; }
-    
-    // ADD THIS PROPERTY
     public List<UpdateLessonResourceDto> Resources { get; set; } = new();
 }
 
-// ADD THIS NEW CLASS
 public class UpdateLessonResourceDto
 {
     public int? LessonResourceId { get; set; }  // Null for new resources

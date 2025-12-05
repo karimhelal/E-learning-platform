@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using DAL.Data;
 using Web.Services;
 using Web.ViewModels;
-
+using Microsoft.AspNetCore.Authorization;
 namespace Web.Controllers;
 
-//[AllowAnonymous]
+[AllowAnonymous]
 public class CertificateController : Controller
 {
     private readonly AppDbContext _context;

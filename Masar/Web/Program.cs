@@ -23,6 +23,7 @@ using Microsoft.EntityFrameworkCore;
 using Web.Hubs;
 using Web.Interfaces;
 using Web.Services;
+using Microsoft.AspNetCore.Antiforgery;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,8 +39,13 @@ builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
 builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
+builder.Services.AddScoped<IModuleRepository, ModuleRepository>(); // ADD THIS
+builder.Services.AddScoped<ILessonRepository, LessonRepository>(); // ADD THIS
 builder.Services.AddScoped<IInstructorProfileRepository, InstructorProfileRepository>();
 
+
+// Add generic repositories for LessonProgress and CourseEnrollment
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 // Add generic repositories for LessonProgress and CourseEnrollment
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -60,9 +66,12 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICourseLearningService, CourseLearningService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
+builder.Services.AddScoped<BLL.Interfaces.Student.IStudentProfileService, BLL.Services.Student.StudentProfileService>();
 builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
 
+builder.Services.AddScoped<BLL.Interfaces.Student.IStudentProfileService, BLL.Services.Student.StudentProfileService>();
+builder.Services.AddScoped<ICourseCreationService, CourseCreationService>(); // ADDED THIS LINE
 
 
 // ========================================
@@ -91,6 +100,7 @@ builder.Services.AddAntiforgery(options =>
     options.HeaderName = "RequestVerificationToken";
 });
 
+builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 // Configure DbContext with SQL Server
@@ -135,6 +145,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICertificateGenerationService, CertificateGenerationService>();
 
 var app = builder.Build();
 app.UseAuthentication();
@@ -157,6 +168,9 @@ app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add this BEFORE MapControllerRoute
+app.MapRazorPages(); // ADD THIS LINE
 
 app.MapControllerRoute(
     name: "default",
