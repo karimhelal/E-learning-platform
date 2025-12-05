@@ -1,5 +1,4 @@
 ﻿using BLL.DTOs.Classroom;
-using Core.Entities;
 
 namespace BLL.Interfaces.CourseLearning;
 

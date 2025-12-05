@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251203054919_AddNotificationsAndCourseStatus")]
-    partial class AddNotificationsAndCourseStatus
+    [Migration("20251205144023_AddedUserSkillsAndSocialLinks")]
+    partial class AddedUserSkillsAndSocialLinks
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -277,6 +277,12 @@ namespace DAL.Migrations
                         .HasColumnType("date")
                         .HasColumnName("created_date");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
                     b.HasKey("Id");
 
                     b.ToTable("LearningEntities", (string)null);
@@ -368,11 +374,6 @@ namespace DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LessonContentId"));
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("content");
-
                     b.Property<int>("LessonId")
                         .HasColumnType("int")
                         .HasColumnName("lesson_id");
@@ -447,6 +448,17 @@ namespace DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("lesson_id");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("resource_title");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("resource_url");
+
                     b.Property<string>("resource_type")
                         .IsRequired()
                         .HasMaxLength(21)
@@ -504,7 +516,8 @@ namespace DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("notification_id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -537,6 +550,32 @@ namespace DAL.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("Core.Entities.Skill", b =>
+                {
+                    b.Property<int>("SkillId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("skill_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SkillId"));
+
+                    b.Property<string>("SkillName")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("skill_name");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("SkillId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Skills", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.StudentProfile", b =>
@@ -675,6 +714,37 @@ namespace DAL.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.UserSocialLink", b =>
+                {
+                    b.Property<int>("UserSocialLinkId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("social_link_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserSocialLinkId"));
+
+                    b.Property<string>("SocialPlatform")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("platform");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("url");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("UserSocialLinkId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSocialLinks", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
@@ -922,15 +992,14 @@ namespace DAL.Migrations
                     b.ToTable("Tracks", (string)null);
                 });
 
-            modelBuilder.Entity("Core.Entities.PdfContent", b =>
+            modelBuilder.Entity("Core.Entities.ArticleContent", b =>
                 {
                     b.HasBaseType("Core.Entities.LessonContent");
 
-                    b.Property<string>("PdfUrl")
+                    b.Property<string>("Content")
                         .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("pdf_url");
+                        .HasColumnName("article_content");
 
                     b.HasDiscriminator().HasValue("Article");
                 });
@@ -945,9 +1014,8 @@ namespace DAL.Migrations
 
                     b.Property<string>("VideoUrl")
                         .IsRequired()
-                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("pdf_url");
+                        .HasColumnName("video_url");
 
                     b.HasDiscriminator().HasValue("Video");
                 });
@@ -956,11 +1024,6 @@ namespace DAL.Migrations
                 {
                     b.HasBaseType("Core.Entities.LessonResource");
 
-                    b.Property<string>("PdfUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("pdf_url");
-
                     b.HasDiscriminator().HasValue("PDF");
                 });
 
@@ -968,24 +1031,14 @@ namespace DAL.Migrations
                 {
                     b.HasBaseType("Core.Entities.LessonResource");
 
-                    b.Property<string>("Link")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("link_url");
-
-                    b.HasDiscriminator().HasValue("Url");
+                    b.HasDiscriminator().HasValue("URL");
                 });
 
             modelBuilder.Entity("Core.Entities.ZipResource", b =>
                 {
                     b.HasBaseType("Core.Entities.LessonResource");
 
-                    b.Property<string>("ZipUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("zip_url");
-
-                    b.HasDiscriminator().HasValue("Zip");
+                    b.HasDiscriminator().HasValue("ZIP");
                 });
 
             modelBuilder.Entity("Core.Entities.Assignment", b =>
@@ -1163,6 +1216,17 @@ namespace DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Core.Entities.Skill", b =>
+                {
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("Skills")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Core.Entities.StudentProfile", b =>
                 {
                     b.HasOne("Core.Entities.User", "User")
@@ -1191,6 +1255,17 @@ namespace DAL.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Track");
+                });
+
+            modelBuilder.Entity("Core.Entities.UserSocialLink", b =>
+                {
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("UserSocialLinks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1365,7 +1440,11 @@ namespace DAL.Migrations
                 {
                     b.Navigation("InstructorProfile");
 
+                    b.Navigation("Skills");
+
                     b.Navigation("StudentProfile");
+
+                    b.Navigation("UserSocialLinks");
                 });
 
             modelBuilder.Entity("Core.Entities.Course", b =>

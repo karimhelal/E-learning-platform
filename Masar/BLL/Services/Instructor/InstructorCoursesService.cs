@@ -13,7 +13,6 @@ namespace BLL.Services.Instructor;
 public class InstructorCoursesService : IInstructorCoursesService
 {
     private readonly ICourseRepository _courseRepo;
-    private readonly ICategoryRepository _categoryRepo;
     private readonly AppDbContext _context;
 
     public InstructorCoursesService(
@@ -22,27 +21,26 @@ public class InstructorCoursesService : IInstructorCoursesService
         AppDbContext context)
     {
         _courseRepo = courseRepo;
-        _categoryRepo = categoryRepo;
         _context = context;
     }
 
-    public async Task<PagedResultDto<InstructorCourseDto>> GetInstructorCoursesPagedAsync(
-        int instructorId,
-        PagingRequestDto request)
+    public async Task<PagedResultDto<InstructorCourseDto>> GetInstructorCoursesPagedAsync(int instructorId, PagingRequestDto request)
     {
         var query = _courseRepo.GetCoursesByInstructorQueryable(instructorId);
 
-        // Apply sorting BEFORE includes
-        bool isASC = request.SortOrder.ToUpper() == "ASC";
-        string sortBy = request.SortBy?.ToLower() ?? "createddate";
+        bool isASC = request.SortOrder == SortOrder.Ascending;
+        CourseSortOption sortBy = request.SortBy;
 
         query = sortBy switch
         {
-            "createddate" => isASC ? query.OrderBy(c => c.CreatedDate)
-                                   : query.OrderByDescending(c => c.CreatedDate),
+            CourseSortOption.CreationDate => isASC ? query.OrderBy(c => c.CreatedDate)
+                                                   : query.OrderByDescending(c => c.CreatedDate),
 
-            "students" => isASC ? query.OrderBy(c => c.Enrollments!.Count())
-                                : query.OrderByDescending(c => c.Enrollments!.Count()),
+            CourseSortOption.Popularity => isASC ? query.OrderBy(c => c.Enrollments!.Count())
+                                                 : query.OrderByDescending(c => c.Enrollments!.Count()),
+
+            CourseSortOption.Title => isASC ? query.OrderBy(c => c.Title)
+                                            : query.OrderByDescending(c => c.Title),
 
             _ => query.OrderByDescending(c => c.CreatedDate)
         };
@@ -62,7 +60,7 @@ public class InstructorCoursesService : IInstructorCoursesService
                 LastUpdatedDate = c.CreatedDate,
                 Status = c.Status.ToString(),
                 Level = c.Level,
-                MainCategory = c.Categories.FirstOrDefault(),
+                MainCategory = c.Categories.Select(cat => cat.Name).FirstOrDefault(),
 
                 // calculated fields
                 NumberOfModules = c.Modules.Count(),
@@ -82,6 +80,7 @@ public class InstructorCoursesService : IInstructorCoursesService
         return new PagedResultDto<InstructorCourseDto>
         {
             Items = items ?? new List<InstructorCourseDto>(),
+
             Settings = new PaginationSettingsDto
             {
                 TotalPages = totalPages,
@@ -93,7 +92,7 @@ public class InstructorCoursesService : IInstructorCoursesService
     }
 
     // Update the GetCourseForEditAsync method to include the new fields
-    public async Task<BLL.DTOs.Instructor.InstructorCourseEditDto?> GetCourseForEditAsync(int instructorId, int courseId)
+    public async Task<InstructorCourseEditDto?> GetCourseForEditAsync(int instructorId, int courseId)
     {
         var course = await _courseRepo.GetCourseByIdQueryable(courseId)
             .Where(c => c.InstructorId == instructorId)
@@ -120,7 +119,7 @@ public class InstructorCoursesService : IInstructorCoursesService
             ? (int)enrollments.Average(e => (float)e.ProgressPercentage) 
             : 0;
 
-        return new BLL.DTOs.Instructor.InstructorCourseEditDto
+        return new InstructorCourseEditDto
         {
             CourseId = course.Id,
             Title = course.Title,

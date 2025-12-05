@@ -18,7 +18,7 @@ public class ClassroomDto
 
 public class CourseOverviewStatsDto
 {
-    public string CourseDescription { get; set; }
+    public string? CourseDescription { get; set; }
 
     public int ModulesCount { get; set; }
     public int LessonsCount { get; set; }
@@ -41,15 +41,15 @@ public class CourseInstructorStatsDto
 {
     public int InstructorId { get; set; }
     public string InstructorName { get; set; }
-    public string RoleTitle { get; set; }
-    public string Bio { get; set; }
+    public string? RoleTitle { get; set; }
+    public string? Bio { get; set; }
 
     public int? YearsOfExperience { get; set; }
     public float AverageRating { get; set; }
     public int StudentsTaughtCount { get; set; }
     public int TotalCoursesCount { get; set; }
 
-    public string ProfilePictureUrl { get; set; }
+    public string? ProfilePictureUrl { get; set; }
 }
 
 

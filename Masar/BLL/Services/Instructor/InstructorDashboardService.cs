@@ -10,10 +10,12 @@ public class InstructorDashboardService : IInstructorDashboardService
 {
     private readonly ICourseRepository _courseRepo;
     private readonly IUserRepository _userRepo;
-    public InstructorDashboardService(ICourseRepository courseRepo, IUserRepository userRepo)
+    private readonly IInstructorProfileRepository _instructorProfileRepo;
+    public InstructorDashboardService(ICourseRepository courseRepo, IUserRepository userRepo, IInstructorProfileRepository instructorProfileRepository)
     {
         _courseRepo = courseRepo;
         _userRepo = userRepo;
+        _instructorProfileRepo = instructorProfileRepository;
     }
 
 
@@ -108,16 +110,19 @@ public class InstructorDashboardService : IInstructorDashboardService
     public async Task<InstructorDashboardDto> GetInstructorDashboardAsync(int instructorId)
     {
         // 1. Validate User
-        var instructorProfile = await _userRepo.GetInstructorProfileQueryable(instructorId)
-                                               .Include(ip => ip.User)
-                                               .FirstOrDefaultAsync();
-
-        if (instructorProfile == null)
+        if (!await _userRepo.HasInstructorProfileWithIdAsync(instructorId))
             throw new InvalidOperationException($"Instructor with Id: {instructorId} doesn't exist.");
+
+        var instructorProfile = await _userRepo.GetInstructorProfileQueryable(instructorId)
+            .Include(p => p.User)
+            .FirstOrDefaultAsync();
 
         // 2. Base Query
         var coursesQuery = _courseRepo.GetCoursesByInstructorQueryable(instructorId);
+        var instructorEnrollmentsQuery = _instructorProfileRepo.GetAllInstructorEnrollmentsQueryable(instructorId);
+
         var startOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+
 
         // 3. Aggregate Stats (Single DB Call)
         var stats = await coursesQuery
@@ -194,7 +199,7 @@ public class InstructorDashboardService : IInstructorDashboardService
             CurrentMonthStats = new InstructorCurrentMonthStatsDto
             {
                 NewStudents = stats.Sum(s => s.NewStudentsCount),
-                Completions = totalCompletions,
+                NewCompletions = totalCompletions,
                 NewReviews = 26
             },
 

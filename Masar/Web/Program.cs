@@ -38,6 +38,7 @@ builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
 builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
+builder.Services.AddScoped<IInstructorProfileRepository, InstructorProfileRepository>();
 
 
 // Add generic repositories for LessonProgress and CourseEnrollment

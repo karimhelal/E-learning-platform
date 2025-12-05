@@ -513,7 +513,8 @@ namespace DAL.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("notification_id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -546,6 +547,32 @@ namespace DAL.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("Core.Entities.Skill", b =>
+                {
+                    b.Property<int>("SkillId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("skill_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SkillId"));
+
+                    b.Property<string>("SkillName")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("skill_name");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("SkillId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Skills", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.StudentProfile", b =>
@@ -684,6 +711,37 @@ namespace DAL.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.UserSocialLink", b =>
+                {
+                    b.Property<int>("UserSocialLinkId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("social_link_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserSocialLinkId"));
+
+                    b.Property<string>("SocialPlatform")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("platform");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("url");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("UserSocialLinkId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSocialLinks", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
@@ -1155,6 +1213,17 @@ namespace DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Core.Entities.Skill", b =>
+                {
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("Skills")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Core.Entities.StudentProfile", b =>
                 {
                     b.HasOne("Core.Entities.User", "User")
@@ -1183,6 +1252,17 @@ namespace DAL.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Track");
+                });
+
+            modelBuilder.Entity("Core.Entities.UserSocialLink", b =>
+                {
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("UserSocialLinks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1357,7 +1437,11 @@ namespace DAL.Migrations
                 {
                     b.Navigation("InstructorProfile");
 
+                    b.Navigation("Skills");
+
                     b.Navigation("StudentProfile");
+
+                    b.Navigation("UserSocialLinks");
                 });
 
             modelBuilder.Entity("Core.Entities.Course", b =>

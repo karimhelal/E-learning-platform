@@ -7,10 +7,8 @@ using Web.ViewModels.Instructor.Dashboard;
 using Web.ViewModels.Misc;
 using Core.Entities.Enums;
 using BLL.DTOs.Instructor;
-using BLL.DTOs.Course;  // ADD THIS LINE
 using Microsoft.AspNetCore.Identity;
 using Core.Entities;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Core.RepositoryInterfaces;
 using Web.Interfaces;
@@ -67,6 +65,7 @@ public class InstructorController : Controller
     private async Task SetInstructorViewBagDataAsync()
     {
         var instructorId = await GetInstructorIdAsync();
+
         if (instructorId > 0)
         {
             var instructorProfile = await _userRepository.GetInstructorProfileAsync(instructorId, includeUserBase: true);
@@ -77,16 +76,18 @@ public class InstructorController : Controller
         }
     }
 
+
+
     [HttpGet("/instructor/dashboard")]
     public async Task<IActionResult> Dashboard()
     {
         ViewBag.Title = "Instructor Dashboard | Masar";
-        await SetInstructorViewBagDataAsync(); // Add this line
+        //await SetInstructorViewBagDataAsync(); // Add this line
 
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
             return Unauthorized("Instructor profile not found");
-            
+
         var dashboardData = await _dashboardService.GetInstructorDashboardAsync(instructorId);
 
         var viewModel = new InstructorDashboardViewModel
@@ -108,7 +109,7 @@ public class InstructorController : Controller
                 {
                     NewStudents = dashboardData.CurrentMonthStats.NewStudents,
                     NewReviews = dashboardData.CurrentMonthStats.NewReviews,
-                    Completions = dashboardData.CurrentMonthStats.Completions
+                    Completions = dashboardData.CurrentMonthStats.NewCompletions
                 },
 
                 TopPerformingCourses = dashboardData.TopPerformingCourses.Select(c => 
@@ -155,13 +156,13 @@ public class InstructorController : Controller
     public async Task<IActionResult> MyCourses()
     {
         ViewBag.Title = "My Courses | Masar";
-        await SetInstructorViewBagDataAsync(); // Add this line
+        //await SetInstructorViewBagDataAsync(); // Add this line
         
         var instructorId = await GetInstructorIdAsync();
         if (instructorId == 0)
             return Unauthorized("Instructor profile not found");
             
-        var initialRequest = new PagingRequestDto() { CurrentPage = 1, PageSize = 3 };
+        var initialRequest = new PagingRequestDto() { CurrentPage = 1, PageSize = 6 };
         var coursesData = await _coursesService.GetInstructorCoursesPagedAsync(instructorId, initialRequest);
         
         var viewModel = new InstructorCoursesViewModel
@@ -184,11 +185,11 @@ public class InstructorController : Controller
                     ThumbnailImageUrl = c.ThumbnailImageUrl,
                     Status = c.Status,
 
-                    CreatedDate = c.CreatedDate.ToString("dd-MM-yyyy"),
-                    LastUpdatedDate = c.LastUpdatedDate.ToString("dd-MM-yyyy"),
+                    CreatedDate = c.CreatedDate?.ToString("dd-MM-yyyy") ?? "",
+                    LastUpdatedDate = c.LastUpdatedDate?.ToString("dd-MM-yyyy") ?? "",
 
                     Level = c.Level.ToString(),
-                    MainCategory = c.MainCategory?.Name ?? "Undefined",
+                    MainCategory = c.MainCategory ?? "UnCategorized",
 
                     NumberOfStudents = c.NumberOfStudents,
                     NumberOfModules = c.NumberOfModules,
@@ -233,11 +234,11 @@ public class InstructorController : Controller
                 ThumbnailImageUrl = c.ThumbnailImageUrl,
                 Status = c.Status,
 
-                CreatedDate = c.CreatedDate.ToString("MM-dd-yyyy"),
-                LastUpdatedDate = c.LastUpdatedDate.ToString("MM-dd-yyyy"),
+                CreatedDate = c.CreatedDate?.ToString("MM-dd-yyyy") ?? "",
+                LastUpdatedDate = c.LastUpdatedDate?.ToString("MM-dd-yyyy") ?? "",
 
                 Level = c.Level.ToString(),
-                MainCategory = c.MainCategory?.Name ?? "Undefined",
+                MainCategory = c.MainCategory ?? "UnCategorized",
 
                 NumberOfStudents = c.NumberOfStudents,
                 NumberOfModules = c.NumberOfModules,

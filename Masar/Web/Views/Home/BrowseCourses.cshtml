@@ -2,6 +2,15 @@
 
 @{
     ViewBag.Title = Model.PageTitle;
+
+    var TitleSortOptionName = CourseSortOption.Title.ToString();
+    var PopularitySortOptionName = CourseSortOption.Popularity.ToString();
+    var CreationDateSortOptionName = CourseSortOption.CreationDate.ToString();
+    var RatingSortOptionName = CourseSortOption.Rating.ToString();
+    var ReviewsSortOptionName = CourseSortOption.Reviews.ToString();
+
+    var DescendingOrderName = SortOrder.Descending.ToString();
+    var AscendingOrderName = SortOrder.Ascending.ToString();
 }
 
 <main class="public-main">
@@ -125,11 +134,11 @@
                         </button>
 
                         <div class="filter-dropdown-menu">
-                            <button class="filter-option" data-value="title">A-Z</button>
-                            <button class="filter-option active" data-value="creationDate">Creation Date</button>
-                            <button class="filter-option" data-value="students">Popularity</button>
-                            <button class="filter-option" data-value="rate">Rating</button>
-                            <button class="filter-option" data-value="reviews">Reviews</button>
+                            <button class="filter-option" data-value="@TitleSortOptionName">A-Z</button>
+                            <button class="filter-option active" data-value="@CreationDateSortOptionName">Creation Date</button>
+                            <button class="filter-option" data-value="@PopularitySortOptionName">Popularity</button>
+                            <button class="filter-option" data-value="@RatingSortOptionName">Rating</button>
+                            <button class="filter-option" data-value="@ReviewsSortOptionName">Reviews</button>
                         </div>
 
                         <input type="hidden" id="sortFilter" value="creationDate" />
@@ -142,8 +151,8 @@
                         </button>
 
                         <div class="filter-dropdown-menu">
-                            <button class="filter-option" data-value="asc">Ascending</button>
-                            <button class="filter-option active" data-value="desc">Descending</button>
+                            <button class="filter-option" data-value="@AscendingOrderName">Ascending</button>
+                            <button class="filter-option active" data-value="@DescendingOrderName">Descending</button>
                         </div>
 
                         <input type="hidden" id="sortOrder" value="desc" />

@@ -5,5 +5,5 @@ public enum LearningEntityStatus
     Draft = 0,      // Default: Hidden, editable
     Pending = 1,    // Submitted for review
     Published = 2,  // Live, visible to students
-    Archived = 3    // Hidden, read-only
+    Rejected = 3,    // Hidden, read-only
 }

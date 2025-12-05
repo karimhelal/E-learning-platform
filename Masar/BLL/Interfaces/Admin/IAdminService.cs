@@ -1,26 +1,20 @@
 ﻿using BLL.DTOs.Admin;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BLL.Interfaces.Admin
+namespace BLL.Interfaces.Admin;
+
+public interface IAdminService
 {
-    public interface IAdminService
-    {
-        Task<PagedResult<AdminUserDto>> GetUsersAsync(string search, string role, int page = 1, int pageSize = 10);
-        Task<bool> DeleteUserAsync(int userId);
+    Task<PagedResult<AdminUserDto>> GetUsersAsync(string search, string role, int page = 1, int pageSize = 10);
+    Task<bool> DeleteUserAsync(int userId);
 
-        // Courses Management
-        Task<PagedResult<AdminCourseDto>> GetCoursesAsync(string search, string category, int page = 1, int pageSize = 10);
-        Task<bool> DeleteCourseAsync(int courseId);
+    // Courses Management
+    Task<PagedResult<AdminCourseDto>> GetCoursesAsync(string search, string category, int page = 1, int pageSize = 10);
+    Task<bool> DeleteCourseAsync(int courseId);
 
-        Task<List<CategoryDto>> GetAllCategoriesAsync();
+    Task<List<CategoryDto>> GetAllCategoriesAsync();
 
-        // Pending Courses
-        Task<List<AdminPendingCourseDto>> GetPendingCoursesAsync();
-        Task ApproveCourseAsync(int courseId);
-        Task RejectCourseAsync(int courseId);
-    }
+    // Pending Courses
+    Task<List<AdminPendingCourseDto>> GetPendingCoursesAsync();
+    Task ApproveCourseAsync(int courseId);
+    Task RejectCourseAsync(int courseId);
 }

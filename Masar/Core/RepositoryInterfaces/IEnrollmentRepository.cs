@@ -63,4 +63,5 @@ public interface IEnrollmentRepository : IGenericRepository<EnrollmentBase>
     void DeleteEnrollment(EnrollmentBase enrollment);
 
     Task UpdateProgressPercentageAsync(int studentId, int courseId, decimal progressPercentage);
+
 }
