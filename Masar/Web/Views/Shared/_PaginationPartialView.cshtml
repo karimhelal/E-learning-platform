@@ -24,14 +24,16 @@
     }
 }
 
-@if(totalPages <= 1)
-{
-    return;
-}
+
 
 <div class="pagination-options" hidden>
     <div id="pageSize">@Model.PageSize</div>
 </div>
+
+@if (totalPages <= 1)
+{
+    return;
+}
 
 <button class="pagination-btn ajax-pager @(current == 1 ? "disabled" : "")"
         onclick="fetchPage(this, -1)"

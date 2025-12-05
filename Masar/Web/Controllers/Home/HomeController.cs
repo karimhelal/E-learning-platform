@@ -74,7 +74,7 @@ public class HomeController : Controller
     [HttpGet("~/browse-courses")]
     public async Task<IActionResult> BrowseCourses()
     {
-        var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 3 };
+        var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 2 };
         var initialRequest = new BrowseRequestDto();
         initialRequest.PagingRequest = pagingRequest;
 
@@ -238,12 +238,13 @@ public class HomeController : Controller
         var result = new List<FilterGroupViewModel>();
 
         if (filterGroupsStats.CategoryCounts.Any())
+        {
             result.Add(new CheckboxFilter
             {
                 Title = "Categories",
                 RequestKey = "CategoryNames",
 
-                FilterOptions = filterGroups.CategoryNames!.Select(cat => new FilterOption
+                FilterOptions = filterGroups.CategoryNames!.Where(c => filterGroupsStats.CategoryCounts.SingleOrDefault(e => e.Key.ToLower() == c.ToLower()).Value > 0).Select(cat => new FilterOption
                 {
                     Label = cat,
                     Count = filterGroupsStats.CategoryCounts.SingleOrDefault(e => e.Key.ToLower() == cat.ToLower()).Value,
@@ -252,15 +253,17 @@ public class HomeController : Controller
                 })
                 .OrderByDescending(x => x.Count)
             });
+        }
 
 
         if (filterGroupsStats.LevelCounts.Any())
+        {
             result.Add(new CheckboxFilter
             {
                 Title = "Levels",
                 RequestKey = "LevelNames",
 
-                FilterOptions = filterGroups.LevelNames!.Select(lev => new FilterOption
+                FilterOptions = filterGroups.LevelNames!.Where(l => filterGroupsStats.LevelCounts.SingleOrDefault(e => e.Key.ToLower() == l.ToLower()).Value > 0).Select(lev => new FilterOption
                 {
                     Label = lev,
                     Count = filterGroupsStats.LevelCounts.SingleOrDefault(e => e.Key.ToLower() == lev.ToLower()).Value,
@@ -268,15 +271,17 @@ public class HomeController : Controller
                     Value = lev
                 })
             });
+        }
 
 
         if (filterGroupsStats.LanguageCounts.Any())
+        {
             result.Add(new CheckboxFilter
             {
                 Title = "Languages",
                 RequestKey = "LanguageNames",
 
-                FilterOptions = filterGroups.LanguageNames!.Select(lang => new FilterOption
+                FilterOptions = filterGroups.LanguageNames!.Where(l => filterGroupsStats.LanguageCounts.SingleOrDefault(e => e.Key.ToLower() == l.ToLower()).Value > 0).Select(lang => new FilterOption
                 {
                     Label = lang,
                     Count = filterGroupsStats.LanguageCounts.SingleOrDefault(e => e.Key.ToLower() == lang.ToLower()).Value,
@@ -285,75 +290,85 @@ public class HomeController : Controller
                 })
                 .OrderByDescending(x => x.Count)
             });
+        }
 
-
-        result.Add(new NumberRangeFilter
+        if (filterGroups.MinDuration != null && filterGroups.MaxDuration != null && (filterGroups.MinDuration != filterGroups.MaxDuration))
         {
-            Title = "Duration (Hours)",
-            RequestKey = "Duration",
+            result.Add(new NumberRangeFilter
+            {
+                Title = "Duration (Hours)",
+                RequestKey = "Duration",
 
-            MinRequestKey = "MinDuration",
-            MaxRequestKey = "MaxDuration",
-            MinValue = filterGroups.MinDuration ?? 0,
-            MaxValue = ((filterGroups.MaxDuration ?? 0) == (filterGroups.MinDuration ?? 1)) ? (filterGroups.MaxDuration ?? 0) + 1 : filterGroups.MaxDuration,
-            Step = 0.5d,
-            Unit = "H"
-        });
+                MinRequestKey = "MinDuration",
+                MaxRequestKey = "MaxDuration",
+                MinValue = filterGroups.MinDuration ?? 0,
+                MaxValue = ((filterGroups.MaxDuration ?? 0) == (filterGroups.MinDuration ?? 1)) ? (filterGroups.MaxDuration ?? 0) + 1 : filterGroups.MaxDuration,
+                Step = 0.5d,
+                Unit = "H"
+            });
+        }
 
-
-        result.Add(new NumberRangeFilter
+        if (filterGroups.MinEnrollments != null && filterGroups.MaxEnrollments != null && (filterGroups.MinEnrollments != filterGroups.MaxEnrollments))
         {
-            Title = "Enrollments",
-            RequestKey = "Enrollments",
+            result.Add(new NumberRangeFilter
+            {
+                Title = "Enrollments",
+                RequestKey = "Enrollments",
 
-            MinRequestKey = "MinEnrollments",
-            MaxRequestKey = "MaxEnrollments",
-            MinValue = filterGroups.MinEnrollments ?? 0,
-            MaxValue = filterGroups.MaxEnrollments ?? 100,
-            Step = 1,
-            Unit = "STUDENTS"
-        });
+                MinRequestKey = "MinEnrollments",
+                MaxRequestKey = "MaxEnrollments",
+                MinValue = filterGroups.MinEnrollments ?? 0,
+                MaxValue = filterGroups.MaxEnrollments ?? 100,
+                Step = 1,
+                Unit = "STUDENTS"
+            });
+        }
 
-
-        result.Add(new NumberRangeFilter
+        if (filterGroups.MinRating != null && filterGroups.MaxRating != null && (filterGroups.MinRating != filterGroups.MaxRating))
         {
-            Title = "Rating",
-            RequestKey = "Rating",
+            result.Add(new NumberRangeFilter
+            {
+                Title = "Rating",
+                RequestKey = "Rating",
 
-            MinRequestKey = "MinRating",
-            MaxRequestKey = "MaxRating",
-            MinValue = filterGroups.MinRating ?? 0,
-            MaxValue = filterGroups.MaxRating ?? 5,
-            Step = 0.1d,
-            Unit = ""
-        });
+                MinRequestKey = "MinRating",
+                MaxRequestKey = "MaxRating",
+                MinValue = filterGroups.MinRating ?? 0,
+                MaxValue = filterGroups.MaxRating ?? 5,
+                Step = 0.1d,
+                Unit = ""
+            });
+        }
 
-
-        result.Add(new NumberRangeFilter
+        if (filterGroups.MinReviews != null && filterGroups.MaxReviews != null && (filterGroups.MinReviews != filterGroups.MaxReviews))
         {
-            Title = "Reviews",
-            RequestKey = "Reviews",
+            result.Add(new NumberRangeFilter
+            {
+                Title = "Reviews",
+                RequestKey = "Reviews",
 
-            MinRequestKey = "MinReviews",
-            MaxRequestKey = "MaxReviews",
-            MinValue = filterGroups.MinReviews ?? 0,
-            MaxValue = filterGroups.MaxReviews ?? 10000,
-            Step = 1,
-            Unit = ""
-        });
+                MinRequestKey = "MinReviews",
+                MaxRequestKey = "MaxReviews",
+                MinValue = filterGroups.MinReviews ?? 0,
+                MaxValue = filterGroups.MaxReviews ?? 10000,
+                Step = 1,
+                Unit = ""
+            });
+        }
 
-
-        result.Add(new DateRangeFilter
+        if (filterGroups.MinCreationDate != null && filterGroups.MaxCreationDate != null && (filterGroups.MinCreationDate != filterGroups.MaxCreationDate))
         {
-            Title = "Creation Date",
-            RequestKey = "CreationDate",
+            result.Add(new DateRangeFilter
+            {
+                Title = "Creation Date",
+                RequestKey = "CreationDate",
 
-            MinRequestKey = "MinCreationDate",
-            MaxRequestKey = "MaxCreationDate",
-            MinDate = filterGroups.MinCreationDate ?? DateOnly.MinValue,
-            MaxDate = filterGroups.MaxCreationDate ?? DateOnly.FromDateTime(DateTime.Now)
-        });
-
+                MinRequestKey = "MinCreationDate",
+                MaxRequestKey = "MaxCreationDate",
+                MinDate = filterGroups.MinCreationDate ?? DateOnly.MinValue,
+                MaxDate = filterGroups.MaxCreationDate ?? DateOnly.FromDateTime(DateTime.Now)
+            });
+        }
 
         //result.Add(new ToggleFilter
         //{

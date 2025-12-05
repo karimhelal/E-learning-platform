@@ -31,7 +31,7 @@ public class InstructorCoursesService : IInstructorCoursesService
         bool isASC = request.SortOrder == SortOrder.Ascending;
         CourseSortOption sortBy = request.SortBy;
 
-        IQueryable<Course> sortedQuery = sortBy switch
+        query = sortBy switch
         {
             CourseSortOption.CreationDate => isASC ? query.OrderBy(c => c.CreatedDate)
                                                    : query.OrderByDescending(c => c.CreatedDate),
@@ -45,17 +45,9 @@ public class InstructorCoursesService : IInstructorCoursesService
             _ => query.OrderByDescending(c => c.CreatedDate)
         };
 
-        // Now apply includes to the sorted query
-        var finalQuery = sortedQuery
-            .Include(c => c.Categories)
-            .Include(c => c.Modules)
-                .ThenInclude(m => m.Lessons)
-                    .ThenInclude(l => l.LessonContent)
-            .Include(c => c.Enrollments);
+        var totalCount = await query.CountAsync();
 
-        var totalCount = await finalQuery.CountAsync();
-
-        var items = await finalQuery
+        var items = await query
             .Skip((request.CurrentPage - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(c => new InstructorCourseDto
@@ -92,12 +84,13 @@ public class InstructorCoursesService : IInstructorCoursesService
             Settings = new PaginationSettingsDto
             {
                 TotalPages = totalPages,
+                TotalCount = totalCount,
                 CurrentPage = request.CurrentPage,
-                PageSize = request.PageSize,
-                TotalCount = totalCount
+                PageSize = request.PageSize
             }
         };
     }
+
 
     // Update the GetCourseForEditAsync method to include the new fields
     public async Task<InstructorCourseEditDto?> GetCourseForEditAsync(int instructorId, int courseId)
