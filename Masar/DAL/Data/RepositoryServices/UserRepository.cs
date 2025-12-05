@@ -78,7 +78,6 @@ public class UserRepository : IUserRepository
     public bool IsInstructor(int userId)
     {
         return _context.UserRoles.Any(UserRoles => UserRoles.UserId == userId && UserRoles.RoleId == (int)UserRolesEnum.Instructor);
-        //return _context.Users.Any(u => u.Id == userId);
     }
 
     public bool IsStudent(int userId)
@@ -149,9 +148,10 @@ public class UserRepository : IUserRepository
         return _context.StudentProfiles.Find(studentId) != null;
     }
 
-    public bool HasInstructorProfileWithId(int instructorId)
+    public async Task<bool> HasInstructorProfileWithIdAsync(int instructorId)
     {
-        return _context.InstructorProfiles.Find(instructorId) != null;
+        return await _context.InstructorProfiles
+            .AnyAsync(ip => ip.InstructorId == instructorId);
     }
 
 }

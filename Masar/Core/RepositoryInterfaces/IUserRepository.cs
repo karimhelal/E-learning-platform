@@ -9,7 +9,7 @@ public interface IUserRepository : IGenericRepository<User>
     bool IsAdmin(int userId);
 
     bool HasStudentProfileWithId(int studentId);
-    bool HasInstructorProfileWithId(int instructorId);
+    Task<bool> HasInstructorProfileWithIdAsync(int instructorId);
 
     Task<InstructorProfile?> GetInstructorProfileForUserAsync(int userId, bool includeUserBase);
     Task<InstructorProfile?> GetInstructorProfileAsync(int instructorId, bool includeUserBase);

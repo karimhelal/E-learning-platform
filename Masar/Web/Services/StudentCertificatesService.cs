@@ -7,13 +7,16 @@ namespace Web.Services;
 public class StudentCertificatesService : IStudentCertificatesService
 {
     private readonly IUserRepository _userRepo;
+    private readonly ICertificateGenerationService _certificateGenerator;
     private readonly ILogger<StudentCertificatesService> _logger;
 
     public StudentCertificatesService(
         IUserRepository userRepo,
+        ICertificateGenerationService certificateGenerator, // Add this
         ILogger<StudentCertificatesService> logger)
     {
         _userRepo = userRepo;
+        _certificateGenerator = certificateGenerator; // Add this
         _logger = logger;
     }
 
@@ -21,6 +24,15 @@ public class StudentCertificatesService : IStudentCertificatesService
     {
         try
         {
+            // FIRST: Generate any missing certificates for completed courses/tracks
+            var generatedCount = await _certificateGenerator.GenerateMissingCertificatesAsync(studentId);
+            if (generatedCount > 0)
+            {
+                _logger.LogInformation(
+                    "Generated {Count} missing certificates for student {StudentId}", 
+                    generatedCount, studentId);
+            }
+
             var studentProfile = await _userRepo.GetStudentProfileAsync(studentId, includeUserBase: true);
 
             if (studentProfile?.User == null)
@@ -31,7 +43,7 @@ public class StudentCertificatesService : IStudentCertificatesService
 
             var user = studentProfile.User;
 
-            // Get all certificates
+            // Get all certificates (now including any newly generated ones)
             var courseCertificates = studentProfile.Certificates
                 .OfType<Core.Entities.CourseCertificate>()
                 .Where(c => c.Course != null)
@@ -60,7 +72,7 @@ public class StudentCertificatesService : IStudentCertificatesService
                     CourseName = c.Track!.Title,
                     DownloadLink = c.Link,
                     VerificationId = $"CERT-T-{c.CertificateId:D6}",
-                    IsFeatured = true // Track certificates are featured
+                    IsFeatured = true
                 })
                 .ToList();
 

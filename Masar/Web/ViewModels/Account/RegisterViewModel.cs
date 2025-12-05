@@ -18,7 +18,7 @@ namespace Web.ViewModels.Account
         public string Password { get; set; } = string.Empty;
         [Required]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare(nameof(Password), ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
         public bool RememberMe { get; set; } = false;

@@ -55,16 +55,17 @@ public class User : IdentityUser<int>
     [Display(Name = "Full Name")]
     public string FullName => $"{FirstName} {LastName}";
 
-
     // 5
 
     // Navigation Properties
     public virtual StudentProfile? StudentProfile { get; set; }
     public virtual InstructorProfile? InstructorProfile { get; set; }
+    public virtual ICollection<UserSocialLink>? UserSocialLinks { get; set; }
+    public virtual ICollection<Skill>? Skills { get; set; }
 
-    public User() : base()
-    {
-        StudentProfile = new StudentProfile();
-        InstructorProfile = new InstructorProfile();
-    }
+    //public User() : base()
+    //{
+    //    StudentProfile = new StudentProfile();
+    //    InstructorProfile = new InstructorProfile();
+    //}
 }

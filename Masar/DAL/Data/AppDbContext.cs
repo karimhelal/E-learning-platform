@@ -39,6 +39,7 @@ namespace DAL.Data
         public DbSet<TrackCertificate> TrackCertificates { get; set; }
 
 
+        public DbSet<UserSocialLink> UserSocialLinks { get; set; }
         public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -583,6 +584,40 @@ namespace DAL.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<UserSocialLink>(entity =>
+            {
+                // UserSocialLink - Table Name
+                entity.ToTable("UserSocialLinks");
+
+                entity.HasKey(s => s.UserSocialLinkId);
+
+                // Enum Conversion (Best Practice: Store as String)
+                entity.Property(sl => sl.SocialPlatform)
+                      .HasConversion<string>()
+                      .HasMaxLength(50);
+
+                // UserSocilaLink - User (One-to-Many)
+                entity
+                    .HasOne(s => s.User)
+                    .WithMany(u => u.UserSocialLinks)
+                    .HasForeignKey(s => s.UserId)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Skill>(entity =>
+            {
+                entity.ToTable("Skills");
+
+                entity.HasKey(s => s.SkillId);
+
+                entity
+                    .HasOne(s => s.User)
+                    .WithMany(u => u.Skills)
+                    .HasForeignKey(s => s.UserId)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             // ==================== MODELS KEYS CONFIGURATIONS ====================
 

@@ -5,7 +5,6 @@ using Core.Entities.Enums;
 using DAL.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BLL.Services.Admin
 {

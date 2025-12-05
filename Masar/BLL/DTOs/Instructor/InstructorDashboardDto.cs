@@ -24,7 +24,7 @@ public class InstructorGeneralStatsDto
 public class InstructorCurrentMonthStatsDto
 {
     public int NewStudents { get; set; }
-    public int Completions { get; set; }
+    public int NewCompletions { get; set; }
     public int NewReviews { get; set; }
 }
 
@@ -41,8 +41,8 @@ public class InstructorCourseCardDto
 {
     public int CourseId { get; set; }
     public string Title { get; set; }
-    public string Description { get; set; }
-    public string MainCategory { get; set; }
+    public string? Description { get; set; }
+    public string? MainCategory { get; set; }
     public string Level { get; set; }
     public string Status { get; set; }
     public float Rating { get; set; }

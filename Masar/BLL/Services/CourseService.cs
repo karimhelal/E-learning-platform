@@ -1,13 +1,11 @@
 ﻿using BLL.DTOs.Course;
-using BLL.DTOs.Course.Lesson;
-using BLL.DTOs.Course.Module;
 using BLL.DTOs.Instructor;
 using BLL.DTOs.Misc;
 using BLL.Interfaces;
 using Core.Entities;
+using Core.Entities.Enums;
 using Core.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.InteropServices;
 
 namespace BLL.Services;
 
@@ -28,16 +26,19 @@ public class CourseService : ICourseService
     {
         var query = _courseRepo.GetCoursesByInstructorQueryable(instructorId);
 
-        bool isASC = request.SortOrder.ToUpper() == "ASC";
-        string sortBy = request.SortBy?.ToLower() ?? "createddate";
+        bool isASC = request.SortOrder == SortOrder.Ascending;
+        CourseSortOption sortBy = request.SortBy;
 
         query = sortBy switch
         {
-            "createddate" => isASC ? query.OrderBy(c => c.CreatedDate)
-                                   : query.OrderByDescending(c => c.CreatedDate),
+            CourseSortOption.CreationDate => isASC ? query.OrderBy(c => c.CreatedDate)
+                                                   : query.OrderByDescending(c => c.CreatedDate),
 
-            "students" => isASC ? query.OrderBy(c => c.Enrollments!.Count())
-                                : query.OrderByDescending(c => c.Enrollments!.Count()),
+            CourseSortOption.Popularity => isASC ? query.OrderBy(c => c.Enrollments!.Count())
+                                                 : query.OrderByDescending(c => c.Enrollments!.Count()),
+
+            CourseSortOption.Title => isASC ? query.OrderBy(c => c.Title)
+                                            : query.OrderByDescending(c => c.Title),
 
             _ => query.OrderByDescending(c => c.CreatedDate)
         };
@@ -54,7 +55,7 @@ public class CourseService : ICourseService
                 Description = c.Description,
                 ThumbnailImageUrl = c.ThumbnailImageUrl,
                 CreatedDate = c.CreatedDate,
-                MainCategory = c.Categories.FirstOrDefault(),
+                MainCategory = c.Categories.FirstOrDefault().Name,
 
                 // calculated fields
                 NumberOfModules = c.Modules.Count(),
@@ -83,14 +84,6 @@ public class CourseService : ICourseService
         };
     }
 
-    public async Task<InstructorCourseEditResult> GetInstructorCourseForEditorAsync(
-        int courseId,
-        int instructorId,
-        InstructorCourseEditRequest request)
-    {
-        return new InstructorCourseEditResult();
-    }
-
     public InstructorCourseBasicDetailsDto? GetInstructorCourseBasicDetails(
         int instructorId,
         int courseId)
@@ -109,8 +102,8 @@ public class CourseService : ICourseService
             Description = course.Description!,
             Level = course.Level,
             ThumbnailImageUrl = course.ThumbnailImageUrl!,
-            MainCategory = course.Categories?.FirstOrDefault()!,
-            AdiitionalCategories = course.Categories!,
+            MainCategory = course.Categories?.FirstOrDefault()!.Name,
+            Categories = course.Categories!.Select(cat => cat.Name),
             LearningOutcomes = course.LearningOutcomes,
         };
     }
@@ -130,13 +123,13 @@ public class CourseService : ICourseService
                 {
                     ModuleId = m.ModuleId,
                     CourseId = m.CourseId,
-                    ModuleName = m.Title,
+                    ModuleTitle = m.Title,
                     ModuleOrder = m.Order,
 
                     LessonsDetails = m.Lessons!.Select(l => new LessonDetailsDto 
                     {
                         LessonId = l.LessonId,
-                        LessonName = l.Title,
+                        LessonTitle = l.Title,
                         LessonOrder = l.Order,
                         LessonContentType = l.ContentType,
                         ModuleId = m.ModuleId,
@@ -182,21 +175,21 @@ public class CourseService : ICourseService
         var query = _courseRepo.GetAllQueryable();
 
         // applying sorting
-        bool isAsc = request.SortOrder.ToLower() == "asc";
-        var sortBy = request.SortBy.ToLower() ?? "students";
+        bool isASC = request.SortOrder == SortOrder.Ascending;
+        CourseSortOption sortBy = request.SortBy;
 
         query = sortBy switch
         {
-            "creationdate" => isAsc ? query.OrderBy(c => c.CreatedDate)
-                                    : query.OrderByDescending(c => c.CreatedDate),
+            CourseSortOption.CreationDate => isASC ? query.OrderBy(c => c.CreatedDate)
+                                                   : query.OrderByDescending(c => c.CreatedDate),
 
-            "students" => isAsc ? query.OrderBy(c => c.Enrollments!.Count())
-                                : query.OrderByDescending(c => c.Enrollments!.Count()),
+            CourseSortOption.Popularity => isASC ? query.OrderBy(c => c.Enrollments!.Count())
+                                                 : query.OrderByDescending(c => c.Enrollments!.Count()),
 
-            "title" => isAsc ? query.OrderBy(c => c.Title)
-                             : query.OrderByDescending(c => c.Title),
+            CourseSortOption.Title => isASC ? query.OrderBy(c => c.Title)
+                                            : query.OrderByDescending(c => c.Title),
 
-            _ => query.OrderByDescending(c => c.Enrollments!.Count())
+            _ => query.OrderByDescending(c => c.CreatedDate)
         };
 
 
@@ -215,9 +208,9 @@ public class CourseService : ICourseService
                 Description = course.Description,
                 ThumbnailImageUrl = course.ThumbnailImageUrl,
                 CreatedDate = course.CreatedDate,
-                MainCategory = course.Categories.FirstOrDefault(),
-                Categories = course.Categories,
-                Languages = course.Languages,
+                MainCategory = course.Categories.Select(cat => cat.Name).FirstOrDefault(),
+                Categories = course.Categories.Select(cat => cat.Name),
+                Languages = course.Languages.Select(lang => lang.Name),
                 Level = course.Level,
 
                 // calculated fields
@@ -356,22 +349,21 @@ public class CourseService : ICourseService
                                         && c.Enrollments!.Count() <= enrollmentsRange.MaxEnrollments);
 
         // applying sorting
-        bool isAsc = request?.PagingRequest?.SortOrder.ToLower() == "asc";
-        var sortBy = request?.PagingRequest?.SortBy.ToLower() ?? "students";
+        bool isAsc = request?.PagingRequest?.SortOrder == SortOrder.Ascending;
+        CourseSortOption sortBy = request?.PagingRequest?.SortBy ?? CourseSortOption.CreationDate;
+
         query = sortBy switch
         {
-            "createddate" => isAsc ? query.OrderBy(c => c.CreatedDate)
-                                   : query.OrderByDescending(c => c.CreatedDate),
+            CourseSortOption.CreationDate => isAsc ? query.OrderBy(c => c.CreatedDate)
+                                                   : query.OrderByDescending(c => c.CreatedDate),
 
-            "students" => isAsc ? query.OrderBy(c => c.Enrollments!.Count())
-                                : query.OrderByDescending(c => c.Enrollments!.Count()),
+            CourseSortOption.Popularity => isAsc ? query.OrderBy(c => c.Enrollments!.Count())
+                                                 : query.OrderByDescending(c => c.Enrollments!.Count()),
 
-            "title" => isAsc ? query.OrderBy(c => c.Title)
-                             : query.OrderByDescending(c => c.Title),
+            CourseSortOption.Title => isAsc ? query.OrderBy(c => c.Title)
+                                            : query.OrderByDescending(c => c.Title),
 
-            //"reviews" => isAsc 
-            //"rating" => isAsc
-            _ => query.OrderByDescending(c => c.Enrollments!.Count())
+            _ => query.OrderByDescending(c => c.CreatedDate)
         };
 
 
@@ -392,9 +384,9 @@ public class CourseService : ICourseService
                 Description = course.Description,
                 ThumbnailImageUrl = course.ThumbnailImageUrl,
                 CreatedDate = course.CreatedDate,
-                MainCategory = course.Categories.FirstOrDefault(),
-                Categories = course.Categories,
-                Languages = course.Languages,
+                MainCategory = course.Categories.Select(cat => cat.Name).FirstOrDefault(),
+                Categories = course.Categories.Select(cat => cat.Name),
+                Languages = course.Languages.Select(lang => lang.Name),
                 Level = course.Level,
 
                 // calculated fields
@@ -456,8 +448,8 @@ public class CourseService : ICourseService
                 .OfType<VideoContent>()
                 .Sum(v => (int?)v.DurationInSeconds) ?? 0
             );
-        result.MinDuration = Math.Ceiling(durationsQuery.Min() / 3600.0);
-        result.MaxDuration = Math.Ceiling(durationsQuery.Max() / 3600.0);
+        result.MinDuration = Math.Ceiling(durationsQuery.Select(x => (int?)x).Min() ?? 0 / 3600.0);
+        result.MaxDuration = Math.Ceiling(durationsQuery.Select(x => (int?)x).Max() ?? 0 / 3600.0);
 
 
         var enrollmentsQuery = coursesQuery.Select(c => c.Enrollments!.Count());
@@ -670,9 +662,9 @@ public class CourseService : ICourseService
             Description = course.Description,
             ThumbnailImageUrl = course.ThumbnailImageUrl,
             CreatedDate = course.CreatedDate,
-            MainCategory = course.Categories.FirstOrDefault(),
-            Categories = course.Categories,
-            Languages = course.Languages,
+            MainCategory = course.Categories.FirstOrDefault().Name,
+            Categories = course.Categories.Select(cat => cat.Name),
+            Languages = course.Languages.Select(lang => lang.Name),
             Level = course.Level,
 
             // calculated fields
@@ -730,9 +722,9 @@ public class CourseService : ICourseService
             InstructorYearsOfExperience = course.Instructor.YearsOfExperience ?? 0,
             
             // Categories & Languages
-            MainCategory = course.Categories!.FirstOrDefault()!,
-            Categories = course.Categories!,
-            Languages = course.Languages!,
+            MainCategory = course.Categories!.FirstOrDefault()!.Name,
+            Categories = course.Categories!.Select(cat => cat.Name),
+            Languages = course.Languages!.Select(lang => lang.Name),
             
             // Learning Outcomes
             LearningOutcomes = course.LearningOutcomes,

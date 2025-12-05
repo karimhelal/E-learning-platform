@@ -5,6 +5,9 @@ namespace Core.Entities;
 
 public class Notification
 {
+    [Key]
+    [Column("notification_id")]
+    [Display(Name = "Notification ID")]
     public int Id { get; set; }
 
     [Required]

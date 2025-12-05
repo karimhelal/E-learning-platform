@@ -132,8 +132,8 @@ namespace Web.Services
                     Title = c.Title,
                     Difficulty = c.Level.ToString()
                 }).ToList(),
-                ActionText = isEnrolled ? "Continue Learning" : "Enroll Now",
-                ActionUrl = isEnrolled ? $"/student/track/{track.Id}" : $"/student/enroll/track/{track.Id}"
+                ActionText = isEnrolled ? "Continue Learning" : "View Details",
+                ActionUrl = $"/track/{track.Id}"
             };
         }
 

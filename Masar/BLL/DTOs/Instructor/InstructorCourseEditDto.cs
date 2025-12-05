@@ -8,11 +8,11 @@ public class InstructorCourseEditDto
     // Basic Details
     public int CourseId { get; set; }
     public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string ThumbnailImageUrl { get; set; } = string.Empty;
+    public string? Description { get; set; } = string.Empty;
+    public string? ThumbnailImageUrl { get; set; } = string.Empty;
     public CourseLevel Level { get; set; }
     public Category? MainCategory { get; set; }
-    public ICollection<CourseLearningOutcome> LearningOutcomes { get; set; } = new List<CourseLearningOutcome>();
+    public IEnumerable<CourseLearningOutcome>? LearningOutcomes { get; set; } = new List<CourseLearningOutcome>();
     
     // Stats
     public int EnrolledStudents { get; set; }
@@ -21,10 +21,10 @@ public class InstructorCourseEditDto
     public int AverageProgress { get; set; }
     
     // Modules
-    public List<ModuleEditDto> Modules { get; set; } = new();
+    public IEnumerable<ModuleEditDto>? Modules { get; set; } = [];
     
     // Enrolled Students
-    public List<EnrolledStudentDto> Students { get; set; } = new();
+    public IEnumerable<EnrolledStudentDto>? Students { get; set; } = [];
 }
 
 public class ModuleEditDto
@@ -35,7 +35,7 @@ public class ModuleEditDto
     public int Order { get; set; }
     public int LessonsCount { get; set; }
     public int TotalDurationSeconds { get; set; }
-    public List<LessonEditDto> Lessons { get; set; } = new();
+    public IEnumerable<LessonEditDto>? Lessons { get; set; } = [];
 }
 
 public class LessonEditDto
@@ -43,11 +43,11 @@ public class LessonEditDto
     public int LessonId { get; set; }
     public string Title { get; set; } = string.Empty;
     public int Order { get; set; }
-    public Core.Entities.Enums.LessonContentType ContentType { get; set; }
+    public LessonContentType ContentType { get; set; }
     public int DurationInSeconds { get; set; }
     public string? VideoUrl { get; set; }
     public string? ArticleContent { get; set; }
-    public List<LessonResourceEditDto> Resources { get; set; } = new(); // ADDED THIS
+    public IEnumerable<LessonResourceEditDto>? Resources { get; set; } = []; // ADDED THIS
 }
 
 // ADD THIS NEW CLASS

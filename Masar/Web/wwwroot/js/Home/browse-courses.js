@@ -325,7 +325,7 @@ function fetchPage(caller, dir) {
 
     const filterOptions = {
         sortBy: $('#sortFilter').val() || "CreationDate",
-        sortOrder: $('#sortOrder').val() || "DESC"
+        sortOrder: $('#sortOrder').val() || "Descending"
     }
 
     const apiOptions = {
@@ -368,7 +368,7 @@ function filterCourses() {
 
     const filterOptions = {
         sortBy: $('#sortFilter').val() || "CreationDate",
-        sortOrder: $('#sortOrder').val() || "DESC"
+        sortOrder: $('#sortOrder').val() || "Descending"
     }
 
     const apiOptions = {

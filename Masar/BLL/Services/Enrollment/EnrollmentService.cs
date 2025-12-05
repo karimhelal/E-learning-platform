@@ -20,5 +20,4 @@ public class EnrollmentService : IEnrollmentService
     {
         return await _enrollmentRepo.GetCourseIdIfEnrolledAsync(studentId, lessonId);
     }
-
 }
