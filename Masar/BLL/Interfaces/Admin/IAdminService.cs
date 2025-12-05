@@ -20,7 +20,8 @@ namespace BLL.Interfaces.Admin
 
         // Pending Courses
         Task<List<AdminPendingCourseDto>> GetPendingCoursesAsync();
+        Task<int> GetPendingCoursesCountAsync();
         Task ApproveCourseAsync(int courseId);
-        Task RejectCourseAsync(int courseId);
+        Task RejectCourseAsync(int courseId,string reason);
     }
 }

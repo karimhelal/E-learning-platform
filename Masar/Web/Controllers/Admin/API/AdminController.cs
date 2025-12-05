@@ -1,4 +1,5 @@
-﻿using BLL.Interfaces.Admin;
+﻿using BLL.DTOs.Admin;
+using BLL.Interfaces.Admin;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers.Admin.API
@@ -48,6 +49,30 @@ namespace Web.Controllers.Admin.API
             var success = await _adminService.DeleteCourseAsync(id);
             if (!success) return NotFound(new { message = "Course not found" });
             return Ok(new { message = "Deleted successfully" });
+        }
+
+
+        [HttpGet("pending-courses")]
+        public async Task<IActionResult> GetPending()
+        {
+            var result = await _adminService.GetPendingCoursesAsync();
+            return Ok(result);
+        }
+
+        [HttpPost("courses/{id}/approve")]
+        public async Task<IActionResult> Approve(int id)
+        {
+            await _adminService.ApproveCourseAsync(id);
+            return Ok(new { message = "Course Approved" });
+        }
+
+        [HttpPost("courses/{id}/reject")]
+        public async Task<IActionResult> Reject(int id, [FromBody] RejectDto model)
+        {
+            if (string.IsNullOrEmpty(model.Reason)) return BadRequest("Reason is required");
+
+            await _adminService.RejectCourseAsync(id, model.Reason);
+            return Ok(new { message = "Course Rejected" });
         }
 
     }

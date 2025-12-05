@@ -57,9 +57,10 @@
                 <span class="logo-text">Masar</span>
             </a>
             <ul class="nav-links" id="navLinks">
-                @if(User.Identity.IsAuthenticated)
+                @if (User.Identity.IsAuthenticated)
                 {
-                    @if(User.IsInRole("Admin")){
+                    @if (User.IsInRole("Admin"))
+                    {
                         <li><a asp-action="Users" asp-controller="Admin">Dashboard</a></li>
                     }
                     else
@@ -67,20 +68,55 @@
                         <li><a asp-action="Dashboard" asp-controller="Student">Dashboard</a></li>
                     }
                 }
-                
+
                 <li><a href="#tracks">Tracks</a></li>
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#testimonials">Reviews</a></li>
                 <li><a href="#contact">Contact</a></li>
-                @if(!User.Identity.IsAuthenticated){ 
-                 <li>
-                    <a href="/Account/Login" class="nav-btn">Get Started</a>
-                </li>
-                }else {
-                    <a href="/Account/Logout" class="nav-btn">Logout</a>
+
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <li>
+                        <a href="/Account/Login" class="nav-btn">Get Started</a>
+                    </li>
+                }
+                else
+                {
+                    /* ================================================== */
+                    /* بداية كود الجرس (يظهر فقط للمسجلين)               */
+                    /* ================================================== */
+                    <li class="nav-item-notification">
+                        <div class="notification-wrapper">
+                            <div class="bell-trigger" id="bellIcon" onclick="toggleNotifications()">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                            </div>
+
+                            <div class="notification-dropdown" id="notificationDropdown">
+                                <div class="dropdown-header">
+                                    <span>Notifications</span>
+                                    <small style="cursor:pointer; color:var(--accent-purple);">Mark all read</small>
+                                </div>
+                                <div class="dropdown-body" id="notificationList">
+                                    <div class="empty-notif text-center p-3 text-muted">
+                                        <small>No new notifications</small>
+                                    </div>
+                                </div>
+                                <div class="dropdown-footer">
+                                    <a href="#">View All</a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    /* ================================================== */
+                    /* نهاية كود الجرس                                   */
+                    /* ================================================== */
+
+                    <li>
+                        <a href="/Account/Logout" class="nav-btn">Logout</a>
+                    </li>
                 }
             </ul>
-            <!-- Mobile Toggle -->
             <button class="mobile-toggle" id="mobileToggle" type="button">
                 <i class="fas fa-bars"></i>
             </button>
@@ -272,5 +308,115 @@
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+<script>
+
+    function toggleNotifications() {
+        const dropdown = document.getElementById('notificationDropdown');
+        dropdown.classList.toggle('active');
+    }
+
+    document.addEventListener('click', function(e) {
+        const wrapper = document.querySelector('.notification-wrapper');
+        if (!wrapper.contains(e.target)) {
+            document.getElementById('notificationDropdown').classList.remove('active');
+        }
+    });
+
+   
+    document.addEventListener('DOMContentLoaded', loadNotifications);
+
+    async function loadNotifications() {
+        try {
+            const res = await fetch('/api/notifications/unread');
+            const data = await res.json();
+            updateNotificationUI(data, false);
+        } catch (e) { console.error(e); }
+    }
+
+   
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .build();
+
+    connection.on("ReceiveNotification", function (title, message, url) {
+
+        const newNotif = { title, message, url, createdAt: new Date().toISOString() };
+        updateNotificationUI([newNotif], true);
+
+        
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+            background: '#151b38', color: '#fff'
+        });
+        Toast.fire({ icon: 'info', title: title });
+    });
+
+   connection.start().then(() => {
+    @if (User.IsInRole("Admin")) 
+    {
+        <text>
+        connection.invoke("JoinAdminGroup").catch(err => console.error(err));
+        </text>
+    }
+    console.log("🟢 Connected to Notification Hub");
+    }).catch(err => console.error(err));
+
+    
+    function updateNotificationUI(notifications, isNew) {
+        const list = document.getElementById('notificationList');
+        const badge = document.getElementById('notificationCount');
+        
+        
+        const emptyMsg = list.querySelector('.empty-notif');
+        if (emptyMsg && notifications.length > 0) emptyMsg.remove();
+
+        notifications.forEach(n => {
+            const time = new Date(n.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const html = `
+                <div class="notif-item unread" onclick="window.location.href='${n.url}'">
+                    <div class="notif-icon"><i class="fas fa-bell"></i></div>
+                    <div class="notif-content">
+                        <h6>${n.title}</h6>
+                        <p>${n.message}</p>
+                        <span class="notif-time">${time}</span>
+                    </div>
+                </div>
+            `;
+            
+            if (isNew) list.insertAdjacentHTML('afterbegin', html);
+            else list.insertAdjacentHTML('beforeend', html);
+        });
+
+        let currentCount = parseInt(badge.innerText) || 0;
+        let newCount = isNew ? currentCount + notifications.length : notifications.length;
+        
+        badge.innerText = newCount;
+        badge.style.display = newCount > 0 ? 'flex' : 'none';
+    }
+
+    // دالة تحديد الكل كمقروء
+    async function markAllRead() {
+        try {
+            await fetch('/api/notifications/mark-read', { method: 'POST' });
+        
+            // تصفير العداد وإخفاؤه
+            const badge = document.getElementById('notificationCount');
+            badge.innerText = '0';
+            badge.style.display = 'none';
+        
+            // (اختياري) تحويل شكل الإشعارات لمقروءة بصرياً
+            document.querySelectorAll('.notif-item.unread').forEach(el => {
+                el.classList.remove('unread');
+                el.style.opacity = '0.7';
+            });
+
+        } catch (e) {
+            console.error("Failed to mark notifications read", e);
+        }
+    }
+</script>
 </body>
 </html>

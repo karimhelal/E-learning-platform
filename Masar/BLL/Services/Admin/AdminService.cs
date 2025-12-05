@@ -1,6 +1,7 @@
 ﻿using BLL.DTOs.Admin;
 using BLL.Interfaces.Admin;
 using Core.Entities;
+using Core.Entities.Enums;
 using DAL.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,14 @@ namespace BLL.Services.Admin
     {
         private readonly UserManager<User> _userManager;
         private readonly AppDbContext _context;
+        private readonly INotifier _notifier;
         private readonly static int PageSize = 10;
 
-        public AdminService(UserManager<User> userManager, AppDbContext context)
+        public AdminService(UserManager<User> userManager, AppDbContext context, INotifier notifier)
         {
             _userManager = userManager;
             _context = context;
+            _notifier = notifier;
         }
 
         public async Task<List<CategoryDto>> GetAllCategoriesAsync()
@@ -185,25 +188,83 @@ namespace BLL.Services.Admin
         // Pending Courses Methodss
         public async Task<List<AdminPendingCourseDto>> GetPendingCoursesAsync()
         {
-            throw new NotImplementedException();
+            var defaultImg = "https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=800&auto=format&fit=crop";
+            var query = _context.Courses.AsNoTracking()
+                                        .Where(c => c.Status == LearningEntityStatus.Pending)
+                                        .Include(c=>c.Instructor).ThenInclude(i=>i.User)
+                                        .Select(c => new AdminPendingCourseDto
+                                        {
+                                            Id = c.Id,
+                                            Title = c.Title,
+                                            Level = c.Level.ToString(),
+                                            ThumbnailImageUrl = c.ThumbnailImageUrl ?? defaultImg,
+                                            InstructorName = c.Instructor.User.FirstName + " " + c.Instructor.User.LastName,
+                                            ModulesCount = c.Modules.Count(),
+                                            LessonsCount = c.Modules.SelectMany(m=>m.Lessons).Count(),
+                                            InstructorCoursesCount = c.Instructor.OwnedCourses.Count(),
+                                            CreatedDate = c.CreatedDate
+                                        });
+            return await query.ToListAsync();
+        }
+
+        public async Task<int> GetPendingCoursesCountAsync()
+        {
+            return await _context.Courses
+                .CountAsync(c => c.Status == LearningEntityStatus.Pending);
         }
 
         public async Task ApproveCourseAsync(int courseId)
         {
             var course = await _context.Courses.FindAsync(courseId);
-            if(course != null)
+            var userId = await _context.InstructorProfiles
+                            .Where(i => i.InstructorId == course.InstructorId)
+                            .Select(i => i.UserId)
+                            .FirstOrDefaultAsync();
+            if (course == null) return;
+
+            course.Status = LearningEntityStatus.Published;
+
+            
+            var notification = new Notification
             {
-                //change status
-            }
+                UserId = userId,
+                Title = "Course Approved! 🎉",
+                Message = $"Your course '{course.Title}' is now live.",
+                Url = $"/Course/Details/{courseId}",
+                CreatedAt = DateTime.Now
+            };
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+
+            
+            await _notifier.SendToUserAsync(userId, notification.Title, notification.Message, notification.Url);
         }
 
-        public async Task RejectCourseAsync(int courseId)
+        
+        public async Task RejectCourseAsync(int courseId, string reason)
         {
             var course = await _context.Courses.FindAsync(courseId);
-            if (course != null)
+            var userId = await _context.InstructorProfiles
+                            .Where(i => i.InstructorId == course.InstructorId)
+                            .Select(i => i.UserId)
+                            .FirstOrDefaultAsync();
+            if (course == null) return;
+
+            course.Status = LearningEntityStatus.Archived;
+
+            var notification = new Notification
             {
-                //change status
-            }
+                UserId = userId,
+                Title = "Course Rejected ⚠️",
+                Message = $"Your course '{course.Title}' was rejected. Reason: {reason}",
+                Url = "/Instructor/Dashboard",
+                CreatedAt = DateTime.Now
+            };
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+
+
+            await _notifier.SendToUserAsync(userId, notification.Title, notification.Message, notification.Url);
         }
     }
 }

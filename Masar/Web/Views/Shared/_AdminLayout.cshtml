@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="~/css/components.css" />
     <link rel="stylesheet" href="~/css/pages/manage-users.css" />
     <link rel="stylesheet" href="~/css/pages/manage-courses.css" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <div class="grid-background"></div>
@@ -37,7 +38,7 @@
                             </a>
                         </li>
                         <li>
-                            <a asp-controller="Admin" asp-action="Courses" class="nav-link @(ViewData["Title"] == "Pending Courses" ? "active" : "")">
+                            <a asp-controller="Admin" asp-action="PendingCourses" class="nav-link @(ViewData["Title"] == "Pending Courses" ? "active" : "")">
                                 <i class="fas fa-book"></i> <span>Pending Courses</span>
                             </a>
                         </li>

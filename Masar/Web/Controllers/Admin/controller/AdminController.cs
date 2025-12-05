@@ -48,5 +48,26 @@ namespace Web.Controllers.Admin.controller
             ViewData["Title"] = "Access Denied";
             return View();
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> PendingCourses()
+        {
+            var categories = await _adminService.GetAllCategoriesAsync();
+
+            var pendingCount = await _adminService.GetPendingCoursesCountAsync(); 
+
+            var model = new PendingPageViewModel
+            {
+                Categories = categories.Select(c => new SelectListItem
+                {
+                    Text = c.Name,
+                    Value = c.Name
+                }).ToList(),
+                PendingCount = pendingCount
+            };
+
+            return View(model);
+        }
     }
 }

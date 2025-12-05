@@ -8,7 +8,10 @@ namespace Web.Hubs
         // Add Admin to group "Admins"
         public async Task JoinAdminGroup()
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
+            if (Context.User.IsInRole("Admin"))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
+            }
         }
     }
 }
