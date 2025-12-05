@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using BLL.Interfaces.Admin;
+using Microsoft.AspNetCore.SignalR;
 using Web.Hubs;
 using Web.Interfaces;
 
@@ -16,6 +17,11 @@ namespace Web.Services
         public async Task SendToAdminsAsync(string title, string message, string url)
         {
             await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", title, message, url);
+        }
+
+        public async Task SendToUserAsync(int userId, string title, string message, string url)
+        {
+            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", title, message, url);
         }
     }
 }
