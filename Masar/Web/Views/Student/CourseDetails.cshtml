@@ -86,7 +86,7 @@
                     </div>
                     @if (Model.Data.ProgressPercentage < 100)
                     {
-                        <a href="/student/course/@Model.Data.CourseId/lesson/next" class="btn btn-primary">
+                        <a href="/classroom/course/@Model.Data.CourseId" class="btn btn-primary">
                             <span>Continue Learning</span>
                             <i class="fas fa-play"></i>
                         </a>
@@ -244,13 +244,13 @@
                                     <div class="lesson-icon @iconClass">
                                         <i class="fas @iconName"></i>
                                     </div>
-                                    <div class="lesson-info" onclick="window.location.href='/student/course/@Model.Data.CourseId/lesson/@lesson.LessonId'">
+                                    <div class="lesson-info" onclick="window.location.href='/classroom/course/@Model.Data.CourseId/@lesson.LessonId'">
                                         <div class="lesson-title">@lesson.LessonName</div>
                                         <div class="lesson-duration">@durationText</div>
                                     </div>
                                     <button class="lesson-status @(lesson.IsCompleted ? "completed" : "")" 
                                             type="button"
-                                            onclick="toggleLessonCompletion(@lesson.LessonId, this, event)">
+                                            @*onclick="toggleLessonCompletion(@lesson.LessonId, this, event)"*@>
                                         @if (lesson.IsCompleted)
                                         {
                                             <i class="fas fa-check"></i>

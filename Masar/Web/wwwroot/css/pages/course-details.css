@@ -480,11 +480,6 @@
     position: relative;
 }
 
-.lesson-status:hover {
-    border-color: var(--accent-green);
-    transform: scale(1.15);
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-}
 
 .lesson-status.completed {
     background: var(--accent-green);
@@ -492,19 +487,15 @@
     color: white;
 }
 
-.lesson-status.completed:hover {
-    border-color: var(--accent-orange);
-    background: var(--accent-orange);
-}
 
 .lesson-status i {
     font-size: 0.75rem;
 }
 
 /* Tooltip */
-.lesson-status::after {
-    content: 'Mark complete';
-    position: absolute;
+/*.lesson-status::after {*/
+/*    content: 'Mark complete';*/
+    /*position: absolute;
     bottom: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
@@ -524,9 +515,9 @@
     opacity: 1;
 }
 
-.lesson-status.completed::after {
-    content: 'Mark incomplete';
-}
+.lesson-status.completed::after {*/
+/*    content: 'Mark incomplete';*/
+/*}*/
 
 /* ========================================
    MODULE ACTIONS

@@ -241,7 +241,7 @@ public class StudentController : Controller
         return View(viewModel);
     }
 
-    [HttpGet("/student/course/{courseId}/details")]
+    [HttpGet("/student/course/details/{courseId}")]
     public async Task<IActionResult> CourseDetails(int courseId)
     {
         ViewBag.Title = "Course Details | Masar";

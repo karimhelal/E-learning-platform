@@ -123,7 +123,7 @@ namespace Web.Services
                 StudentsCount = studentsCount,
                 Rating = 4.8m,
                 ActionText = isEnrolled ? "Continue Learning" : "Enroll Now",
-                ActionUrl = isEnrolled ? $"/student/course/{course.Id}/details" : $"/student/enroll/course/{course.Id}"
+                ActionUrl = isEnrolled ? $"/student/course/details/{course.Id}" : $"/student/enroll/course/{course.Id}"
             };
         }
 

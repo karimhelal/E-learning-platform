@@ -528,4 +528,3 @@ public class HomeController : Controller
             return (int)Math.Ceiling(totalSeconds / 3600.0);
         }
     }
-}
