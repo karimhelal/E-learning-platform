@@ -249,7 +249,7 @@ namespace BLL.Services.Admin
                             .FirstOrDefaultAsync();
             if (course == null) return;
 
-            course.Status = LearningEntityStatus.Archived;
+            course.Status = LearningEntityStatus.Rejected;
 
             var notification = new Notification
             {

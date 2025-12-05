@@ -13,10 +13,9 @@ public interface IAdminService
 
     Task<List<CategoryDto>> GetAllCategoriesAsync();
 
-        // Pending Courses
-        Task<List<AdminPendingCourseDto>> GetPendingCoursesAsync();
-        Task<int> GetPendingCoursesCountAsync();
-        Task ApproveCourseAsync(int courseId);
-        Task RejectCourseAsync(int courseId,string reason);
-    }
+   // Pending Courses
+   Task<List<AdminPendingCourseDto>> GetPendingCoursesAsync();
+   Task<int> GetPendingCoursesCountAsync();
+   Task ApproveCourseAsync(int courseId);
+   Task RejectCourseAsync(int courseId,string reason);
 }

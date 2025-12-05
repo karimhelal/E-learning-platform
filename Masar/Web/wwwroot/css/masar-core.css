@@ -1,6 +1,6 @@
 ﻿/* ========================================
    MASAR - Core Design System
-   Every Code is a Step Forward
+   Merged & Optimized Version
    ======================================== */
 
 * {
@@ -253,7 +253,7 @@ code {
     background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box, linear-gradient(135deg, var(--accent-purple), var(--accent-cyan)) border-box;
 }
 
-/* Spacing Utilities */
+/* Spacing Utilities - Full Set (Preserved from File 1) */
 .mt-1 {
     margin-top: var(--spacing-sm);
 }
@@ -269,7 +269,6 @@ code {
 .mt-4 {
     margin-top: var(--spacing-xl);
 }
-
 
 .mb-1 {
     margin-bottom: var(--spacing-sm);
@@ -287,7 +286,6 @@ code {
     margin-bottom: var(--spacing-xl);
 }
 
-
 .p-1 {
     padding: var(--spacing-sm);
 }
@@ -304,7 +302,7 @@ code {
     padding: var(--spacing-xl);
 }
 
-
+/* Extended Spacing (From File 1 - kept for compatibility) */
 .p-lr-1 {
     padding: 0 var(--spacing-sm);
 }
@@ -320,7 +318,6 @@ code {
 .p-lr-4 {
     padding: 0 var(--spacing-xl);
 }
-
 
 .p-tb-1 {
     padding: var(--spacing-sm) 0;
@@ -338,7 +335,6 @@ code {
     padding: var(--spacing-xl) 0;
 }
 
-
 .p-t-1 {
     padding-top: var(--spacing-sm);
 }
@@ -354,7 +350,6 @@ code {
 .p-t-4 {
     padding-top: var(--spacing-xl);
 }
-
 
 .p-b-1 {
     padding-bottom: var(--spacing-sm);
@@ -416,6 +411,8 @@ code {
         font-size: 1.25rem;
     }
 }
+
+
 
 /* --- Notification Bell --- */
 .notification-wrapper {
