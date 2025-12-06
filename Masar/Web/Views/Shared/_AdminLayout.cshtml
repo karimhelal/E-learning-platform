@@ -42,6 +42,16 @@
                                 <i class="fas fa-book"></i> <span>Pending Courses</span>
                             </a>
                         </li>
+                        <li>
+                            <a asp-controller="Admin" asp-action="Tracks" class="nav-link @(ViewData["Title"]?.ToString()?.Contains("Track") == true && ViewData["Title"] != "Create Track" ? "active" : "")">
+                                <i class="fas fa-road"></i> <span>Manage Tracks</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/Admin/CreateTrack" class="nav-link @(ViewData["Title"] == "Create Track" ? "active" : "")">
+                                <i class="fas fa-plus-circle"></i> <span>Create Track</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="nav-section">

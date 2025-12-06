@@ -265,5 +265,101 @@ namespace BLL.Services.Admin
 
             await _notifier.SendToUserAsync(userId, notification.Title, notification.Message, notification.Url);
         }
+
+
+        // Tracks Methods 
+        public async Task<PagedResult<AdminTrackDto>> GetTracksAsync(string search, int page = 1, int pageSize = 10)
+        {
+            var query = _context.Tracks
+                        .AsNoTracking()
+                        .Include(t => t.TrackCourses)
+                        .Include(t => t.Enrollments)
+                        .AsQueryable();
+
+            // Search by title or description
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(t =>
+                    t.Title.Contains(search) ||
+                    (t.Description != null && t.Description.Contains(search)));
+            }
+
+            var count = await query.CountAsync();
+
+            var data = await query.OrderByDescending(t => t.CreatedDate)
+                          .Skip((page - 1) * pageSize)
+                          .Take(pageSize)
+                          .Select(t => new AdminTrackDto
+                          {
+                              Id = t.Id,
+                              Title = t.Title,
+                              Description = t.Description,
+                              CoursesCount = t.TrackCourses != null ? t.TrackCourses.Count : 0,
+                              StudentsCount = t.Enrollments != null ? t.Enrollments.Count : 0,
+                              CreatedDate = t.CreatedDate
+                          }).ToListAsync();
+
+            return new PagedResult<AdminTrackDto>
+            {
+                Items = data,
+                TotalCount = count,
+                PageNumber = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<bool> DeleteTrackAsync(int trackId)
+        {
+            var track = await _context.Tracks.FindAsync(trackId);
+            if (track == null) return false;
+
+            _context.Tracks.Remove(track);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<CourseSimpleDto>> GetAllCoursesSimpleAsync()
+        {
+            return await _context.Courses
+                .AsNoTracking()
+                // Remove the Published filter to show all courses
+                .OrderBy(c => c.Title)
+                .Select(c => new CourseSimpleDto
+                {
+                    Id = c.Id,
+                    Title = c.Title
+                })
+                .ToListAsync();
+        }
+
+        public async Task<int> CreateTrackAsync(CreateTrackDto dto)
+        {
+            var track = new Track
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                Status = (LearningEntityStatus)dto.Status,
+                CreatedDate = DateOnly.FromDateTime(DateTime.Now)
+            };
+
+            _context.Tracks.Add(track);
+            await _context.SaveChangesAsync();
+
+            // Add Courses to Track
+            if (dto.CourseIds.Count > 0)
+            {
+                foreach (var courseId in dto.CourseIds)
+                {
+                    _context.TrackCourses.Add(new Track_Course
+                    {
+                        TrackId = track.Id,
+                        CourseId = courseId
+                    });
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            return track.Id;
+        }
     }
 }
