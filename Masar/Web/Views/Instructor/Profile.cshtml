@@ -4,6 +4,11 @@
     Layout = "~/Views/Shared/_InstructorLayout.cshtml";
 }
 
+<!-- Hidden form for antiforgery token -->
+<form id="antiforgeryForm" style="display: none;">
+    @Html.AntiForgeryToken()
+</form>
+
 <!-- Profile Hero -->
 <section class="profile-hero">
     <div class="profile-hero-container">
@@ -84,9 +89,6 @@
                         <i class="fas fa-user"></i>
                         About
                     </h2>
-                    <button class="section-edit-btn">
-                        <i class="fas fa-edit"></i>
-                    </button>
                 </div>
                 <p class="profile-bio">
                     @(Model.Data.Bio ?? "Passionate educator with years of experience in teaching and mentoring students. Dedicated to creating high-quality courses that help students achieve their learning goals.")
@@ -100,9 +102,6 @@
                         <i class="fas fa-info-circle"></i>
                         Personal Information
                     </h2>
-                    <button class="section-edit-btn">
-                        <i class="fas fa-edit"></i>
-                    </button>
                 </div>
 
                 <div class="info-grid">
@@ -125,17 +124,6 @@
                         </div>
                     }
 
-                    @if (!string.IsNullOrEmpty(Model.Data.Location))
-                    {
-                        <div class="info-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <div class="info-details">
-                                <span class="info-label">Location</span>
-                                <span class="info-value">@Model.Data.Location</span>
-                            </div>
-                        </div>
-                    }
-
                     <div class="info-item">
                         <i class="fas fa-calendar"></i>
                         <div class="info-details">
@@ -154,42 +142,32 @@
                             </div>
                         </div>
                     }
-
-                    @if (!string.IsNullOrEmpty(Model.Data.Languages))
-                    {
-                        <div class="info-item">
-                            <i class="fas fa-language"></i>
-                            <div class="info-details">
-                                <span class="info-label">Languages</span>
-                                <span class="info-value">@Model.Data.Languages</span>
-                            </div>
-                        </div>
-                    }
                 </div>
             </div>
 
-            <!-- Teaching Skills -->
-            @if (Model.Data.TeachingExpertise.Any())
-            {
-                <div class="profile-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <i class="fas fa-code"></i>
-                            Teaching Expertise
-                        </h2>
-                        <button class="section-edit-btn">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
+            <!-- Skills -->
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-code"></i>
+                        Skills
+                    </h2>
+                </div>
 
+                @if (Model.Data.Skills.Any())
+                {
                     <div class="skills-tags">
-                        @foreach (var skill in Model.Data.TeachingExpertise)
+                        @foreach (var skill in Model.Data.Skills)
                         {
                             <span class="skill-tag badge badge-purple">@skill</span>
                         }
                     </div>
-                </div>
-            }
+                }
+                else
+                {
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">No skills added yet. Click "Edit Profile" to add your skills.</p>
+                }
+            </div>
 
             <!-- My Courses -->
             <div class="profile-section">
@@ -240,9 +218,6 @@
                         <i class="fas fa-share-alt"></i>
                         Social Links
                     </h2>
-                    <button class="section-edit-btn">
-                        <i class="fas fa-edit"></i>
-                    </button>
                 </div>
 
                 <div class="social-links">
@@ -260,11 +235,11 @@
                             <span>LinkedIn</span>
                         </a>
                     }
-                    @if (!string.IsNullOrEmpty(Model.Data.TwitterUrl))
+                    @if (!string.IsNullOrEmpty(Model.Data.FacebookUrl))
                     {
-                        <a href="@Model.Data.TwitterUrl" class="social-link twitter" target="_blank">
-                            <i class="fab fa-twitter"></i>
-                            <span>Twitter</span>
+                        <a href="@Model.Data.FacebookUrl" class="social-link facebook" target="_blank">
+                            <i class="fab fa-facebook"></i>
+                            <span>Facebook</span>
                         </a>
                     }
                     @if (!string.IsNullOrEmpty(Model.Data.WebsiteUrl))
@@ -276,7 +251,7 @@
                     }
 
                     @if (string.IsNullOrEmpty(Model.Data.GithubUrl) && string.IsNullOrEmpty(Model.Data.LinkedInUrl) && 
-                         string.IsNullOrEmpty(Model.Data.TwitterUrl) && string.IsNullOrEmpty(Model.Data.WebsiteUrl))
+                         string.IsNullOrEmpty(Model.Data.FacebookUrl) && string.IsNullOrEmpty(Model.Data.WebsiteUrl))
                     {
                         <p style="color: var(--text-muted); font-size: 0.9rem;">No social links added yet.</p>
                     }
@@ -330,8 +305,12 @@
     </div>
 </section>
 
+<!-- Edit Profile Modal Container -->
+<div id="editProfileModalContainer"></div>
+
 @section Styles {
     <link rel="stylesheet" href="~/css/pages/profile.css" />
+    <link rel="stylesheet" href="~/css/pages/profile-edit.css" />
 }
 
 @section Scripts {

@@ -8,11 +8,13 @@ namespace BLL.Services.Student;
 public class StudentProfileService : IStudentProfileService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<StudentProfileService> _logger;
 
-    public StudentProfileService(IUserRepository userRepository, ILogger<StudentProfileService> logger)
+    public StudentProfileService(IUserRepository userRepository, IUnitOfWork unitOfWork, ILogger<StudentProfileService> logger)
     {
         _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -49,6 +51,12 @@ public class StudentProfileService : IStudentProfileService
                     .OfType<Core.Entities.VideoContent>()
                     .Sum(v => v.DurationInSeconds)) / 3600;
 
+            // Get skills from Skills table (only Student type)
+            var skills = user.Skills?
+                .Where(s => s.SkillType == "Student")
+                .Select(s => s.SkillName)
+                .ToList() ?? new List<string>();
+
             return new StudentProfileDto
             {
                 StudentId = studentProfile.StudentId,
@@ -56,23 +64,22 @@ public class StudentProfileService : IStudentProfileService
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email ?? string.Empty,
-                Phone = null, // Add if you have phone field
+                Phone = user.PhoneNumber,
                 ProfilePicture = user.Picture,
                 Bio = studentProfile.Bio,
-                JoinedDate = DateTime.Now.AddMonths(-6), // TODO: Get actual joined date from User entity
-                Location = null, // Add if you have location field
-                Languages = null, // Add if you have languages field
-                GithubUrl = null, // Add if you have social links
-                LinkedInUrl = null,
-                TwitterUrl = null,
-                WebsiteUrl = null,
+                JoinedDate = DateTime.Now.AddMonths(-6),
+                Location = studentProfile.Location,
+                GithubUrl = studentProfile.GithubUrl,
+                LinkedInUrl = studentProfile.LinkedInUrl,
+                FacebookUrl = studentProfile.FacebookUrl,
+                WebsiteUrl = studentProfile.WebsiteUrl,
                 TotalCoursesEnrolled = courseEnrollments.Count,
                 CompletedCourses = completedCourses,
                 ActiveCourses = activeCourses,
                 CertificatesEarned = certificatesCount,
                 TotalLearningHours = totalLearningHours,
-                CurrentStreak = 0, // TODO: Calculate actual streak
-                LearningInterests = GetLearningInterests(courseEnrollments),
+                CurrentStreak = 0,
+                Skills = skills,
                 EnrolledCourses = courseEnrollments
                     .OrderByDescending(e => e.EnrollmentDate)
                     .Take(6)
@@ -91,11 +98,9 @@ public class StudentProfileService : IStudentProfileService
                     .OrderByDescending(c => c.IssuedDate)
                     .Select(c => new StudentCertificateDto
                     {
-                        // FIXED: Use CertificateId instead of CourseCertificateId/TrackCertificateId
                         CertificateId = c.CertificateId,
                         Title = c is Core.Entities.CourseCertificate courseCert ? courseCert.Course?.Title ?? "Certificate" :
                                (c as Core.Entities.TrackCertificate)?.Track?.Title ?? "Certificate",
-                        // FIXED: Convert DateOnly to DateTime
                         IssuedDate = c.IssuedDate.ToDateTime(TimeOnly.MinValue),
                         Type = c is Core.Entities.CourseCertificate ? "Course" : "Track"
                     })
@@ -109,13 +114,72 @@ public class StudentProfileService : IStudentProfileService
         }
     }
 
-    private List<string> GetLearningInterests(List<Core.Entities.CourseEnrollment> enrollments)
+    public async Task<bool> UpdateStudentProfileAsync(int studentId, UpdateStudentProfileDto profileDto)
     {
-        return enrollments
-            .SelectMany(e => e.Course?.Categories ?? new List<Core.Entities.Category>())
-            .Select(c => c.Name)
-            .Distinct()
-            .Take(5)
-            .ToList();
+        try
+        {
+            var studentProfile = await _userRepository.GetStudentProfileAsync(studentId, includeUserBase: true);
+
+            if (studentProfile == null || studentProfile.User == null)
+            {
+                _logger.LogWarning("Student profile not found for update. StudentId: {StudentId}", studentId);
+                return false;
+            }
+
+            // Update student profile fields
+            studentProfile.Bio = profileDto.Bio;
+            studentProfile.Location = profileDto.Location;
+            studentProfile.GithubUrl = profileDto.GithubUrl;
+            studentProfile.LinkedInUrl = profileDto.LinkedInUrl;
+            studentProfile.FacebookUrl = profileDto.FacebookUrl;
+            studentProfile.WebsiteUrl = profileDto.WebsiteUrl;
+
+            // Update user info
+            studentProfile.User.FirstName = profileDto.FirstName;
+            studentProfile.User.LastName = profileDto.LastName;
+            studentProfile.User.PhoneNumber = profileDto.Phone;
+            
+            // Update profile picture if provided
+            if (!string.IsNullOrEmpty(profileDto.ProfilePictureUrl))
+            {
+                studentProfile.User.Picture = profileDto.ProfilePictureUrl;
+            }
+
+            // Update skills (saved as Skills in database with SkillType = Student)
+            if (profileDto.Skills != null)
+            {
+                // Remove existing student skills only
+                var existingStudentSkills = studentProfile.User.Skills?
+                    .Where(s => s.SkillType == "Student")
+                    .ToList() ?? new List<Core.Entities.Skill>();
+                
+                foreach (var skill in existingStudentSkills)
+                {
+                    studentProfile.User.Skills?.Remove(skill);
+                }
+                
+                // Add new skills with SkillType = Student
+                foreach (var skillName in profileDto.Skills.Where(s => !string.IsNullOrWhiteSpace(s)))
+                {
+                    studentProfile.User.Skills?.Add(new Core.Entities.Skill
+                    {
+                        SkillName = skillName.Trim(),
+                        UserId = studentProfile.UserId,
+                        SkillType = "Student"
+                    });
+                }
+            }
+
+            // Save changes using Unit of Work
+            await _unitOfWork.CompleteAsync();
+
+            _logger.LogInformation("Student profile updated successfully. StudentId: {StudentId}", studentId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating student profile for StudentId: {StudentId}", studentId);
+            return false;
+        }
     }
 }

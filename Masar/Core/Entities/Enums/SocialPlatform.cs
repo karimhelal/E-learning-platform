@@ -7,4 +7,5 @@ public enum SocialPlatform
     Youtube = 2,
     Twitter = 3,
     Personal = 4,
+    Facebook = 5,
 }

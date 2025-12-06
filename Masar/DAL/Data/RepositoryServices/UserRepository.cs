@@ -91,7 +91,10 @@ public class UserRepository : IUserRepository
         var query = _context.InstructorProfiles.AsQueryable();
 
         if (includeUserBase)
-            query = query.Include(ip => ip.User);
+            query = query.Include(ip => ip.User)
+                         .ThenInclude(u => u!.Skills)
+                       .Include(ip => ip.User)
+                         .ThenInclude(u => u!.UserSocialLinks);
 
         return query.FirstOrDefaultAsync(ip => ip.InstructorId == instructorId);
     }
@@ -103,7 +106,8 @@ public class UserRepository : IUserRepository
             .AsQueryable();
 
         if (includeUserBase)
-            query = query.Include(sp => sp.User);
+            query = query.Include(sp => sp.User)
+                         .ThenInclude(u => u!.Skills);
 
         // Include enrollments with their related entities
         query = query

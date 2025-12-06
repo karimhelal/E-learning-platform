@@ -1,0 +1,953 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace DAL.Migrations
+{
+    /// <inheritdoc />
+    public partial class initial_state : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    category_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    category_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    category_slug = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    parent_category_id = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.category_id);
+                    table.ForeignKey(
+                        name: "FK_Categories_Categories_parent_category_id",
+                        column: x => x.parent_category_id,
+                        principalTable: "Categories",
+                        principalColumn: "category_id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Languages",
+                columns: table => new
+                {
+                    language_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    language_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    language_slug = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Languages", x => x.language_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LearningEntities",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    created_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LearningEntities", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Roles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    user_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    first_name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    last_name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    picture = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    password_hash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.user_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LearningEntity_Category",
+                columns: table => new
+                {
+                    learning_entity_id = table.Column<int>(type: "int", nullable: false),
+                    category_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LearningEntity_Category", x => new { x.learning_entity_id, x.category_id });
+                    table.ForeignKey(
+                        name: "FK_LearningEntity_Category_Categories_category_id",
+                        column: x => x.category_id,
+                        principalTable: "Categories",
+                        principalColumn: "category_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LearningEntity_Category_LearningEntities_learning_entity_id",
+                        column: x => x.learning_entity_id,
+                        principalTable: "LearningEntities",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LearningEntity_Language",
+                columns: table => new
+                {
+                    learning_entity_id = table.Column<int>(type: "int", nullable: false),
+                    language_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LearningEntity_Language", x => new { x.learning_entity_id, x.language_id });
+                    table.ForeignKey(
+                        name: "FK_LearningEntity_Language_Languages_language_id",
+                        column: x => x.language_id,
+                        principalTable: "Languages",
+                        principalColumn: "language_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LearningEntity_Language_LearningEntities_learning_entity_id",
+                        column: x => x.learning_entity_id,
+                        principalTable: "LearningEntities",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tracks",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false),
+                    title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tracks", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_Tracks_LearningEntities_id",
+                        column: x => x.id,
+                        principalTable: "LearningEntities",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleId = table.Column<int>(type: "int", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RoleClaims_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "InstructorProfiles",
+                columns: table => new
+                {
+                    instructor_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    user_id = table.Column<int>(type: "int", nullable: false),
+                    bio = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    years_of_experience = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InstructorProfiles", x => x.instructor_id);
+                    table.ForeignKey(
+                        name: "FK_InstructorProfiles_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    notification_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(600)", maxLength: 600, nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.notification_id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Skills",
+                columns: table => new
+                {
+                    skill_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    skill_name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    user_id = table.Column<int>(type: "int", nullable: false),
+                    skill_type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Skills", x => x.skill_id);
+                    table.ForeignKey(
+                        name: "FK_Skills_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudentProfiles",
+                columns: table => new
+                {
+                    student_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    user_id = table.Column<int>(type: "int", nullable: false),
+                    bio = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    location = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    languages = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    github_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    linkedin_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    facebook_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    website_url = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentProfiles", x => x.student_id);
+                    table.ForeignKey(
+                        name: "FK_StudentProfiles_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserClaims_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserLogins",
+                columns: table => new
+                {
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
+                        name: "FK_UserLogins_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserRoles",
+                columns: table => new
+                {
+                    user_id = table.Column<int>(type: "int", nullable: false),
+                    role_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserRoles", x => new { x.user_id, x.role_id });
+                    table.ForeignKey(
+                        name: "FK_UserRoles_Roles_role_id",
+                        column: x => x.role_id,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserRoles_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserSocialLinks",
+                columns: table => new
+                {
+                    social_link_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    platform = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    user_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSocialLinks", x => x.social_link_id);
+                    table.ForeignKey(
+                        name: "FK_UserSocialLinks_Users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: "FK_UserTokens_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Courses",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false),
+                    instructor_id = table.Column<int>(type: "int", nullable: false),
+                    title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    thumbnail_image_url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    difficulty_level = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Courses", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_Courses_InstructorProfiles_instructor_id",
+                        column: x => x.instructor_id,
+                        principalTable: "InstructorProfiles",
+                        principalColumn: "instructor_id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Courses_LearningEntities_id",
+                        column: x => x.id,
+                        principalTable: "LearningEntities",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Certificates",
+                columns: table => new
+                {
+                    certificate_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    student_id = table.Column<int>(type: "int", nullable: false),
+                    title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    issued_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    link = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    cetificate_type = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
+                    course_id = table.Column<int>(type: "int", nullable: true),
+                    track_id = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Certificates", x => x.certificate_id);
+                    table.ForeignKey(
+                        name: "FK_Certificates_Courses_course_id",
+                        column: x => x.course_id,
+                        principalTable: "Courses",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_Certificates_StudentProfiles_student_id",
+                        column: x => x.student_id,
+                        principalTable: "StudentProfiles",
+                        principalColumn: "student_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Certificates_Tracks_track_id",
+                        column: x => x.track_id,
+                        principalTable: "Tracks",
+                        principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseLearningOutcomes",
+                columns: table => new
+                {
+                    course_outcome_id = table.Column<int>(type: "int", nullable: false),
+                    course_id = table.Column<int>(type: "int", nullable: false),
+                    title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseLearningOutcomes", x => new { x.course_outcome_id, x.course_id });
+                    table.ForeignKey(
+                        name: "FK_CourseLearningOutcomes_Courses_course_id",
+                        column: x => x.course_id,
+                        principalTable: "Courses",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Enrollments",
+                columns: table => new
+                {
+                    student_id = table.Column<int>(type: "int", nullable: false),
+                    track_id = table.Column<int>(type: "int", nullable: true),
+                    enrollment_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    enrollment_date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    progress_percentage = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    enrollment_type = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
+                    course_id = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Enrollments", x => x.enrollment_id);
+                    table.ForeignKey(
+                        name: "FK_Enrollments_Courses_course_id",
+                        column: x => x.course_id,
+                        principalTable: "Courses",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Enrollments_StudentProfiles_student_id",
+                        column: x => x.student_id,
+                        principalTable: "StudentProfiles",
+                        principalColumn: "student_id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Enrollments_Tracks_track_id",
+                        column: x => x.track_id,
+                        principalTable: "Tracks",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Modules",
+                columns: table => new
+                {
+                    module_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    course_id = table.Column<int>(type: "int", nullable: false),
+                    title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    order = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Modules", x => x.module_id);
+                    table.ForeignKey(
+                        name: "FK_Modules_Courses_course_id",
+                        column: x => x.course_id,
+                        principalTable: "Courses",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Track_Course",
+                columns: table => new
+                {
+                    track_id = table.Column<int>(type: "int", nullable: false),
+                    course_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Track_Course", x => new { x.track_id, x.course_id });
+                    table.ForeignKey(
+                        name: "FK_Track_Course_Courses_course_id",
+                        column: x => x.course_id,
+                        principalTable: "Courses",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Track_Course_Tracks_track_id",
+                        column: x => x.track_id,
+                        principalTable: "Tracks",
+                        principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Assignments",
+                columns: table => new
+                {
+                    assignment_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    module_id = table.Column<int>(type: "int", nullable: false),
+                    title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    instruction = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Assignments", x => x.assignment_id);
+                    table.ForeignKey(
+                        name: "FK_Assignments_Modules_module_id",
+                        column: x => x.module_id,
+                        principalTable: "Modules",
+                        principalColumn: "module_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Lessons",
+                columns: table => new
+                {
+                    lesson_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    module_id = table.Column<int>(type: "int", nullable: false),
+                    title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    content_type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    order = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Lessons", x => x.lesson_id);
+                    table.ForeignKey(
+                        name: "FK_Lessons_Modules_module_id",
+                        column: x => x.module_id,
+                        principalTable: "Modules",
+                        principalColumn: "module_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LessonContents",
+                columns: table => new
+                {
+                    lesson_content_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    lesson_id = table.Column<int>(type: "int", nullable: false),
+                    content_type = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
+                    article_content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    duration_seconds = table.Column<int>(type: "int", nullable: true),
+                    video_url = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LessonContents", x => x.lesson_content_id);
+                    table.ForeignKey(
+                        name: "FK_LessonContents_Lessons_lesson_id",
+                        column: x => x.lesson_id,
+                        principalTable: "Lessons",
+                        principalColumn: "lesson_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LessonProgresses",
+                columns: table => new
+                {
+                    lesson_progress_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    student_id = table.Column<int>(type: "int", nullable: false),
+                    lesson_id = table.Column<int>(type: "int", nullable: false),
+                    started_date = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    completed_date = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    is_completed = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LessonProgresses", x => x.lesson_progress_id);
+                    table.ForeignKey(
+                        name: "FK_LessonProgresses_Lessons_lesson_id",
+                        column: x => x.lesson_id,
+                        principalTable: "Lessons",
+                        principalColumn: "lesson_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LessonProgresses_StudentProfiles_student_id",
+                        column: x => x.student_id,
+                        principalTable: "StudentProfiles",
+                        principalColumn: "student_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LessonResources",
+                columns: table => new
+                {
+                    lesson_resource_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    lesson_id = table.Column<int>(type: "int", nullable: false),
+                    resource_url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    resource_title = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    resource_type = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LessonResources", x => x.lesson_resource_id);
+                    table.ForeignKey(
+                        name: "FK_LessonResources_Lessons_lesson_id",
+                        column: x => x.lesson_id,
+                        principalTable: "Lessons",
+                        principalColumn: "lesson_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assignments_module_id",
+                table: "Assignments",
+                column: "module_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_parent_category_id",
+                table: "Categories",
+                column: "parent_category_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Category_Slug",
+                table: "Categories",
+                column: "category_slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Certificates_course_id",
+                table: "Certificates",
+                column: "course_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Certificates_student_id",
+                table: "Certificates",
+                column: "student_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Certificates_track_id",
+                table: "Certificates",
+                column: "track_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseLearningOutcomes_course_id",
+                table: "CourseLearningOutcomes",
+                column: "course_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Courses_instructor_id",
+                table: "Courses",
+                column: "instructor_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseEnrollment_Course_Student",
+                table: "Enrollments",
+                columns: new[] { "course_id", "student_id" },
+                unique: true,
+                filter: "[course_id] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Enrollments_student_id",
+                table: "Enrollments",
+                column: "student_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrackEnrollment_Track_Student",
+                table: "Enrollments",
+                columns: new[] { "track_id", "student_id" },
+                unique: true,
+                filter: "[track_id] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InstructorProfile_UserId",
+                table: "InstructorProfiles",
+                column: "user_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Language_Slug",
+                table: "Languages",
+                column: "language_slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LearningEntity_Category_category_id",
+                table: "LearningEntity_Category",
+                column: "category_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LearningEntity_Language_language_id",
+                table: "LearningEntity_Language",
+                column: "language_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LessonContents_lesson_id",
+                table: "LessonContents",
+                column: "lesson_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LessonProgress_Student_Lesson",
+                table: "LessonProgresses",
+                columns: new[] { "student_id", "lesson_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LessonProgresses_lesson_id",
+                table: "LessonProgresses",
+                column: "lesson_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LessonResources_lesson_id",
+                table: "LessonResources",
+                column: "lesson_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Lesson_Module_Order",
+                table: "Lessons",
+                columns: new[] { "module_id", "order" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Module_Course_Order",
+                table: "Modules",
+                columns: new[] { "course_id", "order" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoleClaims_RoleId",
+                table: "RoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                table: "Roles",
+                column: "NormalizedName",
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Skills_user_id",
+                table: "Skills",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentProfile_UserId",
+                table: "StudentProfiles",
+                column: "user_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Track_Course_course_id",
+                table: "Track_Course",
+                column: "course_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserClaims_UserId",
+                table: "UserClaims",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserLogins_UserId",
+                table: "UserLogins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserRoles_role_id",
+                table: "UserRoles",
+                column: "role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "EmailIndex",
+                table: "Users",
+                column: "NormalizedEmail");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_Email",
+                table: "Users",
+                column: "email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
+                table: "Users",
+                column: "NormalizedUserName",
+                unique: true,
+                filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSocialLinks_user_id",
+                table: "UserSocialLinks",
+                column: "user_id");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Assignments");
+
+            migrationBuilder.DropTable(
+                name: "Certificates");
+
+            migrationBuilder.DropTable(
+                name: "CourseLearningOutcomes");
+
+            migrationBuilder.DropTable(
+                name: "Enrollments");
+
+            migrationBuilder.DropTable(
+                name: "LearningEntity_Category");
+
+            migrationBuilder.DropTable(
+                name: "LearningEntity_Language");
+
+            migrationBuilder.DropTable(
+                name: "LessonContents");
+
+            migrationBuilder.DropTable(
+                name: "LessonProgresses");
+
+            migrationBuilder.DropTable(
+                name: "LessonResources");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
+
+            migrationBuilder.DropTable(
+                name: "RoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "Skills");
+
+            migrationBuilder.DropTable(
+                name: "Track_Course");
+
+            migrationBuilder.DropTable(
+                name: "UserClaims");
+
+            migrationBuilder.DropTable(
+                name: "UserLogins");
+
+            migrationBuilder.DropTable(
+                name: "UserRoles");
+
+            migrationBuilder.DropTable(
+                name: "UserSocialLinks");
+
+            migrationBuilder.DropTable(
+                name: "UserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
+
+            migrationBuilder.DropTable(
+                name: "Languages");
+
+            migrationBuilder.DropTable(
+                name: "StudentProfiles");
+
+            migrationBuilder.DropTable(
+                name: "Lessons");
+
+            migrationBuilder.DropTable(
+                name: "Tracks");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
+
+            migrationBuilder.DropTable(
+                name: "Modules");
+
+            migrationBuilder.DropTable(
+                name: "Courses");
+
+            migrationBuilder.DropTable(
+                name: "InstructorProfiles");
+
+            migrationBuilder.DropTable(
+                name: "LearningEntities");
+
+            migrationBuilder.DropTable(
+                name: "Users");
+        }
+    }
+}

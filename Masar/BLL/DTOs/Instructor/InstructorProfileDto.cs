@@ -15,14 +15,12 @@ public class InstructorProfileDto
     
     // Professional Info
     public int? YearsOfExperience { get; set; }
-    public string? Location { get; set; }
-    public string? Languages { get; set; }
     public DateTime JoinedDate { get; set; }
     
     // Social Links (you may need to add these to the database)
     public string? GithubUrl { get; set; }
     public string? LinkedInUrl { get; set; }
-    public string? TwitterUrl { get; set; }
+    public string? FacebookUrl { get; set; }
     public string? WebsiteUrl { get; set; }
     
     // Statistics
@@ -35,8 +33,8 @@ public class InstructorProfileDto
     public int StudentInteractions { get; set; }
     public int CertificatesIssued { get; set; }
     
-    // Skills/Expertise Tags
-    public List<string> TeachingExpertise { get; set; } = new();
+    // Skills (instructor-specific, stored with SkillType = "Instructor")
+    public List<string> Skills { get; set; } = new();
     
     // Courses
     public List<InstructorProfileCourseDto> Courses { get; set; } = new();

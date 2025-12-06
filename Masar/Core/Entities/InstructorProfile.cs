@@ -32,6 +32,26 @@ public class InstructorProfile
     [Range(0, 50, ErrorMessage = "{0} of experience must be between {1} and {2}")]
     public int? YearsOfExperience { get; set; }
 
+    // Social Links - NotMapped until migration is run
+    [NotMapped]
+    [DataType(DataType.Url)]
+    [Display(Name = "GitHub URL")]
+    public string? GithubUrl { get; set; }
+
+    [NotMapped]
+    [DataType(DataType.Url)]
+    [Display(Name = "LinkedIn URL")]
+    public string? LinkedInUrl { get; set; }
+
+    [NotMapped]
+    [DataType(DataType.Url)]
+    [Display(Name = "Facebook URL")]
+    public string? FacebookUrl { get; set; }
+
+    [NotMapped]
+    [DataType(DataType.Url)]
+    [Display(Name = "Website URL")]
+    public string? WebsiteUrl { get; set; }
 
 
     // Navigation Properties

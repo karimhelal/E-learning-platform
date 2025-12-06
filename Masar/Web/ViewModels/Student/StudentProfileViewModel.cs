@@ -22,14 +22,13 @@ public class StudentProfileDataViewModel
     public string? Bio { get; set; }
     public string Initials { get; set; } = "JD";
     public string? Location { get; set; }
-    public string? Languages { get; set; }
     public string JoinedDate { get; set; } = string.Empty;
     public string? GithubUrl { get; set; }
     public string? LinkedInUrl { get; set; }
-    public string? TwitterUrl { get; set; }
+    public string? FacebookUrl { get; set; }
     public string? WebsiteUrl { get; set; }
     public StudentProfileStatsViewModel Stats { get; set; } = new();
-    public List<string> LearningInterests { get; set; } = new();
+    public List<string> Skills { get; set; } = new();
     public List<StudentProfileCourseCardViewModel> EnrolledCourses { get; set; } = new();
     public List<StudentCertificateViewModel> Certificates { get; set; } = new();
 }

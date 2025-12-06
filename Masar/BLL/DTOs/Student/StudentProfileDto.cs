@@ -16,12 +16,11 @@ public class StudentProfileDto
     // Learning Info
     public DateTime JoinedDate { get; set; }
     public string? Location { get; set; }
-    public string? Languages { get; set; }
     
     // Social Links
     public string? GithubUrl { get; set; }
     public string? LinkedInUrl { get; set; }
-    public string? TwitterUrl { get; set; }
+    public string? FacebookUrl { get; set; }
     public string? WebsiteUrl { get; set; }
     
     // Statistics
@@ -32,8 +31,8 @@ public class StudentProfileDto
     public int TotalLearningHours { get; set; }
     public int CurrentStreak { get; set; }
     
-    // Skills/Interests
-    public List<string> LearningInterests { get; set; } = new();
+    // Skills (from Skills table)
+    public List<string> Skills { get; set; } = new();
     
     // Enrolled Courses
     public List<StudentProfileCourseDto> EnrolledCourses { get; set; } = new();
@@ -57,6 +56,6 @@ public class StudentCertificateDto
 {
     public int CertificateId { get; set; }
     public string Title { get; set; } = string.Empty;
-    public DateTime IssuedDate { get; set; }  // CHANGED: From DateOnly to DateTime
-    public string Type { get; set; } = string.Empty; // "Course" or "Track"
+    public DateTime IssuedDate { get; set; }
+    public string Type { get; set; } = string.Empty;
 }

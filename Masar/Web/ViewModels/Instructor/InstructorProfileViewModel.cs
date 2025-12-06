@@ -25,21 +25,19 @@ public class InstructorProfileDataViewModel
     
     // Professional Info
     public int? YearsOfExperience { get; set; }
-    public string? Location { get; set; }
-    public string? Languages { get; set; }
     public string JoinedDate { get; set; } = string.Empty;
     
     // Social Links
     public string? GithubUrl { get; set; }
     public string? LinkedInUrl { get; set; }
-    public string? TwitterUrl { get; set; }
+    public string? FacebookUrl { get; set; }
     public string? WebsiteUrl { get; set; }
     
     // Statistics
     public InstructorProfileStatsViewModel Stats { get; set; } = new();
     
-    // Skills/Expertise
-    public List<string> TeachingExpertise { get; set; } = new();
+    // Skills (instructor-specific)
+    public List<string> Skills { get; set; } = new();
     
     // Courses
     public List<InstructorProfileCourseCardViewModel> Courses { get; set; } = new();

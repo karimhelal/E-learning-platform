@@ -47,17 +47,18 @@ public class StudentDashboardService : IStudentDashboardService
 
             var user = studentProfile.User;
 
-            // Get enrollments
-            _logger.LogInformation("Total enrollments loaded: {Count}", studentProfile.Enrollments?.Count ?? 0);
+            // Get enrollments - handle null case
+            var enrollments = studentProfile.Enrollments ?? new HashSet<EnrollmentBase>();
+            _logger.LogInformation("Total enrollments loaded: {Count}", enrollments.Count);
             
-            var courseEnrollments = studentProfile.Enrollments
+            var courseEnrollments = enrollments
                 .OfType<CourseEnrollment>()
                 .Where(e => e.Course != null)
                 .ToList();
 
             _logger.LogInformation("Course enrollments: {Count}", courseEnrollments.Count);
 
-            var trackEnrollments = studentProfile.Enrollments
+            var trackEnrollments = enrollments
                 .OfType<TrackEnrollment>()
                 .Where(e => e.Track != null)
                 .ToList();
@@ -89,8 +90,8 @@ public class StudentDashboardService : IStudentDashboardService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting dashboard data for student {StudentId}", studentId);
-            return null;
+            _logger.LogError(ex, "Error getting dashboard data for student {StudentId}. Exception: {Message}", studentId, ex.Message);
+            throw; // Re-throw to see the actual error
         }
     }
 
