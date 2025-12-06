@@ -448,8 +448,8 @@ public class CourseService : ICourseService
                 .OfType<VideoContent>()
                 .Sum(v => (int?)v.DurationInSeconds) ?? 0
             );
-        result.MinDuration = Math.Ceiling(durationsQuery.Select(x => (int?)x).Min() ?? 0 / 3600.0);
-        result.MaxDuration = Math.Ceiling(durationsQuery.Select(x => (int?)x).Max() ?? 0 / 3600.0);
+        result.MinDuration = Math.Ceiling((durationsQuery.Select(x => (int?)x).Min() ?? 0) / 3600.0);
+        result.MaxDuration = Math.Ceiling((durationsQuery.Select(x => (int?)x).Max() ?? 0) / 3600.0);
 
 
         var enrollmentsQuery = coursesQuery.Select(c => c.Enrollments!.Count());

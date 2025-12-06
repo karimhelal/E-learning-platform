@@ -272,7 +272,7 @@ public class StudentCourseDetailsService : IStudentCourseDetailsService
             }
             else if (progressPercentage > 0)
             {
-                enrollment.Status = EnrollmentStatus.Active;
+                enrollment.Status = EnrollmentStatus.InProgress;
             }
 
             _context.Update(enrollment);

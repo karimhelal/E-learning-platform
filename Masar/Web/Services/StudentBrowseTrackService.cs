@@ -51,10 +51,13 @@ namespace Web.Services
                     userInitials = GetInitials($"{studentProfile.User.FirstName} {studentProfile.User.LastName}");
                 }
 
-                // Fetch actual tracks from database
+                // Fetch actual tracks from database WITH LessonContent for duration calculation
                 var tracks = await _context.Tracks
                     .Include(t => t.TrackCourses)
                         .ThenInclude(tc => tc.Course)
+                            .ThenInclude(c => c!.Modules)
+                                .ThenInclude(m => m.Lessons)
+                                    .ThenInclude(l => l.LessonContent)  // ADD THIS LINE - Critical!
                     .Include(t => t.Enrollments)
                     .Include(t => t.Categories)
                     .ToListAsync();
@@ -97,35 +100,45 @@ namespace Web.Services
             var coursesCount = courses.Count;
             var studentsCount = track.Enrollments?.Count() ?? 0;
             
-            // Calculate total duration
-            var totalHours = courses
+            // Calculate total duration from video content
+            var totalSeconds = courses
                 .Where(c => c.Modules != null)
                 .SelectMany(c => c.Modules!)
                 .SelectMany(m => m.Lessons ?? new List<Lesson>())
                 .Select(l => l.LessonContent)
                 .OfType<VideoContent>()
-                .Sum(v => v.DurationInSeconds) / 3600;
+                .Sum(v => v.DurationInSeconds);
+            
+            var totalHours = (int)Math.Ceiling(totalSeconds / 3600.0);  // Round up
 
             // Get category
             var categoryName = track.Categories?.FirstOrDefault()?.Name ?? "Learning Track";
             
             // Check if student is enrolled
             var isEnrolled = track.Enrollments?.Any(e => e.StudentId == studentId) ?? false;
+            
+            // Extract skills from course categories
+            var skills = courses
+                .SelectMany(c => c.Categories ?? new List<Category>())
+                .Select(cat => cat.Name)
+                .Distinct()
+                .Take(4)
+                .ToList();
 
             return new BrowseTrackItem
             {
                 TrackId = track.Id,
                 Title = track.Title,
                 Description = track.Description ?? "Explore this learning track",
-                Level = "Beginner", // TODO: Add level to Track entity
+                Level = "Beginner", // TODO: Derive from course levels
                 CategoryName = categoryName,
                 CategoryIcon = GetCategoryIcon(categoryName),
                 LevelBadgeClass = "beginner",
                 CoursesCount = coursesCount,
-                DurationHours = (int)totalHours,
+                DurationHours = totalHours,
                 StudentsCount = studentsCount,
                 Rating = 4.8m,
-                Skills = new List<string>(), // TODO: Extract from courses
+                Skills = skills,
                 CoursesPreview = courses.Take(3).Select(c => new CoursePreview
                 {
                     CourseId = c.Id,

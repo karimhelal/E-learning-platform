@@ -2,28 +2,29 @@ using BLL.DTOs.Account;
 using BLL.Helpers;
 using BLL.Interfaces;
 using BLL.Interfaces.Account;
+using BLL.Interfaces.Admin;
 using BLL.Interfaces.CourseLearning;
 using BLL.Interfaces.Enrollment;
-using BLL.Interfaces.Admin;
-using BLL.Interfaces.Student;
 using BLL.Interfaces.Instructor;
+using BLL.Interfaces.Student;
 using BLL.Services;
 using BLL.Services.Account;
+using BLL.Services.Admin;
 using BLL.Services.CourseLearning;
 using BLL.Services.Enrollment;
-using BLL.Services.Admin;
-using BLL.Services.Student;
 using BLL.Services.Instructor;
+using BLL.Services.Student;
 using Core.Entities;
 using Core.RepositoryInterfaces;
 using DAL.Data;
 using DAL.Data.RepositoryServices;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 using Web.Hubs;
 using Web.Interfaces;
 using Web.Services;
-using Microsoft.AspNetCore.Antiforgery;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,7 +53,6 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 
 
 // Current User Service
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddSignalR();
@@ -66,11 +66,11 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICourseLearningService, CourseLearningService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
-builder.Services.AddScoped<BLL.Interfaces.Student.IStudentProfileService, BLL.Services.Student.StudentProfileService>();
+builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
 builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
 
-builder.Services.AddScoped<BLL.Interfaces.Student.IStudentProfileService, BLL.Services.Student.StudentProfileService>();
+builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
 builder.Services.AddScoped<ICourseCreationService, CourseCreationService>(); // ADDED THIS LINE
 
 
@@ -84,8 +84,9 @@ builder.Services.AddScoped<IStudentTrackService, StudentTracksService>();
 builder.Services.AddScoped<IStudentTrackDetailsService, StudentTrackDetailsService>();
 builder.Services.AddScoped<IStudentBrowseTrackService, StudentBrowseTrackService>();
 builder.Services.AddScoped<IStudentCourseDetailsService, StudentCourseDetailsService>(); // ADDED THIS LINE
-builder.Services.AddScoped<Web.Interfaces.IStudentBrowseCoursesService, Web.Services.StudentBrowseCoursesService>(); // ADDED THIS LINE
-builder.Services.AddScoped<Web.Interfaces.IStudentCertificatesService, Web.Services.StudentCertificatesService>();
+builder.Services.AddScoped<IStudentBrowseCoursesService, StudentBrowseCoursesService>(); // ADDED THIS LINE
+builder.Services.AddScoped<IStudentCertificatesService, StudentCertificatesService>();
+builder.Services.AddScoped<ICertificateGenerationService, CertificateGenerationService>();
 
 
 // Authentication Services
@@ -101,7 +102,11 @@ builder.Services.AddAntiforgery(options =>
 });
 
 builder.Services.AddRazorPages();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 // Configure DbContext with SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -145,7 +150,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICertificateGenerationService, CertificateGenerationService>();
+
 
 var app = builder.Build();
 app.UseAuthentication();

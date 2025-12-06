@@ -617,7 +617,7 @@ public static class DbSeeder
                         StudentId = students[0].StudentId,
                         CourseId = courses[0].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 75.50m
                     },
                     new CourseEnrollment
@@ -625,7 +625,7 @@ public static class DbSeeder
                         StudentId = students[0].StudentId,
                         CourseId = courses[1].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-2),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 30.00m
                     },
                     new CourseEnrollment
@@ -633,7 +633,7 @@ public static class DbSeeder
                         StudentId = students[1].StudentId,
                         CourseId = courses[0].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-2),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 45.25m
                     },
                     new CourseEnrollment
@@ -641,7 +641,7 @@ public static class DbSeeder
                         StudentId = students[1].StudentId,
                         CourseId = courses[2].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 80.00m
                     },
                     new CourseEnrollment
@@ -657,7 +657,7 @@ public static class DbSeeder
                         StudentId = students[2].StudentId,
                         CourseId = courses[2].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-1),
-                        Status = EnrollmentStatus.Active   ,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 65.50m
                     }
                 });
@@ -672,7 +672,7 @@ public static class DbSeeder
                         StudentId = students[0].StudentId,
                         TrackId = tracks[0].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 55.00m
                     },
                     new TrackEnrollment
@@ -680,7 +680,7 @@ public static class DbSeeder
                         StudentId = students[1].StudentId,
                         TrackId = tracks[1].Id,
                         EnrollmentDate = DateTime.Now.AddMonths(-3),
-                        Status = EnrollmentStatus.  Active,
+                        Status = EnrollmentStatus.InProgress,
                         ProgressPercentage = 70.50m
                     }
                 });

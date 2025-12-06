@@ -24,12 +24,13 @@ public class HomeController : Controller
     private readonly RazorViewToStringRenderer _razorRenderer;
 
     public HomeController(
-        ILogger<HomeController> logger, 
+        ILogger<HomeController> logger,
         ICourseService courseService,
         RazorViewToStringRenderer razorRenderer,
         AppDbContext context,
         ICurrentUserService currentUserService
-    ) {
+    )
+    {
         _logger = logger;
         _courseService = courseService;
         _razorRenderer = razorRenderer;
@@ -38,43 +39,46 @@ public class HomeController : Controller
     }
 
 
-        [HttpGet("~/")]
-        public async Task<IActionResult> Index()
+    [HttpGet("~/")]
+    public async Task<IActionResult> Index()
+    {
+        var userId = _currentUserService.GetUserId();
+        ViewBag.UserId = userId;
+
+        // Fetch featured tracks (limit to 6)
+        var tracks = await _context.Tracks
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Modules)
+                        .ThenInclude(m => m.Lessons)
+                            .ThenInclude(l => l.LessonContent)
+            .Include(t => t.Enrollments)
+            .Include(t => t.Categories)
+            .Take(6)
+            .ToListAsync();
+
+        var viewModel = new HomeIndexViewModel
         {
-            var userId = _currentUserService.GetUserId();
-            ViewBag.UserId = userId;
-
-            // Fetch featured tracks (limit to 6)
-            var tracks = await _context.Tracks
-                .Include(t => t.TrackCourses)
-                    .ThenInclude(tc => tc.Course)
-                .Include(t => t.Enrollments)
-                .Include(t => t.Categories)
-                .Take(6)
-                .ToListAsync();
-
-            var viewModel = new HomeIndexViewModel
+            FeaturedTracks = tracks.Select(t => new HomeFeaturedTrackViewModel
             {
-                FeaturedTracks = tracks.Select(t => new HomeFeaturedTrackViewModel
-                {
-                    TrackId = t.Id,
-                    Title = t.Title,
-                    Subtitle = t.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
-                    IconClass = GetCategoryIcon(t.Categories?.FirstOrDefault()?.Name),
-                    CoursesCount = t.TrackCourses?.Count ?? 0,
-                    DurationHours = CalculateTrackDuration(t),
-                    StudentsCount = t.Enrollments?.Count ?? 0
-                }).ToList()
-            };
+                TrackId = t.Id,
+                Title = t.Title,
+                Subtitle = t.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
+                IconClass = GetCategoryIcon(t.Categories?.FirstOrDefault()?.Name),
+                CoursesCount = t.TrackCourses?.Count ?? 0,
+                DurationHours = CalculateTrackDuration(t),
+                StudentsCount = t.Enrollments?.Count ?? 0
+            }).ToList()
+        };
 
-            return View(viewModel);
-        }
+        return View(viewModel);
+    }
 
 
     [HttpGet("~/browse-courses")]
     public async Task<IActionResult> BrowseCourses()
     {
-        var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 3 };
+        var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 2 };
         var initialRequest = new BrowseRequestDto();
         initialRequest.PagingRequest = pagingRequest;
 
@@ -186,17 +190,17 @@ public class HomeController : Controller
     public async Task<IActionResult> CourseDetails(int courseId)
     {
         var courseDetails = await _courseService.GetCourseDetailsByIdAsync(courseId);
-        
+
         if (courseDetails == null)
             return NotFound("Course not found");
 
         var userId = _currentUserService.GetUserId();
-        
+
         // TODO: Check if student is enrolled
         bool isEnrolled = false;
         int? enrollmentId = null;
         decimal? progress = null;
-        
+
         if (userId > 0)
         {
             // Check enrollment status
@@ -206,14 +210,14 @@ public class HomeController : Controller
             // progress = enrollment?.ProgressPercentage;
         }
 
-            var viewModel = new CourseDetailsViewModel
-            {
-                Course = courseDetails,
-                PageTitle = courseDetails.Title ?? "Course Details", // FIX: Added null check
-                IsEnrolled = isEnrolled,
-                StudentEnrollmentId = enrollmentId,
-                ProgressPercentage = progress
-            };
+        var viewModel = new CourseDetailsViewModel
+        {
+            Course = courseDetails,
+            PageTitle = courseDetails.Title ?? "Course Details",
+            IsEnrolled = isEnrolled,
+            StudentEnrollmentId = enrollmentId,
+            ProgressPercentage = progress
+        };
 
         return View(viewModel);
     }
@@ -238,12 +242,13 @@ public class HomeController : Controller
         var result = new List<FilterGroupViewModel>();
 
         if (filterGroupsStats.CategoryCounts.Any())
+        {
             result.Add(new CheckboxFilter
             {
                 Title = "Categories",
                 RequestKey = "CategoryNames",
 
-                FilterOptions = filterGroups.CategoryNames!.Select(cat => new FilterOption
+                FilterOptions = filterGroups.CategoryNames!.Where(c => filterGroupsStats.CategoryCounts.SingleOrDefault(e => e.Key.ToLower() == c.ToLower()).Value > 0).Select(cat => new FilterOption
                 {
                     Label = cat,
                     Count = filterGroupsStats.CategoryCounts.SingleOrDefault(e => e.Key.ToLower() == cat.ToLower()).Value,
@@ -252,15 +257,17 @@ public class HomeController : Controller
                 })
                 .OrderByDescending(x => x.Count)
             });
+        }
 
 
         if (filterGroupsStats.LevelCounts.Any())
+        {
             result.Add(new CheckboxFilter
             {
                 Title = "Levels",
                 RequestKey = "LevelNames",
 
-                FilterOptions = filterGroups.LevelNames!.Select(lev => new FilterOption
+                FilterOptions = filterGroups.LevelNames!.Where(l => filterGroupsStats.LevelCounts.SingleOrDefault(e => e.Key.ToLower() == l.ToLower()).Value > 0).Select(lev => new FilterOption
                 {
                     Label = lev,
                     Count = filterGroupsStats.LevelCounts.SingleOrDefault(e => e.Key.ToLower() == lev.ToLower()).Value,
@@ -268,15 +275,17 @@ public class HomeController : Controller
                     Value = lev
                 })
             });
+        }
 
 
         if (filterGroupsStats.LanguageCounts.Any())
+        {
             result.Add(new CheckboxFilter
             {
                 Title = "Languages",
                 RequestKey = "LanguageNames",
 
-                FilterOptions = filterGroups.LanguageNames!.Select(lang => new FilterOption
+                FilterOptions = filterGroups.LanguageNames!.Where(l => filterGroupsStats.LanguageCounts.SingleOrDefault(e => e.Key.ToLower() == l.ToLower()).Value > 0).Select(lang => new FilterOption
                 {
                     Label = lang,
                     Count = filterGroupsStats.LanguageCounts.SingleOrDefault(e => e.Key.ToLower() == lang.ToLower()).Value,
@@ -285,246 +294,259 @@ public class HomeController : Controller
                 })
                 .OrderByDescending(x => x.Count)
             });
-
-
-        result.Add(new NumberRangeFilter
-        {
-            Title = "Duration (Hours)",
-            RequestKey = "Duration",
-
-            MinRequestKey = "MinDuration",
-            MaxRequestKey = "MaxDuration",
-            MinValue = filterGroups.MinDuration ?? 0,
-            MaxValue = ((filterGroups.MaxDuration ?? 0) == (filterGroups.MinDuration ?? 1)) ? (filterGroups.MaxDuration ?? 0) + 1 : filterGroups.MaxDuration,
-            Step = 0.5d,
-            Unit = "H"
-        });
-
-
-        result.Add(new NumberRangeFilter
-        {
-            Title = "Enrollments",
-            RequestKey = "Enrollments",
-
-            MinRequestKey = "MinEnrollments",
-            MaxRequestKey = "MaxEnrollments",
-            MinValue = filterGroups.MinEnrollments ?? 0,
-            MaxValue = filterGroups.MaxEnrollments ?? 100,
-            Step = 1,
-            Unit = "STUDENTS"
-        });
-
-
-        result.Add(new NumberRangeFilter
-        {
-            Title = "Rating",
-            RequestKey = "Rating",
-
-            MinRequestKey = "MinRating",
-            MaxRequestKey = "MaxRating",
-            MinValue = filterGroups.MinRating ?? 0,
-            MaxValue = filterGroups.MaxRating ?? 5,
-            Step = 0.1d,
-            Unit = ""
-        });
-
-
-        result.Add(new NumberRangeFilter
-        {
-            Title = "Reviews",
-            RequestKey = "Reviews",
-
-            MinRequestKey = "MinReviews",
-            MaxRequestKey = "MaxReviews",
-            MinValue = filterGroups.MinReviews ?? 0,
-            MaxValue = filterGroups.MaxReviews ?? 10000,
-            Step = 1,
-            Unit = ""
-        });
-
-
-        result.Add(new DateRangeFilter
-        {
-            Title = "Creation Date",
-            RequestKey = "CreationDate",
-
-            MinRequestKey = "MinCreationDate",
-            MaxRequestKey = "MaxCreationDate",
-            MinDate = filterGroups.MinCreationDate ?? DateOnly.MinValue,
-            MaxDate = filterGroups.MaxCreationDate ?? DateOnly.FromDateTime(DateTime.Now)
-        });
-
-
-        //result.Add(new ToggleFilter
-        //{
-        //    Title = "Certified",
-        //    RequestKey = "HasCertificates",
-
-        //    Label = "Include Certificates",
-        //    IsOn = filterGroups.HasCertificate ?? false
-        //});
-
-            return result;
         }
 
-
-        [HttpGet("~/browse-tracks")]
-        public async Task<IActionResult> BrowseTracks()
+        if (filterGroups.MinDuration != null && filterGroups.MaxDuration != null && (filterGroups.MinDuration != filterGroups.MaxDuration))
         {
-            var tracks = await _context.Tracks
-                .Include(t => t.TrackCourses)
-                    .ThenInclude(tc => tc.Course)
-                .Include(t => t.Enrollments)
-                .Include(t => t.Categories)
-                .ToListAsync();
-
-            var viewModel = new HomeBrowseTracksViewModel
+            result.Add(new NumberRangeFilter
             {
-                PageTitle = "Browse Learning Tracks | Masar",
-                Tracks = tracks.Select(t => new HomeTrackCardViewModel
-                {
-                    TrackId = t.Id,
-                    Title = t.Title,
-                    Description = t.Description ?? "Explore this learning track",
-                    CoursesCount = t.TrackCourses?.Count ?? 0,
-                    DurationHours = CalculateTrackDuration(t),
-                    StudentsCount = t.Enrollments?.Count ?? 0,
-                    CategoryName = t.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
-                    CategoryIcon = GetCategoryIcon(t.Categories?.FirstOrDefault()?.Name),
-                    Level = "Beginner", // You can enhance this based on your logic
-                    Rating = 4.8m,
-                    Skills = ExtractSkills(t),
-                    CoursesPreview = t.TrackCourses?
-                        .Take(3)
-                        .Select(tc => new HomeCoursePreviewViewModel
-                        {
-                            CourseId = tc.Course?.Id ?? 0,
-                            Title = tc.Course?.Title ?? "",
-                            Difficulty = tc.Course?.Level.ToString() ?? "Beginner"
-                        })
-                        .ToList() ?? new List<HomeCoursePreviewViewModel>()
-                }).ToList()
-            };
+                Title = "Duration (Hours)",
+                RequestKey = "Duration",
 
-            return View(viewModel);
+                MinRequestKey = "MinDuration",
+                MaxRequestKey = "MaxDuration",
+                MinValue = filterGroups.MinDuration ?? 0,
+                MaxValue = ((filterGroups.MaxDuration ?? 0) == (filterGroups.MinDuration ?? 1)) ? (filterGroups.MaxDuration ?? 0) + 1 : filterGroups.MaxDuration,
+                Step = 0.5d,
+                Unit = "H"
+            });
         }
 
-        private int CalculateTrackDuration(Track track)
+        if (filterGroups.MinEnrollments != null && filterGroups.MaxEnrollments != null && (filterGroups.MinEnrollments != filterGroups.MaxEnrollments))
         {
-            var totalSeconds = track.TrackCourses?
-                .Where(tc => tc.Course?.Modules != null)
-                .SelectMany(tc => tc.Course!.Modules!)
-                .SelectMany(m => m.Lessons ?? new List<Lesson>())
-                .Select(l => l.LessonContent)
-                .OfType<VideoContent>()
-                .Sum(v => v.DurationInSeconds) ?? 0;
-            
-            return (int)(totalSeconds / 3600);
-        }
-
-        private List<string> ExtractSkills(Track track)
-        {
-            // Extract unique category names from courses in the track
-            return track.TrackCourses?
-                .SelectMany(tc => tc.Course?.Categories ?? new List<Category>())
-                .Select(c => c.Name)
-                .Distinct()
-                .Take(4)
-                .ToList() ?? new List<string>();
-        }
-
-        private string GetCategoryIcon(string? categoryName)
-        {
-            return categoryName?.ToLower() switch
+            result.Add(new NumberRangeFilter
             {
-                "web development" => "fa-laptop-code",
-                "data science" => "fa-brain",
-                "mobile development" => "fa-mobile-alt",
-                "design" => "fa-palette",
-                "cloud computing" => "fa-cloud",
-                "devops" => "fa-server",
-                _ => "fa-book"
-            };
+                Title = "Enrollments",
+                RequestKey = "Enrollments",
+
+                MinRequestKey = "MinEnrollments",
+                MaxRequestKey = "MaxEnrollments",
+                MinValue = filterGroups.MinEnrollments ?? 0,
+                MaxValue = filterGroups.MaxEnrollments ?? 100,
+                Step = 1,
+                Unit = "STUDENTS"
+            });
         }
 
-        [HttpGet("~/track/{trackId:int}")]
-        public async Task<IActionResult> TrackDetails(int trackId)
+        if (filterGroups.MinRating != null && filterGroups.MaxRating != null && (filterGroups.MinRating != filterGroups.MaxRating))
         {
-            var track = await _context.Tracks
-                .Include(t => t.TrackCourses)
-                    .ThenInclude(tc => tc.Course)
-                        .ThenInclude(c => c!.Modules)
-                            .ThenInclude(m => m.Lessons)
-                .Include(t => t.TrackCourses)
-                    .ThenInclude(tc => tc.Course)
-                        .ThenInclude(c => c!.Instructor)
-                            .ThenInclude(i => i!.User)
-                .Include(t => t.Categories)
-                .Include(t => t.Enrollments)
-                .FirstOrDefaultAsync(t => t.Id == trackId);
-
-            if (track == null)
+            result.Add(new NumberRangeFilter
             {
-                return NotFound("Track not found");
-            }
+                Title = "Rating",
+                RequestKey = "Rating",
 
-            var userId = _currentUserService.GetUserId();
-            bool isEnrolled = false;
-
-            if (userId > 0)
-            {
-                isEnrolled = track.Enrollments?.Any(e => e.StudentId == userId) ?? false;
-            }
-
-            var courses = track.TrackCourses?
-                .Select(tc => tc.Course)
-                .Where(c => c != null)
-                .Select(c => new TrackCourseDetailViewModel
-                {
-                    CourseId = c!.Id,
-                    Title = c.Title,
-                    Description = c.Description ?? "",
-                    InstructorName = c.Instructor?.User != null 
-                        ? $"{c.Instructor.User.FirstName} {c.Instructor.User.LastName}" 
-                        : "Instructor",
-                    ThumbnailImageUrl = c.ThumbnailImageUrl,
-                    Level = c.Level.ToString(),
-                    DurationHours = CalculateCourseDuration(c),
-                    ModulesCount = c.Modules?.Count ?? 0,
-                    LessonsCount = c.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0,
-                    Rating = 4.7m // You can calculate this from reviews
-                })
-                .ToList() ?? new List<TrackCourseDetailViewModel>();
-
-            var viewModel = new TrackDetailsViewModel
-            {
-                TrackId = track.Id,
-                Title = track.Title,
-                Description = track.Description ?? "Start your learning journey",
-                CategoryName = track.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
-                CategoryIcon = GetCategoryIcon(track.Categories?.FirstOrDefault()?.Name),
-                Level = "Beginner", // You can calculate based on courses
-                DurationHours = CalculateTrackDuration(track),
-                CoursesCount = courses.Count,
-                StudentsCount = track.Enrollments?.Count ?? 0,
-                Rating = 4.8m,
-                Skills = ExtractSkills(track),
-                Courses = courses,
-                IsEnrolled = isEnrolled,
-                PageTitle = track.Title
-            };
-
-            return View(viewModel);
+                MinRequestKey = "MinRating",
+                MaxRequestKey = "MaxRating",
+                MinValue = filterGroups.MinRating ?? 0,
+                MaxValue = filterGroups.MaxRating ?? 5,
+                Step = 0.1d,
+                Unit = ""
+            });
         }
 
-        private int CalculateCourseDuration(Course course)
+        if (filterGroups.MinReviews != null && filterGroups.MaxReviews != null && (filterGroups.MinReviews != filterGroups.MaxReviews))
         {
-            var totalSeconds = course.Modules?
-                .SelectMany(m => m.Lessons ?? new List<Lesson>())
-                .Select(l => l.LessonContent)
-                .OfType<VideoContent>()
-                .Sum(v => v.DurationInSeconds) ?? 0;
-            
-            return (int)Math.Ceiling(totalSeconds / 3600.0);
+            result.Add(new NumberRangeFilter
+            {
+                Title = "Reviews",
+                RequestKey = "Reviews",
+
+                MinRequestKey = "MinReviews",
+                MaxRequestKey = "MaxReviews",
+                MinValue = filterGroups.MinReviews ?? 0,
+                MaxValue = filterGroups.MaxReviews ?? 10000,
+                Step = 1,
+                Unit = ""
+            });
         }
+
+        if (filterGroups.MinCreationDate != null && filterGroups.MaxCreationDate != null && (filterGroups.MinCreationDate != filterGroups.MaxCreationDate))
+        {
+            result.Add(new DateRangeFilter
+            {
+                Title = "Creation Date",
+                RequestKey = "CreationDate",
+
+                MinRequestKey = "MinCreationDate",
+                MaxRequestKey = "MaxCreationDate",
+                MinDate = filterGroups.MinCreationDate ?? DateOnly.MinValue,
+                MaxDate = filterGroups.MaxCreationDate ?? DateOnly.FromDateTime(DateTime.Now)
+            });
+        }
+
+        return result;
     }
+
+
+    [HttpGet("~/browse-tracks")]
+    public async Task<IActionResult> BrowseTracks()
+    {
+        var tracks = await _context.Tracks
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Modules)
+                        .ThenInclude(m => m.Lessons)
+                            .ThenInclude(l => l.LessonContent)
+            .Include(t => t.Enrollments)
+            .Include(t => t.Categories)
+            .ToListAsync();
+
+        var viewModel = new HomeBrowseTracksViewModel
+        {
+            PageTitle = "Browse Learning Tracks | Masar",
+            Tracks = tracks.Select(t => new HomeTrackCardViewModel
+            {
+                TrackId = t.Id,
+                Title = t.Title,
+                Description = t.Description ?? "Explore this learning track",
+                CoursesCount = t.TrackCourses?.Count ?? 0,
+                DurationHours = CalculateTrackDuration(t),
+                StudentsCount = t.Enrollments?.Count ?? 0,
+                CategoryName = t.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
+                CategoryIcon = GetCategoryIcon(t.Categories?.FirstOrDefault()?.Name),
+                Level = "Beginner",
+                Rating = 4.8m,
+                Skills = ExtractSkills(t),
+                CoursesPreview = t.TrackCourses?
+                    .Take(3)
+                    .Select(tc => new HomeCoursePreviewViewModel
+                    {
+                        CourseId = tc.Course?.Id ?? 0,
+                        Title = tc.Course?.Title ?? "",
+                        Difficulty = tc.Course?.Level.ToString() ?? "Beginner"
+                    })
+                    .ToList() ?? new List<HomeCoursePreviewViewModel>()
+            }).ToList()
+        };
+
+        return View(viewModel);
+    }
+
+
+    [HttpGet("~/track/{trackId:int}")]
+    public async Task<IActionResult> TrackDetails(int trackId)
+    {
+        var track = await _context.Tracks
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Modules)
+                        .ThenInclude(m => m.Lessons)
+                            .ThenInclude(l => l.LessonContent)
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Instructor)
+                        .ThenInclude(i => i!.User)
+            .Include(t => t.Categories)
+            .Include(t => t.Enrollments)
+            .FirstOrDefaultAsync(t => t.Id == trackId);
+
+        if (track == null)
+        {
+            return NotFound("Track not found");
+        }
+
+        var userId = _currentUserService.GetUserId();
+        bool isEnrolled = false;
+
+        if (userId > 0)
+        {
+            isEnrolled = track.Enrollments?.Any(e => e.StudentId == userId) ?? false;
+        }
+
+        var courses = track.TrackCourses?
+            .Select(tc => tc.Course)
+            .Where(c => c != null)
+            .Select(c => new TrackCourseDetailViewModel
+            {
+                CourseId = c!.Id,
+                Title = c.Title,
+                Description = c.Description ?? "",
+                InstructorName = c.Instructor?.User != null
+                    ? $"{c.Instructor.User.FirstName} {c.Instructor.User.LastName}"
+                    : "Instructor",
+                ThumbnailImageUrl = c.ThumbnailImageUrl,
+                Level = c.Level.ToString(),
+                DurationHours = CalculateCourseDuration(c),
+                ModulesCount = c.Modules?.Count ?? 0,
+                LessonsCount = c.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0,
+                Rating = 4.7m
+            })
+            .ToList() ?? new List<TrackCourseDetailViewModel>();
+
+        var viewModel = new TrackDetailsViewModel
+        {
+            TrackId = track.Id,
+            Title = track.Title,
+            Description = track.Description ?? "Start your learning journey",
+            CategoryName = track.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
+            CategoryIcon = GetCategoryIcon(track.Categories?.FirstOrDefault()?.Name),
+            Level = "Beginner",
+            DurationHours = CalculateTrackDuration(track),
+            CoursesCount = courses.Count,
+            StudentsCount = track.Enrollments?.Count ?? 0,
+            Rating = 4.8m,
+            Skills = ExtractSkills(track),
+            Courses = courses,
+            IsEnrolled = isEnrolled,
+            PageTitle = track.Title
+        };
+
+        return View(viewModel);
+    }
+
+    // HELPER METHODS - Keep only ONE instance of each
+
+    private int CalculateTrackDuration(Track track)
+    {
+        if (track.TrackCourses == null || !track.TrackCourses.Any())
+            return 0;
+
+        var totalSeconds = track.TrackCourses
+            .Where(tc => tc.Course?.Modules != null)
+            .SelectMany(tc => tc.Course!.Modules!)
+            .SelectMany(m => m.Lessons ?? new List<Lesson>())
+            .Select(l => l.LessonContent)
+            .OfType<VideoContent>()
+            .Sum(v => v.DurationInSeconds);
+
+        return (int)Math.Ceiling(totalSeconds / 3600.0);
+    }
+
+    private int CalculateCourseDuration(Course course)
+    {
+        if (course.Modules == null || !course.Modules.Any())
+            return 0;
+
+        var totalSeconds = course.Modules
+            .SelectMany(m => m.Lessons ?? new List<Lesson>())
+            .Select(l => l.LessonContent)
+            .OfType<VideoContent>()
+            .Sum(v => v.DurationInSeconds);
+
+        return (int)Math.Ceiling(totalSeconds / 3600.0);
+    }
+
+    private List<string> ExtractSkills(Track track)
+    {
+        return track.TrackCourses?
+            .SelectMany(tc => tc.Course?.Categories ?? new List<Category>())
+            .Select(c => c.Name)
+            .Distinct()
+            .Take(4)
+            .ToList() ?? new List<string>();
+    }
+
+    private string GetCategoryIcon(string? categoryName)
+    {
+        return categoryName?.ToLower() switch
+        {
+            "web development" => "fa-laptop-code",
+            "data science" => "fa-brain",
+            "mobile development" => "fa-mobile-alt",
+            "design" => "fa-palette",
+            "cloud computing" => "fa-cloud",
+            "devops" => "fa-server",
+            _ => "fa-book"
+        };
+    }
+}
