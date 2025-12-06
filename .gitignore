@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Masar/DAL/Migrations/20251205202526_init.cs
+/Masar/DAL/Migrations/20251205202526_init.Designer.cs
+/Masar/DAL/Migrations/20251206141344_init.cs
+/Masar/DAL/Migrations/20251206141344_init.Designer.cs
