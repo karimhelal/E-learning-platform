@@ -44,14 +44,15 @@
                     @Model.Data.Description
                 </p>
 
-                <!-- Instructor Info -->
-                <div class="instructor-info">
+                <!-- Instructor Info - NOW CLICKABLE -->
+                <a href="/instructor/@Model.Data.InstructorId" class="instructor-info instructor-link">
                     <div class="avatar avatar-lg instructor-avatar">@Model.Data.InstructorInitials</div>
                     <div class="instructor-details">
                         <div class="instructor-label">Instructor</div>
                         <div class="instructor-name">@Model.Data.InstructorName</div>
                     </div>
-                </div>
+                    <i class="fas fa-chevron-right instructor-arrow"></i>
+                </a>
 
                 <!-- Course Meta -->
                 <div class="course-meta">
@@ -249,8 +250,7 @@
                                         <div class="lesson-duration">@durationText</div>
                                     </div>
                                     <button class="lesson-status @(lesson.IsCompleted ? "completed" : "")" 
-                                            type="button"
-                                            @*onclick="toggleLessonCompletion(@lesson.LessonId, this, event)"*@>
+                                            type="button">
                                         @if (lesson.IsCompleted)
                                         {
                                             <i class="fas fa-check"></i>
@@ -261,7 +261,6 @@
                         </div>
 
                         <div class="module-actions">
-                            <!-- Will be populated by JavaScript -->
                         </div>
                     </div>
                 }
@@ -272,6 +271,70 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/pages/course-details.css" />
+    <style>
+        /* Instructor Link Styles */
+        .instructor-info.instructor-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 0.75rem;
+            margin: 0.5rem 0 1rem 0;
+            width: fit-content;
+        }
+        
+        .instructor-info.instructor-link:hover {
+            background: rgba(124, 58, 237, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .instructor-info.instructor-link .instructor-avatar {
+            flex-shrink: 0;
+        }
+        
+        .instructor-info.instructor-link .instructor-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .instructor-info.instructor-link .instructor-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .instructor-info.instructor-link .instructor-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+        
+        .instructor-info.instructor-link .instructor-arrow {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .instructor-info.instructor-link:hover .instructor-arrow {
+            opacity: 1;
+            color: var(--accent-purple);
+        }
+        
+        .instructor-info.instructor-link:hover .instructor-name {
+            color: var(--accent-purple);
+        }
+        
+        /* Ensure course-meta has proper spacing */
+        .course-meta {
+            margin-top: 1rem;
+        }
+    </style>
 }
 
 @section Scripts {
@@ -279,7 +342,7 @@
     <script>
         // Toggle lesson completion
         async function toggleLessonCompletion(lessonId, button, event) {
-            event.stopPropagation(); // Prevent navigation
+            event.stopPropagation();
             
             const isCompleted = button.classList.contains('completed');
             
@@ -297,7 +360,6 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Toggle button state
                     if (isCompleted) {
                         button.classList.remove('completed');
                         button.innerHTML = '';
@@ -306,7 +368,6 @@
                         button.innerHTML = '<i class="fas fa-check"></i>';
                     }
                     
-                    // Update all progress indicators
                     location.reload();
                 } else {
                     alert('Failed to update lesson status');

@@ -150,7 +150,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddScoped<IPublicInstructorService, PublicInstructorService>();
 
 var app = builder.Build();
 app.UseAuthentication();

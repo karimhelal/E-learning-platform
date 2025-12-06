@@ -1,0 +1,306 @@
+@model Web.ViewModels.Public.PublicInstructorProfileViewModel
+
+@{
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+}
+
+<!-- Profile Hero -->
+<section class="profile-hero">
+    <div class="profile-hero-container">
+        <!-- Cover Photo -->
+        <div class="profile-cover"></div>
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar-wrapper">
+                <div class="avatar avatar-xl">
+                    @if (!string.IsNullOrEmpty(Model.Data.ProfilePicture))
+                    {
+                        <img src="@Model.Data.ProfilePicture" alt="@Model.Data.FullName" />
+                    }
+                    else
+                    {
+                        @Model.Data.Initials
+                    }
+                </div>
+            </div>
+
+            <div class="profile-info-section">
+                <div>
+                    <h1 class="profile-name">@Model.Data.FullName</h1>
+                    <p class="profile-username">@Model.Data.Username</p>
+                    <p class="profile-role">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        Instructor
+                    </p>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <span class="stat-value">@Model.Data.Stats.TotalCourses</span>
+                        <span class="stat-label">Courses</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value">@Model.Data.Stats.TotalStudents.ToString("N0")</span>
+                        <span class="stat-label">Students</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value">@Model.Data.Stats.AverageRating.ToString("F1")</span>
+                        <span class="stat-label">Rating</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value">@Model.Data.Stats.TotalReviews</span>
+                        <span class="stat-label">Reviews</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button class="btn btn-secondary" id="shareProfileBtn">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Share</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Profile Content -->
+<section class="profile-content">
+    <div class="profile-layout">
+        <!-- Main Content -->
+        <div class="profile-main">
+            <!-- About Section -->
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-user"></i>
+                        About
+                    </h2>
+                </div>
+                <p class="profile-bio">
+                    @(Model.Data.Bio ?? "Passionate educator dedicated to creating high-quality courses that help students achieve their learning goals.")
+                </p>
+            </div>
+
+            <!-- Professional Info -->
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Professional Info
+                    </h2>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-calendar"></i>
+                        <div class="info-details">
+                            <span class="info-label">Member Since</span>
+                            <span class="info-value">@Model.Data.JoinedDate</span>
+                        </div>
+                    </div>
+
+                    @if (Model.Data.YearsOfExperience.HasValue)
+                    {
+                        <div class="info-item">
+                            <i class="fas fa-briefcase"></i>
+                            <div class="info-details">
+                                <span class="info-label">Experience</span>
+                                <span class="info-value">@Model.Data.YearsOfExperience+ years</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Skills -->
+            @if (Model.Data.Skills.Any())
+            {
+                <div class="profile-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-code"></i>
+                            Expertise
+                        </h2>
+                    </div>
+
+                    <div class="skills-tags">
+                        @foreach (var skill in Model.Data.Skills)
+                        {
+                            <span class="skill-tag badge badge-purple">@skill</span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Courses Section -->
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-book-open"></i>
+                        Courses by @Model.Data.FirstName
+                    </h2>
+                </div>
+
+                @if (Model.Data.Courses.Any())
+                {
+                    <div class="courses-grid">
+                        @foreach (var course in Model.Data.Courses)
+                        {
+                            <div class="course-card">
+                                <div class="course-thumbnail">
+                                    @if (!string.IsNullOrEmpty(course.ThumbnailImageUrl))
+                                    {
+                                        <img src="@course.ThumbnailImageUrl" alt="@course.Title" class="course-image" />
+                                    }
+                                    else
+                                    {
+                                        <div class="course-image" style="background: @course.GradientStyle;"></div>
+                                    }
+                                    <span class="course-badge @course.LevelBadgeClass">
+                                        @course.Level
+                                    </span>
+                                </div>
+                                <div class="course-info">
+                                    <span class="course-category badge @course.CategoryBadgeClass">@course.CategoryName</span>
+                                    <h3 class="course-title">@course.Title</h3>
+                                    <p class="course-description">@course.Description</p>
+                                    <div class="course-meta">
+                                        <span class="meta-item">
+                                            <i class="fas fa-play-circle"></i>
+                                            @course.TotalLessons lessons
+                                        </span>
+                                        <span class="meta-item">
+                                            <i class="fas fa-clock"></i>
+                                            @course.DurationHours hrs
+                                        </span>
+                                    </div>
+                                    <div class="course-stats">
+                                        <span class="course-stat">
+                                            <i class="fas fa-users"></i>
+                                            @course.StudentsCount.ToString("N0") students
+                                        </span>
+                                        <span class="course-stat">
+                                            <i class="fas fa-star"></i>
+                                            @course.Rating.ToString("F1")
+                                        </span>
+                                    </div>
+                                    <a href="/student/course/details/@course.CourseId" class="btn btn-primary btn-block">
+                                        <span>View Course</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-book"></i>
+                        <p>No courses available yet.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="profile-sidebar">
+            <!-- Social Links -->
+            @if (!string.IsNullOrEmpty(Model.Data.GithubUrl) || !string.IsNullOrEmpty(Model.Data.LinkedInUrl) || !string.IsNullOrEmpty(Model.Data.WebsiteUrl))
+            {
+                <div class="profile-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-share-alt"></i>
+                            Connect
+                        </h2>
+                    </div>
+
+                    <div class="social-links">
+                        @if (!string.IsNullOrEmpty(Model.Data.GithubUrl))
+                        {
+                            <a href="@Model.Data.GithubUrl" class="social-link github" target="_blank" rel="noopener">
+                                <i class="fab fa-github"></i>
+                                <span>GitHub</span>
+                            </a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Data.LinkedInUrl))
+                        {
+                            <a href="@Model.Data.LinkedInUrl" class="social-link linkedin" target="_blank" rel="noopener">
+                                <i class="fab fa-linkedin"></i>
+                                <span>LinkedIn</span>
+                            </a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Data.WebsiteUrl))
+                        {
+                            <a href="@Model.Data.WebsiteUrl" class="social-link website" target="_blank" rel="noopener">
+                                <i class="fas fa-globe"></i>
+                                <span>Website</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Quick Stats Card -->
+            <div class="profile-section stats-card">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Quick Stats
+                    </h2>
+                </div>
+                <div class="quick-stats">
+                    <div class="quick-stat-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div>
+                            <span class="stat-value">@Model.Data.Stats.TotalStudents.ToString("N0")</span>
+                            <span class="stat-label">Students Taught</span>
+                        </div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <i class="fas fa-book"></i>
+                        <div>
+                            <span class="stat-value">@Model.Data.Stats.TotalCourses</span>
+                            <span class="stat-label">Courses Created</span>
+                        </div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <span class="stat-value">@Model.Data.Stats.AverageRating.ToString("F1")</span>
+                            <span class="stat-label">Average Rating</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/profile.css" />
+    <link rel="stylesheet" href="~/css/pages/public-instructor-profile.css" />
+}
+
+@section Scripts {
+    <script>
+        // Share profile functionality
+        document.getElementById('shareProfileBtn')?.addEventListener('click', function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '@Model.Data.FullName - Instructor Profile',
+                    text: 'Check out @Model.Data.FirstName\'s courses on Masar!',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Profile link copied to clipboard!');
+                });
+            }
+        });
+    </script>
+}

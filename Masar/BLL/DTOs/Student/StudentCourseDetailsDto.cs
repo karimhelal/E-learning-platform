@@ -4,7 +4,7 @@ namespace BLL.DTOs.Student;
 
 public class StudentCourseDetailsDto
 {
-    // Student Info (ADD THESE TWO PROPERTIES)
+    // Student Info
     public string StudentName { get; set; } = string.Empty;
     public string UserInitials { get; set; } = string.Empty;
     
@@ -20,6 +20,7 @@ public class StudentCourseDetailsDto
     public string CategoryName { get; set; } = string.Empty;
     
     // Instructor Info (from InstructorProfile)
+    public int InstructorId { get; set; }  // ADD THIS LINE
     public string InstructorName { get; set; } = string.Empty;
     public string InstructorInitials { get; set; } = string.Empty;
     
@@ -73,7 +74,7 @@ public class LessonWithProgressDto
     public int LessonId { get; set; }
     public int LessonOrder { get; set; }
     public string LessonName { get; set; } = string.Empty;
-    public LessonContentType ContentType { get; set; } // Use your enum
+    public LessonContentType ContentType { get; set; }
     public int DurationMinutes { get; set; }
     public bool IsCompleted { get; set; }
     public DateTime? CompletedDate { get; set; }
