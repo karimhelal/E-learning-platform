@@ -18,5 +18,5 @@ public interface IAdminService
         Task<int> GetPendingCoursesCountAsync();
         Task ApproveCourseAsync(int courseId);
         Task RejectCourseAsync(int courseId,string reason);
-    }
+    
 }
