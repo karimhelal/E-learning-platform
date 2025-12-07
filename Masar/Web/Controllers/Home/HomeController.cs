@@ -24,12 +24,13 @@ public class HomeController : Controller
     private readonly RazorViewToStringRenderer _razorRenderer;
 
     public HomeController(
-        ILogger<HomeController> logger, 
+        ILogger<HomeController> logger,
         ICourseService courseService,
         RazorViewToStringRenderer razorRenderer,
         AppDbContext context,
         ICurrentUserService currentUserService
-    ) {
+    )
+    {
         _logger = logger;
         _courseService = courseService;
         _razorRenderer = razorRenderer;
@@ -38,37 +39,40 @@ public class HomeController : Controller
     }
 
 
-        [HttpGet("~/")]
-        public async Task<IActionResult> Index()
+    [HttpGet("~/")]
+    public async Task<IActionResult> Index()
+    {
+        var userId = _currentUserService.GetUserId();
+        ViewBag.UserId = userId;
+
+        // Fetch featured tracks (limit to 6)
+        var tracks = await _context.Tracks
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Modules)
+                        .ThenInclude(m => m.Lessons)
+                            .ThenInclude(l => l.LessonContent)
+            .Include(t => t.Enrollments)
+            .Include(t => t.Categories)
+            .Take(6)
+            .ToListAsync();
+
+        var viewModel = new HomeIndexViewModel
         {
-            var userId = _currentUserService.GetUserId();
-            ViewBag.UserId = userId;
-
-            // Fetch featured tracks (limit to 6)
-            var tracks = await _context.Tracks
-                .Include(t => t.TrackCourses)
-                    .ThenInclude(tc => tc.Course)
-                .Include(t => t.Enrollments)
-                .Include(t => t.Categories)
-                .Take(6)
-                .ToListAsync();
-
-            var viewModel = new HomeIndexViewModel
+            FeaturedTracks = tracks.Select(t => new HomeFeaturedTrackViewModel
             {
-                FeaturedTracks = tracks.Select(t => new HomeFeaturedTrackViewModel
-                {
-                    TrackId = t.Id,
-                    Title = t.Title,
-                    Subtitle = t.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
-                    IconClass = GetCategoryIcon(t.Categories?.FirstOrDefault()?.Name),
-                    CoursesCount = t.TrackCourses?.Count ?? 0,
-                    DurationHours = CalculateTrackDuration(t),
-                    StudentsCount = t.Enrollments?.Count ?? 0
-                }).ToList()
-            };
+                TrackId = t.Id,
+                Title = t.Title,
+                Subtitle = t.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
+                IconClass = GetCategoryIcon(t.Categories?.FirstOrDefault()?.Name),
+                CoursesCount = t.TrackCourses?.Count ?? 0,
+                DurationHours = CalculateTrackDuration(t),
+                StudentsCount = t.Enrollments?.Count ?? 0
+            }).ToList()
+        };
 
-            return View(viewModel);
-        }
+        return View(viewModel);
+    }
 
 
     [HttpGet("~/browse-courses")]
@@ -186,17 +190,17 @@ public class HomeController : Controller
     public async Task<IActionResult> CourseDetails(int courseId)
     {
         var courseDetails = await _courseService.GetCourseDetailsByIdAsync(courseId);
-        
+
         if (courseDetails == null)
             return NotFound("Course not found");
 
         var userId = _currentUserService.GetUserId();
-        
+
         // TODO: Check if student is enrolled
         bool isEnrolled = false;
         int? enrollmentId = null;
         decimal? progress = null;
-        
+
         if (userId > 0)
         {
             // Check enrollment status
@@ -206,14 +210,14 @@ public class HomeController : Controller
             // progress = enrollment?.ProgressPercentage;
         }
 
-            var viewModel = new CourseDetailsViewModel
-            {
-                Course = courseDetails,
-                PageTitle = courseDetails.Title ?? "Course Details", // FIX: Added null check
-                IsEnrolled = isEnrolled,
-                StudentEnrollmentId = enrollmentId,
-                ProgressPercentage = progress
-            };
+        var viewModel = new CourseDetailsViewModel
+        {
+            Course = courseDetails,
+            PageTitle = courseDetails.Title ?? "Course Details",
+            IsEnrolled = isEnrolled,
+            StudentEnrollmentId = enrollmentId,
+            ProgressPercentage = progress
+        };
 
         return View(viewModel);
     }
@@ -370,176 +374,179 @@ public class HomeController : Controller
             });
         }
 
-        //result.Add(new ToggleFilter
-        //{
-        //    Title = "Certified",
-        //    RequestKey = "HasCertificates",
-
-        //    Label = "Include Certificates",
-        //    IsOn = filterGroups.HasCertificate ?? false
-        //});
-
-            return result;
-        }
-
-
-        [HttpGet("~/browse-tracks")]
-        public async Task<IActionResult> BrowseTracks()
-        {
-            var tracks = await _context.Tracks
-                .Include(t => t.TrackCourses)
-                    .ThenInclude(tc => tc.Course)
-                .Include(t => t.Enrollments)
-                .Include(t => t.Categories)
-                .ToListAsync();
-
-            var viewModel = new HomeBrowseTracksViewModel
-            {
-                PageTitle = "Browse Learning Tracks | Masar",
-                Tracks = tracks.Select(t => new HomeTrackCardViewModel
-                {
-                    TrackId = t.Id,
-                    Title = t.Title,
-                    Description = t.Description ?? "Explore this learning track",
-                    CoursesCount = t.TrackCourses?.Count ?? 0,
-                    DurationHours = CalculateTrackDuration(t),
-                    StudentsCount = t.Enrollments?.Count ?? 0,
-                    CategoryName = t.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
-                    CategoryIcon = GetCategoryIcon(t.Categories?.FirstOrDefault()?.Name),
-                    Level = "Beginner", // You can enhance this based on your logic
-                    Rating = 4.8m,
-                    Skills = ExtractSkills(t),
-                    CoursesPreview = t.TrackCourses?
-                        .Take(3)
-                        .Select(tc => new HomeCoursePreviewViewModel
-                        {
-                            CourseId = tc.Course?.Id ?? 0,
-                            Title = tc.Course?.Title ?? "",
-                            Difficulty = tc.Course?.Level.ToString() ?? "Beginner"
-                        })
-                        .ToList() ?? new List<HomeCoursePreviewViewModel>()
-                }).ToList()
-            };
-
-            return View(viewModel);
-        }
-
-        private int CalculateTrackDuration(Track track)
-        {
-            var totalSeconds = track.TrackCourses?
-                .Where(tc => tc.Course?.Modules != null)
-                .SelectMany(tc => tc.Course!.Modules!)
-                .SelectMany(m => m.Lessons ?? new List<Lesson>())
-                .Select(l => l.LessonContent)
-                .OfType<VideoContent>()
-                .Sum(v => v.DurationInSeconds) ?? 0;
-            
-            return (int)(totalSeconds / 3600);
-        }
-
-        private List<string> ExtractSkills(Track track)
-        {
-            // Extract unique category names from courses in the track
-            return track.TrackCourses?
-                .SelectMany(tc => tc.Course?.Categories ?? new List<Category>())
-                .Select(c => c.Name)
-                .Distinct()
-                .Take(4)
-                .ToList() ?? new List<string>();
-        }
-
-        private string GetCategoryIcon(string? categoryName)
-        {
-            return categoryName?.ToLower() switch
-            {
-                "web development" => "fa-laptop-code",
-                "data science" => "fa-brain",
-                "mobile development" => "fa-mobile-alt",
-                "design" => "fa-palette",
-                "cloud computing" => "fa-cloud",
-                "devops" => "fa-server",
-                _ => "fa-book"
-            };
-        }
-
-        [HttpGet("~/track/{trackId:int}")]
-        public async Task<IActionResult> TrackDetails(int trackId)
-        {
-            var track = await _context.Tracks
-                .Include(t => t.TrackCourses)
-                    .ThenInclude(tc => tc.Course)
-                        .ThenInclude(c => c!.Modules)
-                            .ThenInclude(m => m.Lessons)
-                .Include(t => t.TrackCourses)
-                    .ThenInclude(tc => tc.Course)
-                        .ThenInclude(c => c!.Instructor)
-                            .ThenInclude(i => i!.User)
-                .Include(t => t.Categories)
-                .Include(t => t.Enrollments)
-                .FirstOrDefaultAsync(t => t.Id == trackId);
-
-            if (track == null)
-            {
-                return NotFound("Track not found");
-            }
-
-            var userId = _currentUserService.GetUserId();
-            bool isEnrolled = false;
-
-            if (userId > 0)
-            {
-                isEnrolled = track.Enrollments?.Any(e => e.StudentId == userId) ?? false;
-            }
-
-            var courses = track.TrackCourses?
-                .Select(tc => tc.Course)
-                .Where(c => c != null)
-                .Select(c => new TrackCourseDetailViewModel
-                {
-                    CourseId = c!.Id,
-                    Title = c.Title,
-                    Description = c.Description ?? "",
-                    InstructorName = c.Instructor?.User != null 
-                        ? $"{c.Instructor.User.FirstName} {c.Instructor.User.LastName}" 
-                        : "Instructor",
-                    ThumbnailImageUrl = c.ThumbnailImageUrl,
-                    Level = c.Level.ToString(),
-                    DurationHours = CalculateCourseDuration(c),
-                    ModulesCount = c.Modules?.Count ?? 0,
-                    LessonsCount = c.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0,
-                    Rating = 4.7m // You can calculate this from reviews
-                })
-                .ToList() ?? new List<TrackCourseDetailViewModel>();
-
-            var viewModel = new TrackDetailsViewModel
-            {
-                TrackId = track.Id,
-                Title = track.Title,
-                Description = track.Description ?? "Start your learning journey",
-                CategoryName = track.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
-                CategoryIcon = GetCategoryIcon(track.Categories?.FirstOrDefault()?.Name),
-                Level = "Beginner", // You can calculate based on courses
-                DurationHours = CalculateTrackDuration(track),
-                CoursesCount = courses.Count,
-                StudentsCount = track.Enrollments?.Count ?? 0,
-                Rating = 4.8m,
-                Skills = ExtractSkills(track),
-                Courses = courses,
-                IsEnrolled = isEnrolled,
-                PageTitle = track.Title
-            };
-
-            return View(viewModel);
-        }
-
-        private int CalculateCourseDuration(Course course)
-        {
-            var totalSeconds = course.Modules?
-                .SelectMany(m => m.Lessons ?? new List<Lesson>())
-                .Select(l => l.LessonContent)
-                .OfType<VideoContent>()
-                .Sum(v => v.DurationInSeconds) ?? 0;
-            
-            return (int)Math.Ceiling(totalSeconds / 3600.0);
-        }
+        return result;
     }
+
+
+    [HttpGet("~/browse-tracks")]
+    public async Task<IActionResult> BrowseTracks()
+    {
+        var tracks = await _context.Tracks
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Modules)
+                        .ThenInclude(m => m.Lessons)
+                            .ThenInclude(l => l.LessonContent)
+            .Include(t => t.Enrollments)
+            .Include(t => t.Categories)
+            .ToListAsync();
+
+        var viewModel = new HomeBrowseTracksViewModel
+        {
+            PageTitle = "Browse Learning Tracks | Masar",
+            Tracks = tracks.Select(t => new HomeTrackCardViewModel
+            {
+                TrackId = t.Id,
+                Title = t.Title,
+                Description = t.Description ?? "Explore this learning track",
+                CoursesCount = t.TrackCourses?.Count ?? 0,
+                DurationHours = CalculateTrackDuration(t),
+                StudentsCount = t.Enrollments?.Count ?? 0,
+                CategoryName = t.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
+                CategoryIcon = GetCategoryIcon(t.Categories?.FirstOrDefault()?.Name),
+                Level = "Beginner",
+                Rating = 4.8m,
+                Skills = ExtractSkills(t),
+                CoursesPreview = t.TrackCourses?
+                    .Take(3)
+                    .Select(tc => new HomeCoursePreviewViewModel
+                    {
+                        CourseId = tc.Course?.Id ?? 0,
+                        Title = tc.Course?.Title ?? "",
+                        Difficulty = tc.Course?.Level.ToString() ?? "Beginner"
+                    })
+                    .ToList() ?? new List<HomeCoursePreviewViewModel>()
+            }).ToList()
+        };
+
+        return View(viewModel);
+    }
+
+
+    [HttpGet("~/track/{trackId:int}")]
+    public async Task<IActionResult> TrackDetails(int trackId)
+    {
+        var track = await _context.Tracks
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Modules)
+                        .ThenInclude(m => m.Lessons)
+                            .ThenInclude(l => l.LessonContent)
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Instructor)
+                        .ThenInclude(i => i!.User)
+            .Include(t => t.Categories)
+            .Include(t => t.Enrollments)
+            .FirstOrDefaultAsync(t => t.Id == trackId);
+
+        if (track == null)
+        {
+            return NotFound("Track not found");
+        }
+
+        var userId = _currentUserService.GetUserId();
+        bool isEnrolled = false;
+
+        if (userId > 0)
+        {
+            isEnrolled = track.Enrollments?.Any(e => e.StudentId == userId) ?? false;
+        }
+
+        var courses = track.TrackCourses?
+            .Select(tc => tc.Course)
+            .Where(c => c != null)
+            .Select(c => new TrackCourseDetailViewModel
+            {
+                CourseId = c!.Id,
+                Title = c.Title,
+                Description = c.Description ?? "",
+                InstructorName = c.Instructor?.User != null
+                    ? $"{c.Instructor.User.FirstName} {c.Instructor.User.LastName}"
+                    : "Instructor",
+                ThumbnailImageUrl = c.ThumbnailImageUrl,
+                Level = c.Level.ToString(),
+                DurationHours = CalculateCourseDuration(c),
+                ModulesCount = c.Modules?.Count ?? 0,
+                LessonsCount = c.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0,
+                Rating = 4.7m
+            })
+            .ToList() ?? new List<TrackCourseDetailViewModel>();
+
+        var viewModel = new TrackDetailsViewModel
+        {
+            TrackId = track.Id,
+            Title = track.Title,
+            Description = track.Description ?? "Start your learning journey",
+            CategoryName = track.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
+            CategoryIcon = GetCategoryIcon(track.Categories?.FirstOrDefault()?.Name),
+            Level = "Beginner",
+            DurationHours = CalculateTrackDuration(track),
+            CoursesCount = courses.Count,
+            StudentsCount = track.Enrollments?.Count ?? 0,
+            Rating = 4.8m,
+            Skills = ExtractSkills(track),
+            Courses = courses,
+            IsEnrolled = isEnrolled,
+            PageTitle = track.Title
+        };
+
+        return View(viewModel);
+    }
+
+    // HELPER METHODS - Keep only ONE instance of each
+
+    private int CalculateTrackDuration(Track track)
+    {
+        if (track.TrackCourses == null || !track.TrackCourses.Any())
+            return 0;
+
+        var totalSeconds = track.TrackCourses
+            .Where(tc => tc.Course?.Modules != null)
+            .SelectMany(tc => tc.Course!.Modules!)
+            .SelectMany(m => m.Lessons ?? new List<Lesson>())
+            .Select(l => l.LessonContent)
+            .OfType<VideoContent>()
+            .Sum(v => v.DurationInSeconds);
+
+        return (int)Math.Ceiling(totalSeconds / 3600.0);
+    }
+
+    private int CalculateCourseDuration(Course course)
+    {
+        if (course.Modules == null || !course.Modules.Any())
+            return 0;
+
+        var totalSeconds = course.Modules
+            .SelectMany(m => m.Lessons ?? new List<Lesson>())
+            .Select(l => l.LessonContent)
+            .OfType<VideoContent>()
+            .Sum(v => v.DurationInSeconds);
+
+        return (int)Math.Ceiling(totalSeconds / 3600.0);
+    }
+
+    private List<string> ExtractSkills(Track track)
+    {
+        return track.TrackCourses?
+            .SelectMany(tc => tc.Course?.Categories ?? new List<Category>())
+            .Select(c => c.Name)
+            .Distinct()
+            .Take(4)
+            .ToList() ?? new List<string>();
+    }
+
+    private string GetCategoryIcon(string? categoryName)
+    {
+        return categoryName?.ToLower() switch
+        {
+            "web development" => "fa-laptop-code",
+            "data science" => "fa-brain",
+            "mobile development" => "fa-mobile-alt",
+            "design" => "fa-palette",
+            "cloud computing" => "fa-cloud",
+            "devops" => "fa-server",
+            _ => "fa-book"
+        };
+    }
+}

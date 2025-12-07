@@ -1,0 +1,168 @@
+@model Web.ViewModels.Instructor.EditProfileFormModel
+
+<div class="modal-overlay" id="editProfileModal">
+    <div class="modal-container modal-lg">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-user-edit"></i>
+                Edit Profile
+            </h2>
+            <button type="button" class="modal-close-btn" id="closeEditProfileModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="editProfileForm">
+            @Html.AntiForgeryToken()
+            
+            <div class="modal-body">
+                <!-- Tab Navigation -->
+                <div class="profile-tabs">
+                    <button type="button" class="profile-tab active" data-tab="personal">
+                        <i class="fas fa-user"></i>
+                        Personal Info
+                    </button>
+                    <button type="button" class="profile-tab" data-tab="about">
+                        <i class="fas fa-info-circle"></i>
+                        About
+                    </button>
+                    <button type="button" class="profile-tab" data-tab="skills">
+                        <i class="fas fa-code"></i>
+                        Skills
+                    </button>
+                    <button type="button" class="profile-tab" data-tab="social">
+                        <i class="fas fa-share-alt"></i>
+                        Social Links
+                    </button>
+                </div>
+
+                <!-- Personal Information Tab -->
+                <div class="profile-tab-content active" id="tab-personal">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName" class="form-label">First Name <span class="required">*</span></label>
+                            <input type="text" id="firstName" name="FirstName" class="form-input" 
+                                   value="@Model.FirstName" required maxlength="50" />
+                            <span class="field-validation-error" data-valmsg-for="FirstName"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName" class="form-label">Last Name <span class="required">*</span></label>
+                            <input type="text" id="lastName" name="LastName" class="form-input" 
+                                   value="@Model.LastName" required maxlength="50" />
+                            <span class="field-validation-error" data-valmsg-for="LastName"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" name="Phone" class="form-input" 
+                                   value="@Model.Phone" placeholder="+1 (555) 000-0000" />
+                            <span class="field-validation-error" data-valmsg-for="Phone"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="yearsOfExperience" class="form-label">Years of Experience</label>
+                            <input type="number" id="yearsOfExperience" name="YearsOfExperience" class="form-input" 
+                                   value="@Model.YearsOfExperience" min="0" max="50" />
+                            <span class="field-validation-error" data-valmsg-for="YearsOfExperience"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About Tab -->
+                <div class="profile-tab-content" id="tab-about">
+                    <div class="form-group">
+                        <label for="bio" class="form-label">Bio / About Me</label>
+                        <textarea id="bio" name="Bio" class="form-textarea" rows="8" maxlength="2000"
+                                  placeholder="Tell students about yourself, your teaching style, and experience...">@Model.Bio</textarea>
+                        <div class="char-counter">
+                            <span id="bioCharCount">@(Model.Bio?.Length ?? 0)</span> / 2000 characters
+                        </div>
+                        <span class="field-validation-error" data-valmsg-for="Bio"></span>
+                    </div>
+                </div>
+
+                <!-- Skills Tab -->
+                <div class="profile-tab-content" id="tab-skills">
+                    <div class="form-group">
+                        <label class="form-label">Skills</label>
+                        <p class="form-hint">Add skills or topics you teach. Press Enter or click Add Skill to add a new skill.</p>
+                        
+                        <div class="expertise-input-wrapper">
+                            <input type="text" id="skillInput" class="form-input" 
+                                   placeholder="e.g., JavaScript, React, Web Development" />
+                            <button type="button" id="addSkillBtn" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-plus"></i> Add Skill
+                            </button>
+                        </div>
+
+                        <div class="expertise-tags" id="skillTags">
+                            @if (Model.Skills.Any())
+                            {
+                                @foreach (var skill in Model.Skills)
+                                {
+                                    <span class="expertise-tag">
+                                        @skill
+                                        <button type="button" class="remove-tag-btn" data-skill="@skill">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <input type="hidden" name="Skills" value="@skill" />
+                                    </span>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Links Tab -->
+                <div class="profile-tab-content" id="tab-social">
+                    <div class="form-group">
+                        <label for="githubUrl" class="form-label">
+                            <i class="fab fa-github"></i> GitHub Profile
+                        </label>
+                        <input type="url" id="githubUrl" name="GithubUrl" class="form-input" 
+                               value="@Model.GithubUrl" placeholder="https://github.com/username" />
+                        <span class="field-validation-error" data-valmsg-for="GithubUrl"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="linkedInUrl" class="form-label">
+                            <i class="fab fa-linkedin"></i> LinkedIn Profile
+                        </label>
+                        <input type="url" id="linkedInUrl" name="LinkedInUrl" class="form-input" 
+                               value="@Model.LinkedInUrl" placeholder="https://linkedin.com/in/username" />
+                        <span class="field-validation-error" data-valmsg-for="LinkedInUrl"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="facebookUrl" class="form-label">
+                            <i class="fab fa-facebook"></i> Facebook Profile
+                        </label>
+                        <input type="url" id="facebookUrl" name="FacebookUrl" class="form-input" 
+                               value="@Model.FacebookUrl" placeholder="https://facebook.com/username" />
+                        <span class="field-validation-error" data-valmsg-for="FacebookUrl"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="websiteUrl" class="form-label">
+                            <i class="fas fa-globe"></i> Personal Website
+                        </label>
+                        <input type="url" id="websiteUrl" name="WebsiteUrl" class="form-input" 
+                               value="@Model.WebsiteUrl" placeholder="https://yourwebsite.com" />
+                        <span class="field-validation-error" data-valmsg-for="WebsiteUrl"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelEditProfile">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

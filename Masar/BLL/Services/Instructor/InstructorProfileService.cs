@@ -10,12 +10,14 @@ public class InstructorProfileService : IInstructorProfileService
     private readonly IUserRepository _userRepo;
     private readonly ICourseRepository _courseRepo;
     private readonly ILessonRepository _lessonRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public InstructorProfileService(IUserRepository userRepo, ICourseRepository courseRepo, ILessonRepository lessonRepository)
+    public InstructorProfileService(IUserRepository userRepo, ICourseRepository courseRepo, IUnitOfWork unitOfWork, ILessonRepository lessonRepository)
     {
         _userRepo = userRepo;
         _courseRepo = courseRepo;
         _lessonRepo = lessonRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<InstructorProfileDto?> GetInstructorProfileAsync(int instructorId)
@@ -60,6 +62,19 @@ public class InstructorProfileService : IInstructorProfileService
 
         var teachingHours = (int)(totalTeachingHours / 3600.0);
 
+        // Get skills from database (only Instructor type)
+        var skills = user.Skills?
+            .Where(s => s.SkillType == "Instructor")
+            .Select(s => s.SkillName)
+            .ToList() ?? new List<string>();
+
+        // Get social links from UserSocialLinks table
+        var socialLinks = user.UserSocialLinks?.ToList() ?? new List<Core.Entities.UserSocialLink>();
+        var githubUrl = socialLinks.FirstOrDefault(s => s.SocialPlatform == Core.Entities.Enums.SocialPlatform.Github)?.Url;
+        var linkedInUrl = socialLinks.FirstOrDefault(s => s.SocialPlatform == Core.Entities.Enums.SocialPlatform.LinkedIn)?.Url;
+        var facebookUrl = socialLinks.FirstOrDefault(s => s.SocialPlatform == Core.Entities.Enums.SocialPlatform.Facebook)?.Url;
+        var websiteUrl = socialLinks.FirstOrDefault(s => s.SocialPlatform == Core.Entities.Enums.SocialPlatform.Personal)?.Url;
+
         return new InstructorProfileDto
         {
             InstructorId = instructorProfile.InstructorId,
@@ -71,17 +86,13 @@ public class InstructorProfileService : IInstructorProfileService
             ProfilePicture = user.Picture,
             Bio = instructorProfile.Bio,
             YearsOfExperience = instructorProfile.YearsOfExperience,
+            JoinedDate = DateTime.Now.AddYears(-2), // TODO: Add actual joined date field
             
-            // TODO: Add these fields to database if needed
-            Location = "Cairo, Egypt", // Placeholder
-            Languages = "English, Arabic", // Placeholder
-            JoinedDate = DateTime.Now.AddYears(-2), // Placeholder
-            
-            // Social Links - TODO: Add to database
-            GithubUrl = null,
-            LinkedInUrl = null,
-            TwitterUrl = null,
-            WebsiteUrl = null,
+            // Social Links from database
+            GithubUrl = githubUrl,
+            LinkedInUrl = linkedInUrl,
+            FacebookUrl = facebookUrl,
+            WebsiteUrl = websiteUrl,
             
             // Statistics
             TotalCourses = totalCourses,
@@ -93,14 +104,8 @@ public class InstructorProfileService : IInstructorProfileService
             StudentInteractions = totalStudents * 5, // Placeholder
             CertificatesIssued = (int)(totalStudents * 0.4), // Placeholder: ~40% completion rate
             
-            // Skills - TODO: Add to database or derive from courses
-            TeachingExpertise = new List<string>
-            {
-                "React & React Native",
-                "JavaScript & TypeScript",
-                "Web Development",
-                "Mobile Development"
-            },
+            // Skills from database (renamed from TeachingExpertise)
+            Skills = skills,
             
             Courses = courses
         };
@@ -123,17 +128,86 @@ public class InstructorProfileService : IInstructorProfileService
         if (instructorProfile == null || instructorProfile.User == null)
             return false;
 
-        // Update instructor profile
+        // Update instructor profile fields (only Bio and YearsOfExperience are persisted in DB currently)
         instructorProfile.Bio = profileDto.Bio;
         instructorProfile.YearsOfExperience = profileDto.YearsOfExperience;
-
+        
         // Update user info
         instructorProfile.User.FirstName = profileDto.FirstName;
         instructorProfile.User.LastName = profileDto.LastName;
         instructorProfile.User.PhoneNumber = profileDto.Phone;
 
-        // Save changes
-        _userRepo.Update(instructorProfile.User);
+        // Update skills (with SkillType = Instructor)
+        if (profileDto.Skills != null)
+        {
+            // Remove existing instructor skills only
+            var existingInstructorSkills = instructorProfile.User.Skills?
+                .Where(s => s.SkillType == "Instructor")
+                .ToList() ?? new List<Core.Entities.Skill>();
+            
+            foreach (var skill in existingInstructorSkills)
+            {
+                instructorProfile.User.Skills?.Remove(skill);
+            }
+            
+            // Add new skills with SkillType = Instructor
+            foreach (var skillName in profileDto.Skills.Where(s => !string.IsNullOrWhiteSpace(s)))
+            {
+                instructorProfile.User.Skills?.Add(new Core.Entities.Skill
+                {
+                    SkillName = skillName.Trim(),
+                    UserId = instructorProfile.UserId,
+                    SkillType = "Instructor"
+                });
+            }
+        }
+
+        // Update social links
+        instructorProfile.User.UserSocialLinks?.Clear();
+        instructorProfile.User.UserSocialLinks = new List<Core.Entities.UserSocialLink>();
+
+        if (!string.IsNullOrEmpty(profileDto.GithubUrl))
+        {
+            instructorProfile.User.UserSocialLinks.Add(new Core.Entities.UserSocialLink
+            {
+                Url = profileDto.GithubUrl,
+                SocialPlatform = Core.Entities.Enums.SocialPlatform.Github,
+                UserId = instructorProfile.UserId
+            });
+        }
+
+        if (!string.IsNullOrEmpty(profileDto.LinkedInUrl))
+        {
+            instructorProfile.User.UserSocialLinks.Add(new Core.Entities.UserSocialLink
+            {
+                Url = profileDto.LinkedInUrl,
+                SocialPlatform = Core.Entities.Enums.SocialPlatform.LinkedIn,
+                UserId = instructorProfile.UserId
+            });
+        }
+
+        if (!string.IsNullOrEmpty(profileDto.FacebookUrl))
+        {
+            instructorProfile.User.UserSocialLinks.Add(new Core.Entities.UserSocialLink
+            {
+                Url = profileDto.FacebookUrl,
+                SocialPlatform = Core.Entities.Enums.SocialPlatform.Facebook,
+                UserId = instructorProfile.UserId
+            });
+        }
+
+        if (!string.IsNullOrEmpty(profileDto.WebsiteUrl))
+        {
+            instructorProfile.User.UserSocialLinks.Add(new Core.Entities.UserSocialLink
+            {
+                Url = profileDto.WebsiteUrl,
+                SocialPlatform = Core.Entities.Enums.SocialPlatform.Personal,
+                UserId = instructorProfile.UserId
+            });
+        }
+
+        // Save changes using Unit of Work
+        await _unitOfWork.CompleteAsync();
 
         return true;
     }

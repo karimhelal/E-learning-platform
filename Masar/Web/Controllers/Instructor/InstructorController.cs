@@ -19,6 +19,14 @@ using Web.ViewModels.Instructor.CreateCourse;
 using Web.ViewModels.Instructor.Dashboard;
 using Web.ViewModels.Instructor.ManageCourse;
 using Web.ViewModels.Misc;
+using Core.Entities.Enums;
+using BLL.DTOs.Instructor;
+using Microsoft.AspNetCore.Identity;
+using Core.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Core.RepositoryInterfaces;
+using Web.Interfaces;
+using DAL.Data;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Web.Controllers.Instructor;
@@ -36,6 +44,7 @@ public class InstructorController : Controller
     private readonly ICategoryRepository _categoryRepository;
     private readonly IInstructorProfileService _instructorProfileService;
     private readonly IInstructorManageCourseService _instructorManageCourseService;
+    private readonly AppDbContext _context;
 
 
     public InstructorController(
@@ -48,7 +57,8 @@ public class InstructorController : Controller
         ICurrentUserService currentUserService,
         ICategoryRepository categoryRepository,
         IInstructorProfileService instructorProfileService,
-        IInstructorManageCourseService instructorManageCourseService)
+        IInstructorManageCourseService instructorManageCourseService,
+        AppDbContext context)
     {
         _dashboardService = dashboardService;
         _coursesService = courseService;
@@ -60,6 +70,7 @@ public class InstructorController : Controller
         _categoryRepository = categoryRepository;
         _instructorProfileService = instructorProfileService;
         _instructorManageCourseService = instructorManageCourseService;
+        _context = context;
     }
 
     private async Task<int> GetInstructorIdAsync()
@@ -323,13 +334,11 @@ public class InstructorController : Controller
                 Initials = $"{profileData.FirstName[0]}{profileData.LastName[0]}",
 
                 YearsOfExperience = profileData.YearsOfExperience,
-                Location = profileData.Location,
-                Languages = profileData.Languages,
                 JoinedDate = profileData.JoinedDate.ToString("MMMM yyyy"),
 
                 GithubUrl = profileData.GithubUrl,
                 LinkedInUrl = profileData.LinkedInUrl,
-                TwitterUrl = profileData.TwitterUrl,
+                FacebookUrl = profileData.FacebookUrl,
                 WebsiteUrl = profileData.WebsiteUrl,
 
                 Stats = new InstructorProfileStatsViewModel
@@ -344,7 +353,7 @@ public class InstructorController : Controller
                     CertificatesIssued = profileData.CertificatesIssued
                 },
 
-                TeachingExpertise = profileData.TeachingExpertise,
+                Skills = profileData.Skills,
 
                 Courses = profileData.Courses.Select((c, index) => new InstructorProfileCourseCardViewModel
                 {
@@ -363,6 +372,80 @@ public class InstructorController : Controller
         };
 
         return View(viewModel);
+    }
+
+    /// <summary>
+    /// Get Edit Profile Form - Returns the edit profile partial view for the modal.
+    /// </summary>
+    [HttpGet("/instructor/profile/edit")]
+    public async Task<IActionResult> GetEditProfileForm()
+    {
+        var instructorId = await GetInstructorIdAsync();
+        if (instructorId == 0)
+            return Unauthorized("Instructor profile not found");
+
+        var profileData = await _profileService.GetInstructorProfileAsync(instructorId);
+
+        if (profileData == null)
+            return NotFound();
+
+        var formModel = new EditProfileFormModel
+        {
+            FirstName = profileData.FirstName,
+            LastName = profileData.LastName,
+            Phone = profileData.Phone,
+            YearsOfExperience = profileData.YearsOfExperience,
+            Bio = profileData.Bio,
+            Skills = profileData.Skills,
+            GithubUrl = profileData.GithubUrl,
+            LinkedInUrl = profileData.LinkedInUrl,
+            FacebookUrl = profileData.FacebookUrl,
+            WebsiteUrl = profileData.WebsiteUrl
+        };
+
+        return PartialView("_EditProfileModal", formModel);
+    }
+
+    /// <summary>
+    /// Update Profile - Handle profile updates from the edit form.
+    /// </summary>
+    [HttpPost("/instructor/profile/edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfile([FromBody] EditProfileFormModel formModel)
+    {
+        var instructorId = await GetInstructorIdAsync();
+        if (instructorId == 0)
+            return Json(new { success = false, message = "Instructor profile not found" });
+
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            return Json(new { success = false, message = "Validation failed", errors });
+        }
+
+        var updateDto = new UpdateInstructorProfileDto
+        {
+            FirstName = formModel.FirstName,
+            LastName = formModel.LastName,
+            Phone = formModel.Phone,
+            YearsOfExperience = formModel.YearsOfExperience,
+            Bio = formModel.Bio,
+            Skills = formModel.Skills,
+            GithubUrl = formModel.GithubUrl,
+            LinkedInUrl = formModel.LinkedInUrl,
+            FacebookUrl = formModel.FacebookUrl,
+            WebsiteUrl = formModel.WebsiteUrl
+        };
+
+        var result = await _profileService.UpdateInstructorProfileAsync(instructorId, updateDto);
+
+        if (result)
+            return Json(new { success = true, message = "Profile updated successfully!" });
+        else
+            return Json(new { success = false, message = "Failed to update profile" });
     }
 
     /// <summary>
@@ -727,6 +810,74 @@ public class InstructorController : Controller
         }
         catch (Exception ex)
         {
+            return Json(new { success = false, message = "Upload failed: " + ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Upload Image - Handle profile photo uploads for instructor.
+    /// </summary>
+    [HttpPost("/instructor/upload-image")]
+    [IgnoreAntiforgeryToken] // Allow upload without token since we handle it manually
+    public async Task<IActionResult> UploadImage(IFormFile file, string type)
+    {
+        Console.WriteLine($"Instructor UploadImage called - file: {file?.FileName}, type: {type}");
+        
+        if (file == null || file.Length == 0)
+            return Json(new { success = false, message = "No file uploaded" });
+
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(extension))
+            return Json(new { success = false, message = "Invalid file type. Allowed: jpg, jpeg, png, webp, gif" });
+
+        if (file.Length > 5 * 1024 * 1024)
+            return Json(new { success = false, message = "File size exceeds 5MB" });
+
+        try
+        {
+            var instructorId = await GetInstructorIdAsync();
+            Console.WriteLine($"Instructor UploadImage - instructorId: {instructorId}");
+            
+            if (instructorId == 0)
+                return Json(new { success = false, message = "Instructor profile not found" });
+
+            var folder = type == "cover" ? "covers" : "profiles";
+            var fileName = $"{folder}-instructor-{instructorId}-{Guid.NewGuid()}{extension}";
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", folder);
+            
+            Console.WriteLine($"Instructor UploadImage - uploadsFolder: {uploadsFolder}");
+            
+            Directory.CreateDirectory(uploadsFolder);
+            
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            
+            var fileUrl = $"/uploads/{folder}/{fileName}";
+            Console.WriteLine($"Instructor UploadImage - fileUrl: {fileUrl}");
+
+            // If it's a profile picture, update the user's picture in database
+            if (type == "profile")
+            {
+                var instructorProfile = await _userRepository.GetInstructorProfileAsync(instructorId, includeUserBase: true);
+                if (instructorProfile?.User != null)
+                {
+                    instructorProfile.User.Picture = fileUrl;
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine($"Instructor UploadImage - saved picture to database");
+                }
+            }
+
+            return Json(new { success = true, url = fileUrl });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Instructor UploadImage error: {ex.Message}");
+            Console.WriteLine($"Instructor UploadImage stack: {ex.StackTrace}");
             return Json(new { success = false, message = "Upload failed: " + ex.Message });
         }
     }

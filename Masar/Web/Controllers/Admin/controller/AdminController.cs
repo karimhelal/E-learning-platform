@@ -69,5 +69,18 @@ namespace Web.Controllers.Admin.controller
 
             return View(model);
         }
+
+        [HttpGet]
+        public IActionResult Tracks()
+        {
+            return View();
+        }
+
+        // Add this action to the MVC AdminController
+        [HttpGet]
+        public IActionResult CreateTrack()
+        {
+            return View();
+        }
     }
 }

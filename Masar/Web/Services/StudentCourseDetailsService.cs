@@ -160,9 +160,10 @@ public class StudentCourseDetailsService : IStudentCourseDetailsService
             Title = course.Title,
             Description = course.Description ?? "",
             ThumbnailImageUrl = course.ThumbnailImageUrl ?? "",
-           // Language = course.Language,
+            // Language = course.Language,
             Level = course.Level,
             CategoryName = course.Categories?.FirstOrDefault()?.Name ?? "General",
+            InstructorId = course.Instructor?.InstructorId ?? 0,  // ADD THIS LINE
             InstructorName = $"{firstName} {lastName}",
             InstructorInitials = initials,
             TotalModules = course.Modules?.Count ?? 0,

@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Manage Tracks";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<header class="content-header">
+    <div class="header-left">
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+        <div class="page-title">
+            <h1>Manage Tracks</h1>
+            <p class="page-subtitle">View and manage learning tracks</p>
+        </div>
+    </div>
+    <div class="header-right">
+        <a href="/Admin/CreateTrack" class="btn-create">
+            <i class="fas fa-plus"></i> Create Track
+        </a>
+    </div>
+</header>
+
+<section class="users-section">
+    <div class="section-header">
+        <div class="section-title">
+            <h2>All Tracks</h2>
+            <span class="users-count" id="tracksCount">0 tracks</span>
+        </div>
+        <div class="section-actions">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchTracks" placeholder="Search tracks..." onkeyup="loadTracks(1)">
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Courses</th>
+                    <th>Students</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tracksTableBody">
+                <tr><td colspan="7" style="text-align:center; padding:40px; color:#94a3b8;">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <button class="pagination-btn" id="prevBtn" onclick="changePage(-1)" disabled>Previous</button>
+        <div class="pagination-info" id="paginationInfo">Page 1</div>
+        <button class="pagination-btn" id="nextBtn" onclick="changePage(1)" disabled>Next</button>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        .content-header { display: flex; justify-content: space-between; align-items: center; }
+        .btn-create {
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/manage-tracks.js"></script>
+}

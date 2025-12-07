@@ -1,24 +1,23 @@
-namespace Web.ViewModels.Instructor;
+namespace Web.ViewModels.Public;
 
-public class InstructorProfileViewModel
+public class PublicInstructorProfileViewModel
 {
-    public InstructorProfileDataViewModel Data { get; set; } = new();
-    
-    // UI-specific properties
+    public PublicInstructorProfileDataViewModel Data { get; set; } = new();
     public string PageTitle { get; set; } = "Instructor Profile";
+    
+    // For layout - student info if logged in
+    public int? StudentId { get; set; }
+    public string? StudentName { get; set; }
+    public string? UserInitials { get; set; }
 }
 
-public class InstructorProfileDataViewModel
+public class PublicInstructorProfileDataViewModel
 {
-    // Basic Info
     public int InstructorId { get; set; }
-    public int UserId { get; set; }
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string? Phone { get; set; }
     public string? ProfilePicture { get; set; }
     public string? Bio { get; set; }
     public string Initials { get; set; } = string.Empty;
@@ -30,39 +29,39 @@ public class InstructorProfileDataViewModel
     // Social Links
     public string? GithubUrl { get; set; }
     public string? LinkedInUrl { get; set; }
-    public string? FacebookUrl { get; set; }
     public string? WebsiteUrl { get; set; }
     
     // Statistics
-    public InstructorProfileStatsViewModel Stats { get; set; } = new();
+    public PublicInstructorStatsViewModel Stats { get; set; } = new();
     
-    // Skills (instructor-specific)
+    // Skills
     public List<string> Skills { get; set; } = new();
     
-    // Courses
-    public List<InstructorProfileCourseCardViewModel> Courses { get; set; } = new();
+    // Published Courses
+    public List<PublicInstructorCourseViewModel> Courses { get; set; } = new();
 }
 
-public class InstructorProfileStatsViewModel
+public class PublicInstructorStatsViewModel
 {
     public int TotalCourses { get; set; }
     public int TotalStudents { get; set; }
     public float AverageRating { get; set; }
     public int TotalReviews { get; set; }
-    public int TeachingStreak { get; set; }
-    public int TotalTeachingHours { get; set; }
-    public int StudentInteractions { get; set; }
-    public int CertificatesIssued { get; set; }
 }
 
-public class InstructorProfileCourseCardViewModel
+public class PublicInstructorCourseViewModel
 {
     public int CourseId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
-    public string StatusBadgeClass { get; set; } = string.Empty;
+    public string? ThumbnailImageUrl { get; set; }
+    public string Level { get; set; } = string.Empty;
+    public string LevelBadgeClass { get; set; } = string.Empty;
+    public string CategoryName { get; set; } = string.Empty;
+    public string CategoryBadgeClass { get; set; } = string.Empty;
     public int StudentsCount { get; set; }
     public float Rating { get; set; }
+    public int TotalLessons { get; set; }
+    public int DurationHours { get; set; }
     public string GradientStyle { get; set; } = string.Empty;
 }

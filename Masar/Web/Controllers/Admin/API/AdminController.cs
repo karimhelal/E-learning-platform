@@ -75,5 +75,36 @@ namespace Web.Controllers.Admin.API
             return Ok(new { message = "Course Rejected" });
         }
 
+        [HttpGet("tracks")]
+        public async Task<IActionResult> GetTracks([FromQuery] string? search, [FromQuery] int page = 1)
+        {
+            var result = await _adminService.GetTracksAsync(search ?? "", page);
+            return Ok(result);
+        }
+
+        [HttpDelete("tracks/{id}")]
+        public async Task<IActionResult> DeleteTrack(int id)
+        {
+            var success = await _adminService.DeleteTrackAsync(id);
+            if (!success) return NotFound(new { message = "Track not found" });
+            return Ok(new { message = "Track deleted successfully" });
+        }
+
+        [HttpGet("courses/simple")]
+        public async Task<IActionResult> GetCoursesSimple()
+        {
+            var result = await _adminService.GetAllCoursesSimpleAsync();
+            return Ok(result);
+        }
+
+        [HttpPost("tracks")]
+        public async Task<IActionResult> CreateTrack([FromBody] CreateTrackDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                return BadRequest(new { message = "Title is required" });
+
+            var trackId = await _adminService.CreateTrackAsync(dto);
+            return Ok(new { message = "Track created successfully", id = trackId });
+        }
     }
 }

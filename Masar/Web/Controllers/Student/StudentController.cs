@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Core.RepositoryInterfaces;
 using Core.Entities;
 using DAL.Data;
+using Microsoft.EntityFrameworkCore;
 
 using Web.ViewModels;
 using Web.ViewModels.Student;
 using static System.Net.WebRequestMethods;
-using BLL.Interfaces.Student;  // Only for IStudentProfileService
+using BLL.Interfaces.Student;
+using Microsoft.AspNetCore.Hosting; // For IWebHostEnvironment
 
 namespace Web.Controllers.Student;
 
@@ -30,6 +32,7 @@ public class StudentController : Controller
     private readonly AppDbContext _context;
     private readonly IStudentProfileService _studentProfileService;
     private readonly Web.Interfaces.IStudentCertificatesService _certificatesService;
+    private readonly IWebHostEnvironment _webHostEnvironment; // Inject IWebHostEnvironment
 
     public StudentController(
         Web.Interfaces.IStudentDashboardService dashboardService,
@@ -38,13 +41,14 @@ public class StudentController : Controller
         Web.Interfaces.IStudentTrackDetailsService trackDetailsService,
         Web.Interfaces.ICurrentUserService currentUserService,
         Web.Interfaces.IStudentBrowseTrackService browseTrackService,
-        Web.Interfaces.IStudentBrowseCoursesService browseCoursesService, // ADD THIS
+        Web.Interfaces.IStudentBrowseCoursesService browseCoursesService,
         IHttpContextAccessor http,
         Web.Interfaces.IStudentCourseDetailsService courseDetailsService,
         IUserRepository userRepository,
         IStudentProfileService studentProfileService,
         Web.Interfaces.IStudentCertificatesService certificatesService,
-        AppDbContext context)
+        AppDbContext context,
+        IWebHostEnvironment webHostEnvironment) // Receive IWebHostEnvironment
     {
         _dashboardService = dashboardService;
         _coursesService = coursesService;
@@ -52,13 +56,14 @@ public class StudentController : Controller
         _trackDetailsService = trackDetailsService;
         _currentUserService = currentUserService;
         _browseTrackService = browseTrackService;
-        _browseCoursesService = browseCoursesService; // ADD THIS
+        _browseCoursesService = browseCoursesService;
         _http = http;
         _courseDetailsService = courseDetailsService;
         _userRepository = userRepository;
         _studentProfileService = studentProfileService;
         _certificatesService = certificatesService;
         _context = context;
+        _webHostEnvironment = webHostEnvironment; // Assign to field
     }
 
     /// <summary>
@@ -71,27 +76,47 @@ public class StudentController : Controller
         var userId = _currentUserService.GetUserId();
 
         if (userId == 0)
+        {
+            Console.WriteLine("GetStudentIdAsync: userId is 0 - user not authenticated");
             return 0;
+        }
+
+        Console.WriteLine($"GetStudentIdAsync: Looking for student profile for userId: {userId}");
 
         var studentProfile = await _userRepository.GetStudentProfileForUserAsync(userId, includeUserBase: false);
 
         // If no profile exists, create one automatically
         if (studentProfile == null)
         {
-            studentProfile = new StudentProfile
+            Console.WriteLine($"GetStudentIdAsync: No student profile found, creating one for userId: {userId}");
+            
+            try
             {
-                UserId = userId,
-                Bio = "New learner on the platform"
-            };
+                studentProfile = new StudentProfile
+                {
+                    UserId = userId,
+                    Bio = "New learner on the platform"
+                };
 
-            _context.StudentProfiles.Add(studentProfile);
-            await _context.SaveChangesAsync();
+                _context.StudentProfiles.Add(studentProfile);
+                await _context.SaveChangesAsync();
 
-            // Reload the profile to get the auto-generated StudentId
-            studentProfile = await _userRepository.GetStudentProfileForUserAsync(userId, includeUserBase: false);
+                Console.WriteLine($"GetStudentIdAsync: Created student profile with ID: {studentProfile.StudentId}");
+
+                // Reload the profile to get the auto-generated StudentId
+                studentProfile = await _userRepository.GetStudentProfileForUserAsync(userId, includeUserBase: false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetStudentIdAsync: Error creating student profile: {ex.Message}");
+                Console.WriteLine($"GetStudentIdAsync: Inner exception: {ex.InnerException?.Message}");
+                return 0;
+            }
         }
 
-        return studentProfile?.StudentId ?? 0;
+        var result = studentProfile?.StudentId ?? 0;
+        Console.WriteLine($"GetStudentIdAsync: Returning studentId: {result}");
+        return result;
     }
 
     [HttpGet("/student/dashboard")]
@@ -99,26 +124,78 @@ public class StudentController : Controller
     {
         ViewBag.Title = "Student Dashboard | Masar";
 
-        var studentId = await GetStudentIdAsync();
-
-        if (studentId == 0)
-            return Unauthorized("Student profile not found");
-
-        var dashboardData = await _dashboardService.GetDashboardDataAsync(studentId);
-
-        if (dashboardData == null)
+        try
         {
-            return NotFound("Student profile not found");
+            var studentId = await GetStudentIdAsync();
+
+            if (studentId == 0)
+            {
+                // Log more details about why this failed
+                var userId = _currentUserService.GetUserId();
+                Console.WriteLine($"Dashboard: Failed to get student profile. UserId: {userId}");
+                
+                // Redirect to a more helpful error page or try to create profile
+                return Content($"Student profile not found. Please contact support. (User ID: {userId})");
+            }
+
+            Console.WriteLine($"Dashboard: Getting dashboard data for studentId: {studentId}");
+            
+            Web.Interfaces.StudentDashboardData? dashboardData = null;
+            
+            try
+            {
+                dashboardData = await _dashboardService.GetDashboardDataAsync(studentId);
+            }
+            catch (Exception serviceEx)
+            {
+                Console.WriteLine($"Dashboard: Service error - {serviceEx.Message}");
+                Console.WriteLine($"Dashboard: Inner exception - {serviceEx.InnerException?.Message}");
+            }
+
+            if (dashboardData == null)
+            {
+                Console.WriteLine($"Dashboard: dashboardData is null for studentId: {studentId}");
+                
+                // Try to return a minimal dashboard instead of an error
+                var studentProfile = await _userRepository.GetStudentProfileForUserAsync(
+                    _currentUserService.GetUserId(), 
+                    includeUserBase: true);
+                
+                if (studentProfile?.User != null)
+                {
+                    // Return minimal dashboard data
+                    dashboardData = new Web.Interfaces.StudentDashboardData
+                    {
+                        StudentId = studentProfile.StudentId,
+                        StudentName = studentProfile.User.FirstName,
+                        UserInitials = $"{studentProfile.User.FirstName[0]}{studentProfile.User.LastName[0]}".ToUpper(),
+                        Stats = new Web.Interfaces.DashboardStats(),
+                        ContinueLearningCourses = new List<Web.Interfaces.ContinueLearningCourse>(),
+                        EnrolledTracks = new List<Web.Interfaces.EnrolledTrack>()
+                    };
+                }
+                else
+                {
+                    return NotFound("Dashboard data could not be loaded. Please try again later.");
+                }
+            }
+
+            var viewModel = new StudentDashboardViewModel
+            {
+                Data = dashboardData,
+                PageTitle = "Student Dashboard",
+                GreetingMessage = GetGreeting()
+            };
+
+            return View(viewModel);
         }
-
-        var viewModel = new StudentDashboardViewModel
+        catch (Exception ex)
         {
-            Data = dashboardData,
-            PageTitle = "Student Dashboard",
-            GreetingMessage = GetGreeting()
-        };
-
-        return View(viewModel);
+            Console.WriteLine($"Dashboard Error: {ex.Message}");
+            Console.WriteLine($"Dashboard Inner: {ex.InnerException?.Message}");
+            Console.WriteLine($"Dashboard Stack Trace: {ex.StackTrace}");
+            return Content($"An error occurred: {ex.Message}\n\nInner: {ex.InnerException?.Message}");
+        }
     }
 
     [HttpGet("/student/my-tracks")]
@@ -313,7 +390,7 @@ public class StudentController : Controller
                 LastName = profileData.LastName,
                 FullName = profileData.FullName,
                 StudentName = profileData.FullName,
-                UserInitials = initials, // Added this line
+                UserInitials = initials,
                 Username = $"@{profileData.FirstName.ToLower()}_{profileData.LastName.ToLower()}",
                 Email = profileData.Email,
                 Phone = profileData.Phone,
@@ -321,11 +398,10 @@ public class StudentController : Controller
                 Bio = profileData.Bio,
                 Initials = initials,
                 Location = profileData.Location,
-                Languages = profileData.Languages,
                 JoinedDate = profileData.JoinedDate.ToString("MMMM yyyy"),
                 GithubUrl = profileData.GithubUrl,
                 LinkedInUrl = profileData.LinkedInUrl,
-                TwitterUrl = profileData.TwitterUrl,
+                FacebookUrl = profileData.FacebookUrl,
                 WebsiteUrl = profileData.WebsiteUrl,
                 Stats = new StudentProfileStatsViewModel
                 {
@@ -336,7 +412,7 @@ public class StudentController : Controller
                     TotalLearningHours = profileData.TotalLearningHours,
                     CurrentStreak = profileData.CurrentStreak
                 },
-                LearningInterests = profileData.LearningInterests,
+                Skills = profileData.Skills,
                 EnrolledCourses = profileData.EnrolledCourses.Select(c => new StudentProfileCourseCardViewModel
                 {
                     CourseId = c.CourseId,
@@ -361,6 +437,150 @@ public class StudentController : Controller
         return View(viewModel);
     }
 
+    /// <summary>
+    /// Get Edit Profile Form - Returns the edit profile partial view for the modal.
+    /// </summary>
+    [HttpGet("/student/profile/edit")]
+    public async Task<IActionResult> GetEditProfileForm()
+    {
+        var studentId = await GetStudentIdAsync();
+        if (studentId == 0)
+            return Unauthorized("Student profile not found");
+
+        var profileData = await _studentProfileService.GetStudentProfileAsync(studentId);
+
+        if (profileData == null)
+            return NotFound();
+
+        var formModel = new EditStudentProfileFormModel
+        {
+            FirstName = profileData.FirstName,
+            LastName = profileData.LastName,
+            Phone = profileData.Phone,
+            Location = profileData.Location,
+            Bio = profileData.Bio,
+            GithubUrl = profileData.GithubUrl,
+            LinkedInUrl = profileData.LinkedInUrl,
+            FacebookUrl = profileData.FacebookUrl,
+            WebsiteUrl = profileData.WebsiteUrl,
+            
+            // Skills from database
+            Skills = profileData.Skills ?? new List<string>()
+        };
+
+        return PartialView("_EditProfileModal", formModel);
+    }
+
+    /// <summary>
+    /// Upload Image - Handle profile photo and cover image uploads.
+    /// </summary>
+    [HttpPost("/student/upload-image")]
+    [IgnoreAntiforgeryToken] // Allow upload without token since we handle it manually
+    public async Task<IActionResult> UploadImage(IFormFile file, string type)
+    {
+        Console.WriteLine($"UploadImage called - file: {file?.FileName}, type: {type}");
+        
+        if (file == null || file.Length == 0)
+            return Json(new { success = false, message = "No file uploaded" });
+
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(extension))
+            return Json(new { success = false, message = "Invalid file type. Allowed: jpg, jpeg, png, webp, gif" });
+
+        if (file.Length > 5 * 1024 * 1024)
+            return Json(new { success = false, message = "File size exceeds 5MB" });
+
+        try
+        {
+            var studentId = await GetStudentIdAsync();
+            Console.WriteLine($"UploadImage - studentId: {studentId}");
+            
+            if (studentId == 0)
+                return Json(new { success = false, message = "Student profile not found" });
+
+            var folder = type == "cover" ? "covers" : "profiles";
+            var fileName = $"{folder}-student-{studentId}-{Guid.NewGuid()}{extension}";
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", folder);
+            
+            Console.WriteLine($"UploadImage - uploadsFolder: {uploadsFolder}");
+            
+            Directory.CreateDirectory(uploadsFolder);
+            
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            
+            var fileUrl = $"/uploads/{folder}/{fileName}";
+            Console.WriteLine($"UploadImage - fileUrl: {fileUrl}");
+
+            // If it's a profile picture, update the user's picture in database
+            if (type == "profile")
+            {
+                var studentProfile = await _userRepository.GetStudentProfileAsync(studentId, includeUserBase: true);
+                if (studentProfile?.User != null)
+                {
+                    studentProfile.User.Picture = fileUrl;
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine($"UploadImage - saved picture to database");
+                }
+            }
+
+            return Json(new { success = true, url = fileUrl });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"UploadImage error: {ex.Message}");
+            Console.WriteLine($"UploadImage stack: {ex.StackTrace}");
+            return Json(new { success = false, message = "Upload failed: " + ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Update Profile - Handle profile updates from the edit form.
+    /// </summary>
+    [HttpPost("/student/profile/edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateStudentProfileRequest request)
+    {
+        var studentId = await GetStudentIdAsync();
+        if (studentId == 0)
+            return Json(new { success = false, message = "Student profile not found" });
+
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            return Json(new { success = false, message = "Validation failed", errors });
+        }
+
+        var updateDto = new BLL.DTOs.Student.UpdateStudentProfileDto
+        {
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Phone = request.Phone,
+            Location = request.Location,
+            Bio = request.Bio,
+            Skills = request.Skills ?? new List<string>(),
+            GithubUrl = request.GithubUrl,
+            LinkedInUrl = request.LinkedInUrl,
+            FacebookUrl = request.FacebookUrl,
+            WebsiteUrl = request.WebsiteUrl
+        };
+
+        var result = await _studentProfileService.UpdateStudentProfileAsync(studentId, updateDto);
+
+        if (result)
+            return Json(new { success = true, message = "Profile updated successfully!" });
+        else
+            return Json(new { success = false, message = "Failed to update profile" });
+    }
+
     private string GetGreeting()
     {
         var hour = DateTime.Now.Hour;
@@ -370,6 +590,20 @@ public class StudentController : Controller
     public class ToggleRequest
     {
         public bool IsCompleted { get; set; }
+    }
+
+    public class UpdateStudentProfileRequest
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string? Location { get; set; }
+        public string? Bio { get; set; }
+        public List<string>? Skills { get; set; }
+        public string? GithubUrl { get; set; }
+        public string? LinkedInUrl { get; set; }
+        public string? FacebookUrl { get; set; }
+        public string? WebsiteUrl { get; set; }
     }
 
     [HttpGet("/student/browse-courses")]

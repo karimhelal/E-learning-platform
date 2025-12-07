@@ -6,7 +6,8 @@
 public enum EnrollmentStatus
 {
     Enrolled = 1,    // New enrollment, not yet started
-    InProgress = 2,      // Currently learning
+    InProgress = 2,  // Currently learning
     Completed = 3,   // Finished the course
-    Dropped = 4      // Withdrawn from course
+    Dropped = 4,     // Withdrawn from course
+    Active = 5       // Active enrollment (from database)
 }

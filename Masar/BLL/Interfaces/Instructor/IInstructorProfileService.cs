@@ -9,4 +9,5 @@ public interface IInstructorProfileService
 
     Task<bool> HasCourseWithIdAsync(int instructorId, int courseId);
     Task<int?> GetCourseIdForLessonAsync(int instructorId, int lessonId);
+    Task<bool> UpdateInstructorProfileAsync(int instructorId, UpdateInstructorProfileDto profileDto);
 }
