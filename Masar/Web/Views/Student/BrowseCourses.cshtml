@@ -1,116 +1,130 @@
 @model StudentBrowseCoursesViewModel
 
-<!-- Page Header -->
-<section class="page-header">
-    <div class="page-header-container">
-        <div class="page-title-section">
-            <h1 class="page-title">Browse Courses ??</h1>
-            <p class="page-subtitle">
-                Explore our wide range of courses and start learning today
-            </p>
-        </div>
-    </div>
-</section>
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    ViewBag.Title = Model.PageTitle;
+
+    var TitleSortOptionName = CourseSortOption.Title.ToString();
+    var PopularitySortOptionName = CourseSortOption.Popularity.ToString();
+    var CreationDateSortOptionName = CourseSortOption.CreationDate.ToString();
+    var RatingSortOptionName = CourseSortOption.Rating.ToString();
+    var ReviewsSortOptionName = CourseSortOption.Reviews.ToString();
+
+    var DescendingOrderName = SortOrder.Descending.ToString();
+    var AscendingOrderName = SortOrder.Ascending.ToString();
+}
 
 <!-- Browse Content -->
-<section class="browse-content">
-    <!-- Stats Summary -->
-    <div class="stats-summary">
-        <div class="stat-item">
-            <span class="stat-number">@Model.Data.Stats.TotalCourses</span>
-            <span class="stat-label">Total Courses</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-number">@Model.Data.Stats.BeginnerCourses</span>
-            <span class="stat-label">Beginner</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-number">@Model.Data.Stats.IntermediateCourses</span>
-            <span class="stat-label">Intermediate</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-number">@Model.Data.Stats.AdvancedCourses</span>
-            <span class="stat-label">Advanced</span>
-        </div>
-    </div>
+<div class="explore-container">
+    <aside class="filter-sidebar hidden" id="filterSidebar">
+        <button class="filter-close-btn" id="closeFilter">
+            <i class="fas fa-times"></i>
+        </button>
 
-    <!-- Courses Grid -->
-    <div class="courses-grid">
-        @if (Model.Data.Courses.Any())
-        {
-            @foreach (var course in Model.Data.Courses)
-            {
-                <div class="course-card">
-                    @if (!string.IsNullOrEmpty(course.ThumbnailImageUrl))
-                    {
-                        <div class="course-card-image">
-                            <img src="@course.ThumbnailImageUrl" alt="@course.Title" />
-                            <span class="badge @course.CategoryBadgeClass">
-                                <i class="fas @course.CategoryIcon"></i>
-                                @course.CategoryName
-                            </span>
-                        </div>
-                    }
-                    
-                    <div class="course-card-body">
-                        <div class="course-header">
-                            <h3 class="course-title">@course.Title</h3>
-                            <span class="level-badge @course.LevelBadgeClass">@course.Level</span>
-                        </div>
-                        
-                        <p class="course-description">@course.Description</p>
-                        
-                        <div class="course-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-user"></i>
-                                <span>@course.InstructorName</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-book-open"></i>
-                                <span>@course.TotalLessons Lessons</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                <span>@course.DurationHours Hours</span>
-                            </div>
-                        </div>
+        <div class="filter-header">
+            <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+            <button class="reset-btn">Reset All</button>
+        </div>
+        <div class="filter-groups-container">
+            <partial name="_FilterGroupsPartialView" model="@Model.Data.Settings.FilterGroups" />
+        </div>
+    </aside>
 
-                        <div class="course-stats">
-                            <div class="stat">
-                                <i class="fas fa-star"></i>
-                                <span>@course.Rating</span>
-                            </div>
-                            <div class="stat">
-                                <i class="fas fa-users"></i>
-                                <span>@course.StudentsCount students</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="course-card-footer">
-                        <a href="@course.ActionUrl" class="btn btn-primary btn-block">
-                            <span>@course.ActionText</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <h3>No courses available</h3>
-                <p>Check back soon for new courses!</p>
+    <div class="filter-overlay" id="filterOverlay"></div>
+
+    <div class="results-area">
+        <div class="results-toolbar">
+            <div style="display: flex; gap: 10px">
+                <button class="mobile-filter-trigger"
+                        id="openFilter">
+                    <i class="fas fa-sliders-h"></i> Filters
+                </button>
+
+                <button class="btn btn-secondary btn-small desktop-filter-toggle"
+                        id="toggleSidebar">
+                    <i class="fas fa-columns"></i>
+                    <span id="toggleText">Show Filters</span>
+                </button>
             </div>
-        }
+
+            <div class="toolbar-search">
+                <div class="search-box-large"
+                     style="padding: 0.6rem 1rem">
+                    <i class="fas fa-search"></i>
+                    <input type="text"
+                           placeholder="Search courses..." />
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div class="view-toggle-group">
+                    <button class="view-btn active"
+                            id="gridViewBtn"
+                            title="Grid View">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="view-btn"
+                            id="listViewBtn"
+                            title="List View">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+
+                <div class="filter-dropdown" id="sortByContainer">
+                    <button class="filter-dropdown-btn" style="min-width: 180px">
+                        <span id="sortByDisplay">Creation Date</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <div class="filter-dropdown-menu">
+                        <button class="filter-option" data-value="@TitleSortOptionName">A-Z</button>
+                        <button class="filter-option active" data-value="@CreationDateSortOptionName">Creation Date</button>
+                        <button class="filter-option" data-value="@PopularitySortOptionName">Popularity</button>
+                        <button class="filter-option" data-value="@RatingSortOptionName">Rating</button>
+                        <button class="filter-option" data-value="@ReviewsSortOptionName">Reviews</button>
+                    </div>
+
+                    <input type="hidden" id="sortFilter" value="CreationDate" />
+                </div>
+
+                <div class="filter-dropdown" id="sortOrderContainer">
+                    <button class="filter-dropdown-btn" style="min-width: 150px">
+                        <span id="sortOrderDisplay">Descending</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <div class="filter-dropdown-menu">
+                        <button class="filter-option" data-value="@AscendingOrderName">Ascending</button>
+                        <button class="filter-option active" data-value="@DescendingOrderName">Descending</button>
+                    </div>
+
+                    <input type="hidden" id="sortOrder" value="Descending" />
+                </div>
+            </div>
+        </div>
+
+        <div class="results-info">
+            <p class="results-count">
+                Showing <strong>@Model.Data.Settings.PaginationSettings.TotalCount</strong> courses
+            </p>
+        </div>
+
+        <div class="courses-catalog">
+            <partial name="_StudentCoursesGridBrowsePartialView" model="@Model.Data.Items" />
+        </div>
+
+        <!-- Pagination Section -->
+        <div class="pagination-container">
+            <partial name="_PaginationPartialView" model="@Model.Data.Settings.PaginationSettings" />
+        </div>
     </div>
-</section>
+</div>
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/pages/Student/browse-courses.css" />
+    <link rel="stylesheet" href="~/css/pages/Home/browse-courses.css" />
+    <link rel="stylesheet" href="~/css/pagination.css" />
 }
 
 @section Scripts {
-    <script src="~/js/browse-courses.js"></script>
+    <script src="~/js/Student/browse-courses.js" asp-append-version="true"></script>
 }

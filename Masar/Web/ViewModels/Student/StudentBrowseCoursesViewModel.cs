@@ -1,8 +1,13 @@
+using Web.ViewModels.Home;
+using Web.ViewModels.Misc;
+using Web.ViewModels.Misc.FilterRequestVMs;
+
 namespace Web.ViewModels.Student
 {
     public class StudentBrowseCoursesViewModel
     {
         public StudentBrowseCoursesPageData Data { get; set; } = new();
+        public string PageTitle { get; set; } = "Browse Courses";
     }
 
     public class StudentBrowseCoursesPageData
@@ -11,35 +16,26 @@ namespace Web.ViewModels.Student
         public string StudentName { get; set; } = string.Empty;
         public string UserInitials { get; set; } = "JD";
 
-        public List<BrowseCourseItem> Courses { get; set; } = new();
-        public BrowseCoursePageStats Stats { get; set; } = new();
+        // Filter and pagination settings (like home browse)
+        public BrowseSettingsViewModel Settings { get; set; } = new();
+        
+        // Course items for display (with enrollment status)
+        public IEnumerable<StudentCourseBrowseCardViewModel> Items { get; set; } = new List<StudentCourseBrowseCardViewModel>();
     }
 
-    public class BrowseCoursePageStats
+    /// <summary>
+    /// Student-specific course card that includes enrollment information
+    /// </summary>
+    public class StudentCourseBrowseCardViewModel : CourseBrowseCardViewModel
     {
-        public int TotalCourses { get; set; }
-        public int BeginnerCourses { get; set; }
-        public int IntermediateCourses { get; set; }
-        public int AdvancedCourses { get; set; }
-    }
-
-    public class BrowseCourseItem
-    {
-        public int CourseId { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string Level { get; set; } = "Beginner";
-        public string CategoryName { get; set; } = "General";
-        public string CategoryIcon { get; set; } = "fa-book";
-        public string CategoryBadgeClass { get; set; } = "badge-purple";
-        public string LevelBadgeClass { get; set; } = "beginner";
-        public string InstructorName { get; set; } = string.Empty;
-        public string? ThumbnailImageUrl { get; set; }
-        public int TotalLessons { get; set; }
-        public int DurationHours { get; set; }
-        public int StudentsCount { get; set; }
-        public decimal Rating { get; set; } = 4.8m;
-        public string ActionText { get; set; } = "Enroll Now";
-        public string ActionUrl { get; set; } = "#";
+        /// <summary>
+        /// Whether the student is enrolled in this course
+        /// </summary>
+        public bool IsEnrolled { get; set; }
+        
+        /// <summary>
+        /// Progress percentage (0-100) if enrolled
+        /// </summary>
+        public decimal ProgressPercentage { get; set; }
     }
 }

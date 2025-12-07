@@ -1,0 +1,117 @@
+@model IEnumerable<StudentCourseBrowseCardViewModel>
+
+@foreach (var courseCard in Model)
+{
+    <div class="catalog-course-card">
+        <div class="course-thumbnail">
+            <div class="course-thumbnail-placeholder"
+                 style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));">
+                @if (!string.IsNullOrEmpty(courseCard.ThumbnailImageUrl))
+                {
+                    <img src="@courseCard.ThumbnailImageUrl" alt="@courseCard.Title" />
+                }
+                else
+                {
+                    <i class="fas fa-book"></i>
+                }
+            </div>
+            <div class="course-overlay">
+                @if (courseCard.IsEnrolled)
+                {
+                    <a href="~/Classroom/Course/@courseCard.CourseId" class="btn btn-primary btn-small">
+                        <span>Continue</span>
+                        <i class="fas fa-play"></i>
+                    </a>
+                }
+                else
+                {
+                    <a href="/Course/@courseCard.CourseId" class="btn btn-primary btn-small">
+                        <span>View Details</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                }
+            </div>
+            <span class="course-level-badge @courseCard.Level.ToLower()">@courseCard.Level</span>
+            @if (courseCard.IsEnrolled)
+            {
+                <span class="course-tag enrolled">Enrolled</span>
+            }
+        </div>
+        <div class="course-card-content">
+            <span class="course-category">
+                <i class="fas fa-book"></i>
+                @courseCard.MainCategory
+            </span>
+            <h3 class="course-card-title">
+                @courseCard.Title
+            </h3>
+            <p class="course-card-description">
+                @courseCard.Description
+            </p>
+            <div class="course-instructor">
+                @{
+                    var initials = "IN";
+                    if (!string.IsNullOrEmpty(courseCard.InstructorName))
+                    {
+                        var parts = courseCard.InstructorName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length >= 2)
+                        {
+                            initials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
+                        }
+                        else if (parts.Length == 1)
+                        {
+                            initials = parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+                        }
+                    }
+                }
+                <div class="avatar avatar-sm">@initials</div>
+                <span class="instructor-name">@courseCard.InstructorName</span>
+            </div>
+            <div class="course-stats-row">
+                <div class="course-stat">
+                    <i class="fas fa-star"></i>
+                    <span>@courseCard.AverageRating (@courseCard.NumberOfReviews)</span>
+                </div>
+                <div class="course-stat">
+                    <i class="fas fa-users"></i>
+                    <span>@courseCard.NumberOfStudents students</span>
+                </div>
+                <div class="course-stat">
+                    <i class="fas fa-clock"></i>
+                    <span>@courseCard.NumberOfHours<span>h</span></span>
+                </div>
+            </div>
+
+            @if (courseCard.IsEnrolled)
+            {
+                <!-- Progress bar for enrolled courses -->
+                <div class="course-progress-wrapper">
+                    <div class="progress-info">
+                        <span class="progress-label">Your Progress</span>
+                        <span class="progress-time">@((int)courseCard.ProgressPercentage)%</span>
+                    </div>
+                    <div class="progress-bar-full">
+                        <div class="progress-fill" style="width: @courseCard.ProgressPercentage%"></div>
+                    </div>
+                </div>
+            }
+
+            <div class="course-card-footer">
+                @if (courseCard.IsEnrolled)
+                {
+                    <a href="~/Classroom/Course/@courseCard.CourseId" class="btn enroll-btn btn-gradient">
+                        <i class="fas fa-play"></i>
+                        <span>Continue Learning</span>
+                    </a>
+                }
+                else
+                {
+                    <a href="/Course/@courseCard.CourseId" class="btn enroll-btn btn-gradient">
+                        <i class="fas fa-info-circle"></i>
+                        <span>View Details</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+}

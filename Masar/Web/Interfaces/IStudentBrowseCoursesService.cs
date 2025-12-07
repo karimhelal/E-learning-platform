@@ -1,5 +1,6 @@
 namespace Web.Interfaces
 {
+    using BLL.DTOs.Misc;
     using Web.ViewModels.Student;
 
     /// <summary>
@@ -7,6 +8,6 @@ namespace Web.Interfaces
     /// </summary>
     public interface IStudentBrowseCoursesService
     {
-        Task<StudentBrowseCoursesPageData?> GetAllCoursesAsync(int studentId);
+        Task<StudentBrowseCoursesPageData?> GetInitialBrowseDataAsync(int studentId, PagingRequestDto pagingRequest);
     }
 }

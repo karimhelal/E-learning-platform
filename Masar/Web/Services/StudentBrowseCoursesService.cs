@@ -1,9 +1,12 @@
-using Core.Entities;
 using Core.RepositoryInterfaces;
-using Core.Entities.Enums;
 using Microsoft.Extensions.Logging;
 using Web.Interfaces;
 using Web.ViewModels.Student;
+using Web.ViewModels.Home;
+using Web.ViewModels.Misc;
+using Web.ViewModels.Misc.FilterRequestVMs;
+using BLL.Interfaces;
+using BLL.DTOs.Misc;
 using DAL.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,20 +18,23 @@ namespace Web.Services
     public class StudentBrowseCoursesService : IStudentBrowseCoursesService
     {
         private readonly IUserRepository _userRepo;
+        private readonly ICourseService _courseService;
         private readonly AppDbContext _context;
         private readonly ILogger<StudentBrowseCoursesService> _logger;
 
         public StudentBrowseCoursesService(
             IUserRepository userRepo,
+            ICourseService courseService,
             AppDbContext context,
             ILogger<StudentBrowseCoursesService> logger)
         {
             _userRepo = userRepo;
+            _courseService = courseService;
             _context = context;
             _logger = logger;
         }
 
-        public async Task<StudentBrowseCoursesPageData?> GetAllCoursesAsync(int studentId)
+        public async Task<StudentBrowseCoursesPageData?> GetInitialBrowseDataAsync(int studentId, PagingRequestDto pagingRequest)
         {
             try
             {
@@ -46,36 +52,60 @@ namespace Web.Services
                     userInitials = GetInitials($"{studentProfile.User.FirstName} {studentProfile.User.LastName}");
                 }
 
-                // Fetch actual courses from database
-                var courses = await _context.Courses
-                    .Include(c => c.Instructor)
-                        .ThenInclude(i => i!.User)
-                    .Include(c => c.Categories)
-                    .Include(c => c.Modules)
-                        .ThenInclude(m => m.Lessons)
-                            .ThenInclude(l => l.LessonContent)
-                    .Include(c => c.Enrollments)
-                    .ToListAsync();
+                // Get courses data using the course service
+                var coursesData = await _courseService.GetInitialBrowsePageCoursesAsync(pagingRequest);
 
-                _logger.LogInformation("Found {Count} courses in database", courses.Count);
+                // Get all course IDs from the result
+                var courseIds = coursesData.Items.Select(c => c.CourseId).ToList();
 
-                var mappedCourses = courses.Select(c => MapCourse(c, studentId)).ToList();
+                // Get enrollment status for all courses in one query
+                var enrollments = await _context.CourseEnrollments
+                    .Where(e => e.StudentId == studentId && courseIds.Contains(e.CourseId))
+                    .Select(e => new { e.CourseId, e.ProgressPercentage })
+                    .ToDictionaryAsync(e => e.CourseId, e => e.ProgressPercentage);
+
+                // Build filter groups
+                var filterGroups = await BuildBrowseFilterGroupsAsync();
+
+                var items = coursesData.Items.Select(c => new StudentCourseBrowseCardViewModel
+                {
+                    CourseId = c.CourseId,
+                    InstructorName = c.InstructorName,
+                    Title = c.Title,
+                    Description = c.Description ?? "--",
+                    ThumbnailImageUrl = c.ThumbnailImageUrl ?? "",
+                    CreatedDate = c.CreatedDate.ToString("dd-MM-yyyy"),
+                    MainCategory = c.MainCategory ?? "Uncategorized",
+                    Categories = c.Categories ?? [],
+                    Languages = c.Languages ?? [],
+                    Level = c.Level.ToString(),
+                    AverageRating = c.AverageRating,
+                    NumberOfReviews = c.NumberOfReviews,
+                    NumberOfStudents = c.NumberOfStudents,
+                    NumberOfLectures = c.NumberOfLectures,
+                    NumberOfMinutes = c.NumberOfMinutes,
+                    // Enrollment status
+                    IsEnrolled = enrollments.ContainsKey(c.CourseId),
+                    ProgressPercentage = enrollments.TryGetValue(c.CourseId, out var progress) ? progress : 0
+                });
 
                 return new StudentBrowseCoursesPageData
                 {
                     StudentId = studentId,
                     StudentName = studentName,
                     UserInitials = userInitials,
-                    
-                    Stats = new BrowseCoursePageStats
+                    Settings = new BrowseSettingsViewModel
                     {
-                        TotalCourses = mappedCourses.Count,
-                        BeginnerCourses = mappedCourses.Count(c => c.Level == "Beginner"),
-                        IntermediateCourses = mappedCourses.Count(c => c.Level == "Intermediate"),
-                        AdvancedCourses = mappedCourses.Count(c => c.Level == "Advanced")
+                        FilterGroups = filterGroups,
+                        PaginationSettings = new PaginationSettingsViewModel
+                        {
+                            CurrentPage = coursesData.Settings.PaginationSettings.CurrentPage,
+                            TotalPages = coursesData.Settings.PaginationSettings.TotalPages,
+                            PageSize = coursesData.Settings.PaginationSettings.PageSize,
+                            TotalCount = coursesData.Settings.PaginationSettings.TotalCount
+                        }
                     },
-
-                    Courses = mappedCourses
+                    Items = items
                 };
             }
             catch (Exception ex)
@@ -85,70 +115,143 @@ namespace Web.Services
             }
         }
 
-        private BrowseCourseItem MapCourse(Course course, int studentId)
+        private async Task<List<FilterGroupViewModel>> BuildBrowseFilterGroupsAsync()
         {
-            var categoryName = course.Categories?.FirstOrDefault()?.Name ?? "General";
-            var instructorName = course.Instructor?.User?.FirstName ?? "Instructor";
-            
-            var totalLessons = course.Modules?
-                .SelectMany(m => m.Lessons ?? new List<Lesson>())
-                .Count() ?? 0;
-            
-            var totalSeconds = course.Modules?
-                .SelectMany(m => m.Lessons ?? new List<Lesson>())
-                .Select(l => l.LessonContent)
-                .OfType<VideoContent>()
-                .Sum(v => v.DurationInSeconds) ?? 0;
-            
-            var durationHours = (int)Math.Ceiling(totalSeconds / 3600.0);
-            var studentsCount = course.Enrollments?.Count() ?? 0;
-            
-            // Check if student is enrolled
-            var isEnrolled = course.Enrollments?.Any(e => e.StudentId == studentId) ?? false;
+            var filterGroups = await _courseService.GetFilterSectionConfig();
+            var filterGroupsStats = await _courseService.GetFilterGroupsStats();
 
-            return new BrowseCourseItem
-            {
-                CourseId = course.Id,
-                Title = course.Title,
-                Description = course.Description ?? "Learn new skills",
-                Level = course.Level.ToString(),
-                CategoryName = categoryName,
-                CategoryIcon = GetCategoryIcon(categoryName),
-                CategoryBadgeClass = GetCategoryBadgeClass(categoryName),
-                LevelBadgeClass = course.Level.ToString().ToLower(),
-                InstructorName = instructorName,
-                ThumbnailImageUrl = course.ThumbnailImageUrl,
-                TotalLessons = totalLessons,
-                DurationHours = durationHours,
-                StudentsCount = studentsCount,
-                Rating = 4.8m,
-                ActionText = isEnrolled ? "Continue Learning" : "Enroll Now",
-                ActionUrl = isEnrolled ? $"/student/course/details/{course.Id}" : $"/student/enroll/course/{course.Id}"
-            };
-        }
+            var result = new List<FilterGroupViewModel>();
 
-        private string GetCategoryIcon(string categoryName)
-        {
-            return categoryName.ToLower() switch
+            if (filterGroupsStats.CategoryCounts.Any())
             {
-                "web development" => "fa-laptop-code",
-                "data science" => "fa-brain",
-                "mobile development" => "fa-mobile-alt",
-                "design" => "fa-palette",
-                _ => "fa-book"
-            };
-        }
+                result.Add(new CheckboxFilter
+                {
+                    Title = "Categories",
+                    RequestKey = "CategoryNames",
+                    FilterOptions = filterGroups.CategoryNames!
+                        .Where(c => filterGroupsStats.CategoryCounts.SingleOrDefault(e => e.Key.ToLower() == c.ToLower()).Value > 0)
+                        .Select(cat => new FilterOption
+                        {
+                            Label = cat,
+                            Count = filterGroupsStats.CategoryCounts.SingleOrDefault(e => e.Key.ToLower() == cat.ToLower()).Value,
+                            IsChecked = false,
+                            Value = cat
+                        })
+                        .OrderByDescending(x => x.Count)
+                });
+            }
 
-        private string GetCategoryBadgeClass(string categoryName)
-        {
-            return categoryName.ToLower() switch
+            if (filterGroupsStats.LevelCounts.Any())
             {
-                "web development" => "badge-purple",
-                "data science" => "badge-cyan",
-                "mobile development" => "badge-green",
-                "design" => "badge-pink",
-                _ => "badge-purple"
-            };
+                result.Add(new CheckboxFilter
+                {
+                    Title = "Levels",
+                    RequestKey = "LevelNames",
+                    FilterOptions = filterGroups.LevelNames!
+                        .Where(l => filterGroupsStats.LevelCounts.SingleOrDefault(e => e.Key.ToLower() == l.ToLower()).Value > 0)
+                        .Select(lev => new FilterOption
+                        {
+                            Label = lev,
+                            Count = filterGroupsStats.LevelCounts.SingleOrDefault(e => e.Key.ToLower() == lev.ToLower()).Value,
+                            IsChecked = false,
+                            Value = lev
+                        })
+                });
+            }
+
+            if (filterGroupsStats.LanguageCounts.Any())
+            {
+                result.Add(new CheckboxFilter
+                {
+                    Title = "Languages",
+                    RequestKey = "LanguageNames",
+                    FilterOptions = filterGroups.LanguageNames!
+                        .Where(l => filterGroupsStats.LanguageCounts.SingleOrDefault(e => e.Key.ToLower() == l.ToLower()).Value > 0)
+                        .Select(lang => new FilterOption
+                        {
+                            Label = lang,
+                            Count = filterGroupsStats.LanguageCounts.SingleOrDefault(e => e.Key.ToLower() == lang.ToLower()).Value,
+                            IsChecked = false,
+                            Value = lang
+                        })
+                        .OrderByDescending(x => x.Count)
+                });
+            }
+
+            if (filterGroups.MinDuration != null && filterGroups.MaxDuration != null && (filterGroups.MinDuration != filterGroups.MaxDuration))
+            {
+                result.Add(new NumberRangeFilter
+                {
+                    Title = "Duration (Hours)",
+                    RequestKey = "Duration",
+                    MinRequestKey = "MinDuration",
+                    MaxRequestKey = "MaxDuration",
+                    MinValue = filterGroups.MinDuration ?? 0,
+                    MaxValue = ((filterGroups.MaxDuration ?? 0) == (filterGroups.MinDuration ?? 1)) ? (filterGroups.MaxDuration ?? 0) + 1 : filterGroups.MaxDuration,
+                    Step = 0.5d,
+                    Unit = "H"
+                });
+            }
+
+            if (filterGroups.MinEnrollments != null && filterGroups.MaxEnrollments != null && (filterGroups.MinEnrollments != filterGroups.MaxEnrollments))
+            {
+                result.Add(new NumberRangeFilter
+                {
+                    Title = "Enrollments",
+                    RequestKey = "Enrollments",
+                    MinRequestKey = "MinEnrollments",
+                    MaxRequestKey = "MaxEnrollments",
+                    MinValue = filterGroups.MinEnrollments ?? 0,
+                    MaxValue = filterGroups.MaxEnrollments ?? 100,
+                    Step = 1,
+                    Unit = "STUDENTS"
+                });
+            }
+
+            if (filterGroups.MinRating != null && filterGroups.MaxRating != null && (filterGroups.MinRating != filterGroups.MaxRating))
+            {
+                result.Add(new NumberRangeFilter
+                {
+                    Title = "Rating",
+                    RequestKey = "Rating",
+                    MinRequestKey = "MinRating",
+                    MaxRequestKey = "MaxRating",
+                    MinValue = filterGroups.MinRating ?? 0,
+                    MaxValue = filterGroups.MaxRating ?? 5,
+                    Step = 0.1d,
+                    Unit = ""
+                });
+            }
+
+            if (filterGroups.MinReviews != null && filterGroups.MaxReviews != null && (filterGroups.MinReviews != filterGroups.MaxReviews))
+            {
+                result.Add(new NumberRangeFilter
+                {
+                    Title = "Reviews",
+                    RequestKey = "Reviews",
+                    MinRequestKey = "MinReviews",
+                    MaxRequestKey = "MaxReviews",
+                    MinValue = filterGroups.MinReviews ?? 0,
+                    MaxValue = filterGroups.MaxReviews ?? 10000,
+                    Step = 1,
+                    Unit = ""
+                });
+            }
+
+            if (filterGroups.MinCreationDate != null && filterGroups.MaxCreationDate != null && (filterGroups.MinCreationDate != filterGroups.MaxCreationDate))
+            {
+                result.Add(new DateRangeFilter
+                {
+                    Title = "Creation Date",
+                    RequestKey = "CreationDate",
+                    MinRequestKey = "MinCreationDate",
+                    MaxRequestKey = "MaxCreationDate",
+                    MinDate = filterGroups.MinCreationDate ?? DateOnly.MinValue,
+                    MaxDate = filterGroups.MaxCreationDate ?? DateOnly.FromDateTime(DateTime.Now)
+                });
+            }
+
+            return result;
         }
 
         private string GetInitials(string name)

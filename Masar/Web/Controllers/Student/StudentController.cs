@@ -10,9 +10,14 @@ using Microsoft.EntityFrameworkCore;
 
 using Web.ViewModels;
 using Web.ViewModels.Student;
+using Web.ViewModels.Home;
+using Web.ViewModels.Misc;
 using static System.Net.WebRequestMethods;
 using BLL.Interfaces.Student;
-using Microsoft.AspNetCore.Hosting; // For IWebHostEnvironment
+using BLL.Interfaces;
+using BLL.DTOs.Misc;
+using BLL.Helpers;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Web.Controllers.Student;
 
@@ -32,7 +37,9 @@ public class StudentController : Controller
     private readonly AppDbContext _context;
     private readonly IStudentProfileService _studentProfileService;
     private readonly Web.Interfaces.IStudentCertificatesService _certificatesService;
-    private readonly IWebHostEnvironment _webHostEnvironment; // Inject IWebHostEnvironment
+    private readonly IWebHostEnvironment _webHostEnvironment;
+    private readonly ICourseService _courseService;
+    private readonly RazorViewToStringRenderer _razorRenderer;
 
     public StudentController(
         Web.Interfaces.IStudentDashboardService dashboardService,
@@ -48,7 +55,9 @@ public class StudentController : Controller
         IStudentProfileService studentProfileService,
         Web.Interfaces.IStudentCertificatesService certificatesService,
         AppDbContext context,
-        IWebHostEnvironment webHostEnvironment) // Receive IWebHostEnvironment
+        IWebHostEnvironment webHostEnvironment,
+        ICourseService courseService,
+        RazorViewToStringRenderer razorRenderer)
     {
         _dashboardService = dashboardService;
         _coursesService = coursesService;
@@ -63,7 +72,9 @@ public class StudentController : Controller
         _studentProfileService = studentProfileService;
         _certificatesService = certificatesService;
         _context = context;
-        _webHostEnvironment = webHostEnvironment; // Assign to field
+        _webHostEnvironment = webHostEnvironment;
+        _courseService = courseService;
+        _razorRenderer = razorRenderer;
     }
 
     /// <summary>
@@ -617,13 +628,78 @@ public class StudentController : Controller
         if (studentId == 0)
             return Unauthorized("Student profile not found");
 
-        var data = await _browseCoursesService.GetAllCoursesAsync(studentId);
+        var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 6 };
+        var data = await _browseCoursesService.GetInitialBrowseDataAsync(studentId, pagingRequest);
+        
         if (data == null)
             return View("Error");
 
-        var vm = new StudentBrowseCoursesViewModel { Data = data };
+        var vm = new StudentBrowseCoursesViewModel 
+        { 
+            Data = data,
+            PageTitle = "Browse Courses"
+        };
 
         return View(vm);
+    }
+
+    [HttpPost("/student/filter-courses")]
+    public async Task<IActionResult> FilterCoursesPartial([FromBody] BrowseRequestDto request)
+    {
+        var studentId = await GetStudentIdAsync();
+        
+        var browseResultDto = await _courseService.GetAllCoursesFilteredForBrowsingPagedAsync(request);
+
+        // Get all course IDs from the result
+        var courseIds = browseResultDto.Items.Select(c => c.CourseId).ToList();
+
+        // Get enrollment status for all courses in one query
+        var enrollments = await _context.CourseEnrollments
+            .Where(e => e.StudentId == studentId && courseIds.Contains(e.CourseId))
+            .Select(e => new { e.CourseId, e.ProgressPercentage })
+            .ToDictionaryAsync(e => e.CourseId, e => e.ProgressPercentage);
+
+        var coursesGridBrowseVM = browseResultDto
+            .Items
+            .Select(c => new StudentCourseBrowseCardViewModel
+            {
+                CourseId = c.CourseId,
+                InstructorName = c.InstructorName,
+                Title = c.Title,
+                Description = c.Description ?? "--",
+                ThumbnailImageUrl = c.ThumbnailImageUrl ?? "",
+                CreatedDate = c.CreatedDate.ToString("dd-MM-yyyy"),
+                MainCategory = c.MainCategory ?? "Uncategorized",
+                Categories = c.Categories ?? [],
+                Languages = c.Languages ?? [],
+                Level = c.Level.ToString(),
+                AverageRating = c.AverageRating,
+                NumberOfReviews = c.NumberOfReviews,
+                NumberOfStudents = c.NumberOfStudents,
+                NumberOfLectures = c.NumberOfLectures,
+                NumberOfMinutes = c.NumberOfMinutes,
+                // Enrollment status
+                IsEnrolled = enrollments.ContainsKey(c.CourseId),
+                ProgressPercentage = enrollments.TryGetValue(c.CourseId, out var progress) ? progress : 0
+            });
+
+        var paginationSettingsVM = new PaginationSettingsViewModel
+        {
+            CurrentPage = browseResultDto.Settings.PaginationSettings.CurrentPage,
+            PageSize = browseResultDto.Settings.PaginationSettings.PageSize,
+            TotalPages = browseResultDto.Settings.PaginationSettings.TotalPages,
+            TotalCount = browseResultDto.Settings.PaginationSettings.TotalCount
+        };
+
+        var CoursesGrid = await _razorRenderer.RenderViewToStringAsync(ControllerContext, "_StudentCoursesGridBrowsePartialView", coursesGridBrowseVM);
+        var Pagination = await _razorRenderer.RenderViewToStringAsync(ControllerContext, "_PaginationPartialView", paginationSettingsVM);
+
+        return Json(new
+        {
+            CoursesGrid = CoursesGrid,
+            Pagination = Pagination,
+            TotalCount = paginationSettingsVM.TotalCount
+        });
     }
 
     [HttpGet("/student/certificates")]
