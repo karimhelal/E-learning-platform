@@ -31,6 +31,7 @@ public class StudentContinueLearningCourseCardDto
     public int CourseId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string? ThumbnailImageUrl { get; set; }
 
     public string MainCategoryName { get; set; } = string.Empty;
     public string MainCategoryIcon { get; set; } = "fa-laptop-code";

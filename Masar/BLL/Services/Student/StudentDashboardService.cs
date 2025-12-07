@@ -47,6 +47,7 @@ public class StudentDashboardService : IStudentDashboardService
                     CourseId = e.CourseId,
                     Title = e.Course!.Title,
                     Description = e.Course.Description ?? "---",
+                    ThumbnailImageUrl = e.Course.ThumbnailImageUrl,
 
                     InstructorName = e.Course.Instructor.User.FullName ?? "????",
 

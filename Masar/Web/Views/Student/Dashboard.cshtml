@@ -87,8 +87,18 @@
                         @foreach (var course in Model.Data.ContinueLearningCourses)
                         {
                             <div class="course-card">
-                                <div class="course-card-header">
-                                    <span class="badge @course.CategoryBadgeClass">
+                                <div class="course-card-image">
+                                    @if (!string.IsNullOrEmpty(course.ThumbnailImageUrl))
+                                    {
+                                        <img src="@course.ThumbnailImageUrl" alt="@course.Title" class="course-thumbnail" />
+                                    }
+                                    else
+                                    {
+                                        <div class="course-thumbnail-placeholder">
+                                            <i class="fas @course.CategoryIcon"></i>
+                                        </div>
+                                    }
+                                    <span class="badge @course.CategoryBadgeClass course-badge-overlay">
                                         <i class="fas @course.CategoryIcon"></i>
                                         @course.CategoryName
                                     </span>
@@ -213,17 +223,7 @@
 
         <!-- Right Sidebar -->
         <aside class="dashboard-sidebar">
-            <!-- Role Switcher -->
-            <div class="sidebar-widget">
-                <h3 class="widget-title">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span>Switch Role</span>
-                </h3>
-                <a asp-controller="Account" asp-action="SwitchToInstructor" class="btn btn-primary btn-block">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                    <span>Switch to Instructor Dashboard</span>
-                </a>
-            </div>
+            <!-- Additional widgets can go here -->
         </aside>
     </div>
 </section>

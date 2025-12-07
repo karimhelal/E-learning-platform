@@ -100,6 +100,7 @@ public class StudentCoursesService : IStudentCoursesService
                     CourseId = course.Id,
                     Title = course.Title,
                     Description = course.Description ?? string.Empty,
+                    ThumbnailImageUrl = course.ThumbnailImageUrl,
                     CategoryName = categoryName,
                     CategoryIcon = icon,
                     CategoryBadgeClass = badge,

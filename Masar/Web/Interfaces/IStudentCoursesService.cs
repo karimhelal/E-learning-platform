@@ -28,6 +28,7 @@ public class MyCourseItem
     public int CourseId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string? ThumbnailImageUrl { get; set; }
     public string CategoryName { get; set; } = string.Empty;
     public string CategoryIcon { get; set; } = "fa-laptop-code";
     public string CategoryBadgeClass { get; set; } = "badge-purple";

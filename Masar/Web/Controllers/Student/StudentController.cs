@@ -230,6 +230,7 @@ public class StudentController : Controller
                         Title = t.Title,
                         Description = t.Description,
                         CoursesCount = t.CoursesCount,
+                        Duration = t.DurationHours > 0 ? $"{t.DurationHours} Hours" : "TBD",
                         Progress = (int)t.ProgressPercentage,
                         Status = t.Status,
                         IconClass = t.IconClass,

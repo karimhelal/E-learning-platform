@@ -423,7 +423,7 @@
 
 .badge-purple {
     background: rgba(124, 58, 237, 0.15);
-    color: var(--accent-purple);
+    color:#ffffffff;
     border-color: var(--accent-purple);
 }
 

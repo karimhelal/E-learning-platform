@@ -140,6 +140,7 @@ public class StudentDashboardService : IStudentDashboardService
                     CourseId = e.Course!.Id,
                     Title = e.Course.Title,
                     Description = e.Course.Description ?? string.Empty,
+                    ThumbnailImageUrl = e.Course.ThumbnailImageUrl,
                     CategoryName = categoryName,
                     CategoryIcon = icon,
                     CategoryBadgeClass = badge,

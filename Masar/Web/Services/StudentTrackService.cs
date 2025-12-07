@@ -94,12 +94,16 @@ public class StudentTracksService : IStudentTrackService
                     ? 0
                     : Math.Round((decimal)completedCourses / totalCourses * 100, 1);
 
+                // Calculate total duration
+                int durationHours = CalculateTrackDuration(courses);
+
                 return new StudentTrackItem
                 {
                     TrackId = track.Id,
                     Title = track.Title,
                     Description = track.Description ?? "",
                     CoursesCount = totalCourses,
+                    DurationHours = durationHours,
                     ProgressPercentage = progress,
                     Status = progress >= 100 ? "completed" : "in-progress",
                     IconClass = "fa-laptop-code", // you can change based on track
@@ -132,6 +136,21 @@ public class StudentTracksService : IStudentTrackService
     // ---------------------------------------------------------------
     // HELPERS
     // ---------------------------------------------------------------
+
+    private int CalculateTrackDuration(List<Course> courses)
+    {
+        if (courses == null || !courses.Any()) return 0;
+
+        var totalSeconds = courses
+            .Where(c => c.Modules != null)
+            .SelectMany(c => c.Modules!)
+            .SelectMany(m => m.Lessons ?? new List<Lesson>())
+            .Select(l => l.LessonContent)
+            .OfType<VideoContent>()
+            .Sum(v => v.DurationInSeconds);
+
+        return (int)Math.Ceiling(totalSeconds / 3600.0);
+    }
 
     private string GetInitials(string name)
     {

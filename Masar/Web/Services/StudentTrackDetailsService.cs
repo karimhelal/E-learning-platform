@@ -19,23 +19,35 @@ namespace Web.Services
             _logger = logger;
         }
 
-        public async Task<StudentTrackDetailsData?> GetTrackDetailsAsync(int userId, int trackId)
+        public async Task<StudentTrackDetailsData?> GetTrackDetailsAsync(int studentId, int trackId)
         {
             try
             {
-                // Fetch student with base info
-                var student = await _userRepo.GetStudentProfileForUserAsync(userId, includeUserBase: true);
+                _logger.LogInformation("Fetching track details for studentId: {StudentId}, trackId: {TrackId}", studentId, trackId);
+
+                // FIXED: Use GetStudentProfileAsync instead of GetStudentProfileForUserAsync
+                // The controller passes StudentId, not UserId
+                var student = await _userRepo.GetStudentProfileAsync(studentId, includeUserBase: true);
 
                 if (student == null)
+                {
+                    _logger.LogWarning("Student profile not found for studentId: {StudentId}", studentId);
                     return null;
+                }
+
+                _logger.LogInformation("Student found: {Name}, Enrollments count: {Count}", 
+                    student.User?.FirstName, student.Enrollments?.Count ?? 0);
 
                 // Find the track enrollment from the generic Enrollments collection
-                var te = student.Enrollments
+                var te = student.Enrollments?
                     .OfType<TrackEnrollment>()
                     .FirstOrDefault(e => e.TrackId == trackId);
                 
                 if (te == null || te.Track == null)
+                {
+                    _logger.LogWarning("Track enrollment not found for trackId: {TrackId}", trackId);
                     return null;
+                }
 
                 var track = te.Track;
 
@@ -56,7 +68,7 @@ namespace Web.Services
                     .Select(tc =>
                     {
                         var course = tc.Course!;
-                        var courseEnrollment = student.Enrollments
+                        var courseEnrollment = student.Enrollments?
                             .OfType<CourseEnrollment>()
                             .FirstOrDefault(c => c.CourseId == course.Id);
 
@@ -80,7 +92,7 @@ namespace Web.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in GetTrackDetailsAsync");
+                _logger.LogError(ex, "Error in GetTrackDetailsAsync for studentId: {StudentId}, trackId: {TrackId}", studentId, trackId);
                 return null;
             }
         }

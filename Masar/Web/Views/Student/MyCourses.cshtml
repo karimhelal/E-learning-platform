@@ -45,22 +45,34 @@
             @foreach (var course in Model.Data.AllCourses)
             {
                 <div class="course-card-full" data-status="@course.Status.ToLower()">
-                    <div class="course-card-header">
-                        <span class="badge @course.CategoryBadgeClass">
-                            <i class="fas @course.CategoryIcon"></i>
-                            @course.CategoryName
-                        </span>
-                        @if (course.Status == "Completed")
+                    <div class="course-card-image">
+                        @if (!string.IsNullOrEmpty(course.ThumbnailImageUrl))
                         {
-                            <span class="course-status-badge completed">
-                                <i class="fas fa-check-circle"></i>
-                                Completed
-                            </span>
+                            <img src="@course.ThumbnailImageUrl" alt="@course.Title" class="course-thumbnail" />
                         }
                         else
                         {
-                            <span class="course-status-badge in-progress">In Progress</span>
+                            <div class="course-thumbnail-placeholder">
+                                <i class="fas @course.CategoryIcon"></i>
+                            </div>
                         }
+                        <div class="course-badge-container">
+                            <span class="badge @course.CategoryBadgeClass">
+                                <i class="fas @course.CategoryIcon"></i>
+                                @course.CategoryName
+                            </span>
+                            @if (course.Status == "Completed")
+                            {
+                                <span class="course-status-badge completed">
+                                    <i class="fas fa-check-circle"></i>
+                                    Completed
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="course-status-badge in-progress">In Progress</span>
+                            }
+                        </div>
                     </div>
                     <div class="course-card-body">
                         <h3 class="course-card-title">@course.Title</h3>

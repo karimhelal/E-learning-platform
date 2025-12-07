@@ -44,6 +44,7 @@ public class StudentTrackItem
     public string Description { get; set; } = string.Empty;
 
     public int CoursesCount { get; set; }
+    public int DurationHours { get; set; }  // Total duration in hours
     public decimal ProgressPercentage { get; set; }
 
     public string Status { get; set; } = "in-progress"; // or completed

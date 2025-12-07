@@ -73,18 +73,54 @@ document.querySelectorAll(".fade-in-up").forEach((el) => {
     observer.observe(el);
 });
 
-// Smooth Scrolling
-document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+// Smooth Scrolling - Handle both same-page anchors and navigation from other pages
+document.querySelectorAll('a[href*="#"]').forEach((anchor) => {
     anchor.addEventListener("click", function (e) {
-        e.preventDefault();
-        const target = document.querySelector(
-            this.getAttribute("href")
-        );
-        if (target) {
-            target.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
+        const href = this.getAttribute("href");
+        
+        // Check if this is a same-page anchor (starts with # or /#)
+        if (href.startsWith("#")) {
+            // Same page anchor
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+                target.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            }
+        } else if (href.startsWith("/#")) {
+            // Link with path + anchor (e.g., /#how-it-works)
+            const isHomePage = window.location.pathname === "/" || window.location.pathname === "";
+            
+            if (isHomePage) {
+                // Already on home page, just scroll
+                e.preventDefault();
+                const targetId = href.substring(1); // Remove the leading /
+                const target = document.querySelector(targetId);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                    });
+                }
+            }
+            // Otherwise, let the browser navigate to the home page with the anchor
         }
     });
+});
+
+// Handle scroll to anchor on page load (when navigating from another page)
+document.addEventListener("DOMContentLoaded", function() {
+    if (window.location.hash) {
+        setTimeout(() => {
+            const target = document.querySelector(window.location.hash);
+            if (target) {
+                target.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            }
+        }, 100);
+    }
 });
