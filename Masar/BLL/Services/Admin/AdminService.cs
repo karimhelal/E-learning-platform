@@ -334,7 +334,7 @@ namespace BLL.Services.Admin
 
         public async Task<int> CreateTrackAsync(CreateTrackDto dto)
         {
-            var track = new Track
+            var track = new Core.Entities.Track
             {
                 Title = dto.Title,
                 Description = dto.Description,

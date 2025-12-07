@@ -57,8 +57,16 @@ public class HomeController : Controller
             .Take(6)
             .ToListAsync();
 
+        // Fetch platform statistics
+        var totalStudents = await _context.Users.CountAsync();
+        var totalCourses = await _context.Courses.CountAsync();
+        var totalInstructors = await _context.InstructorProfiles.CountAsync();
+
         var viewModel = new HomeIndexViewModel
         {
+            TotalStudents = totalStudents,
+            TotalCourses = totalCourses,
+            TotalInstructors = totalInstructors,
             FeaturedTracks = tracks.Select(t => new HomeFeaturedTrackViewModel
             {
                 TrackId = t.Id,

@@ -5,6 +5,7 @@ using BLL.Interfaces;
 using Core.Entities;
 using Core.Entities.Enums;
 using Core.RepositoryInterfaces;
+using MailKit;
 using Microsoft.EntityFrameworkCore;
 
 namespace BLL.Services;
@@ -172,7 +173,7 @@ public class CourseService : ICourseService
 
     public async Task<BrowseResultDto<CourseBrowseCardDto>> GetInitialBrowsePageCoursesAsync(PagingRequestDto request)
     {
-        var query = _courseRepo.GetAllQueryable();
+        var query = _courseRepo.GetAllQueryable().Where(c=>c.Status==LearningEntityStatus.Published);
 
         // applying sorting
         bool isASC = request.SortOrder == SortOrder.Ascending;
@@ -255,7 +256,7 @@ public class CourseService : ICourseService
 
     public async Task<BrowseResultDto<CourseBrowseCardDto>> GetAllCoursesFilteredForBrowsingPagedAsync(BrowseRequestDto request)
     {
-        var query = _courseRepo.GetAllQueryable();
+        var query = _courseRepo.GetAllQueryable().Where(c => c.Status == LearningEntityStatus.Published);
 
 
         if (request == null)
@@ -448,7 +449,7 @@ public class CourseService : ICourseService
                 .OfType<VideoContent>()
                 .Sum(v => (int?)v.DurationInSeconds) ?? 0
             );
-        result.MinDuration = Math.Ceiling((durationsQuery.Select(x => (int?)x).Min() ?? 0) / 3600.0);
+        result.MinDuration = Math.Floor((durationsQuery.Select(x => (int?)x).Min() ?? 0) / 3600.0);
         result.MaxDuration = Math.Ceiling((durationsQuery.Select(x => (int?)x).Max() ?? 0) / 3600.0);
 
 

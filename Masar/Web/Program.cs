@@ -14,6 +14,7 @@ using BLL.Services.CourseLearning;
 using BLL.Services.Enrollment;
 using BLL.Services.Instructor;
 using BLL.Services.Student;
+using BLL.Services.Track;
 using Core.Entities;
 using Core.RepositoryInterfaces;
 using DAL.Data;
@@ -72,6 +73,7 @@ builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardServi
 
 builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
 builder.Services.AddScoped<ICourseCreationService, CourseCreationService>(); // ADDED THIS LINE
+builder.Services.AddScoped<ITrackService, TrackService>(); // ADDED THIS LINE
 
 
 // ========================================

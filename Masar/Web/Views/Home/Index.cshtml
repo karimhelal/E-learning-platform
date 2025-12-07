@@ -29,17 +29,18 @@
                 <span>Start Your Journey Now</span>
                 <i class="fas fa-rocket"></i>
             </a>
+            <!-- Update hero-stats section -->
             <div class="hero-stats">
                 <div class="stat-item">
-                    <span class="stat-number">50K+</span>
+                    <span class="stat-number">@(Model.TotalStudents >= 1000 ? $"{Model.TotalStudents / 1000}K+" : Model.TotalStudents.ToString())</span>
                     <span class="stat-label">Active Students</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number">@Model.FeaturedTracks.Sum(t => t.CoursesCount)+</span>
+                    <span class="stat-number">@Model.TotalCourses+</span>
                     <span class="stat-label">Courses</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number">4.9★</span>
+                    <span class="stat-number">@Model.AverageRating★</span>
                     <span class="stat-label">Rating</span>
                 </div>
             </div>
@@ -163,192 +164,46 @@
     </div>
 
     <div class="tracks-grid">
-        <!-- Web Development -->
-        <div class="track-card fade-in-up">
-            <div class="track-header">
-                <div class="track-icon">
-                    <i class="fas fa-laptop-code"></i>
-                </div>
-                <h3 class="track-title">Web Development</h3>
-                <div class="track-subtitle">frontend + backend</div>
-            </div>
-            <div class="track-content">
-                <div class="track-meta">
-                    <div class="meta-item">
-                        <div class="meta-value">12</div>
-                        <div class="meta-label">Courses</div>
+        @foreach (var track in Model.FeaturedTracks)
+        {
+            <div class="track-card fade-in-up">
+                <div class="track-header">
+                    <div class="track-icon">
+                        <i class="fas @track.IconClass"></i>
                     </div>
-                    <div class="meta-item">
-                        <div class="meta-value">120h</div>
-                        <div class="meta-label">Duration</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">8.2K</div>
-                        <div class="meta-label">Students</div>
-                    </div>
+                    <h3 class="track-title">@track.Title</h3>
+                    <div class="track-subtitle">@track.Subtitle</div>
                 </div>
-                <button class="track-cta">
-                    Explore Track <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Data Science & AI -->
-        <div class="track-card fade-in-up">
-            <div class="track-header">
-                <div class="track-icon">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <h3 class="track-title">Data Science & AI</h3>
-                <div class="track-subtitle">
-                    machine learning + deep learning
+                <div class="track-content">
+                    <div class="track-meta">
+                        <div class="meta-item">
+                            <div class="meta-value">@track.CoursesCount</div>
+                            <div class="meta-label">Courses</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-value">@track.DurationHours h</div>
+                            <div class="meta-label">Duration</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-value">@(track.StudentsCount >= 1000 ? $"{track.StudentsCount / 1000.0:F1}K" : track.StudentsCount.ToString())</div>
+                            <div class="meta-label">Students</div>
+                        </div>
+                    </div>
+                    <a href="/track/@track.TrackId" class="track-cta">
+                        Explore Track <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
-            <div class="track-content">
-                <div class="track-meta">
-                    <div class="meta-item">
-                        <div class="meta-value">15</div>
-                        <div class="meta-label">Courses</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">150h</div>
-                        <div class="meta-label">Duration</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">6.5K</div>
-                        <div class="meta-label">Students</div>
-                    </div>
-                </div>
-                <button class="track-cta">
-                    Explore Track <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Mobile Development -->
-        <div class="track-card fade-in-up">
-            <div class="track-header">
-                <div class="track-icon">
-                    <i class="fas fa-mobile-alt"></i>
-                </div>
-                <h3 class="track-title">Mobile Development</h3>
-                <div class="track-subtitle">iOS + Android</div>
-            </div>
-            <div class="track-content">
-                <div class="track-meta">
-                    <div class="meta-item">
-                        <div class="meta-value">10</div>
-                        <div class="meta-label">Courses</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">100h</div>
-                        <div class="meta-label">Duration</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">5.3K</div>
-                        <div class="meta-label">Students</div>
-                    </div>
-                </div>
-                <button class="track-cta">
-                    Explore Track <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Backend Development -->
-        <div class="track-card fade-in-up">
-            <div class="track-header">
-                <div class="track-icon">
-                    <i class="fas fa-server"></i>
-                </div>
-                <h3 class="track-title">Backend Development</h3>
-                <div class="track-subtitle">
-                    server-side + databases
-                </div>
-            </div>
-            <div class="track-content">
-                <div class="track-meta">
-                    <div class="meta-item">
-                        <div class="meta-value">14</div>
-                        <div class="meta-label">Courses</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">130h</div>
-                        <div class="meta-label">Duration</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">7.8K</div>
-                        <div class="meta-label">Students</div>
-                    </div>
-                </div>
-                <button class="track-cta">
-                    Explore Track <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Cybersecurity -->
-        <div class="track-card fade-in-up">
-            <div class="track-header">
-                <div class="track-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h3 class="track-title">Cybersecurity</h3>
-                <div class="track-subtitle">
-                    ethical hacking + security
-                </div>
-            </div>
-            <div class="track-content">
-                <div class="track-meta">
-                    <div class="meta-item">
-                        <div class="meta-value">11</div>
-                        <div class="meta-label">Courses</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">110h</div>
-                        <div class="meta-label">Duration</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">4.2K</div>
-                        <div class="meta-label">Students</div>
-                    </div>
-                </div>
-                <button class="track-cta">
-                    Explore Track <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Cloud Computing -->
-        <div class="track-card fade-in-up">
-            <div class="track-header">
-                <div class="track-icon">
-                    <i class="fas fa-cloud"></i>
-                </div>
-                <h3 class="track-title">Cloud Computing</h3>
-                <div class="track-subtitle">AWS + Azure + DevOps</div>
-            </div>
-            <div class="track-content">
-                <div class="track-meta">
-                    <div class="meta-item">
-                        <div class="meta-value">13</div>
-                        <div class="meta-label">Courses</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">125h</div>
-                        <div class="meta-label">Duration</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-value">6.1K</div>
-                        <div class="meta-label">Students</div>
-                    </div>
-                </div>
-                <button class="track-cta">
-                    Explore Track <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
+        }
     </div>
+
+    @if (!Model.FeaturedTracks.Any())
+    {
+        <div class="text-center" style="padding: 3rem; color: var(--text-secondary);">
+            <i class="fas fa-graduation-cap fa-3x mb-3"></i>
+            <p>No tracks available yet. Check back soon!</p>
+        </div>
+    }
 </section>
 
 <!-- How It Works -->

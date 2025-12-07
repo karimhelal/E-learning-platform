@@ -1,5 +1,6 @@
 using BLL.DTOs.Course;
 using BLL.Interfaces;
+using BLL.Interfaces.Admin;
 using Core.Entities;
 using Core.Entities.Enums;
 using Core.RepositoryInterfaces;
@@ -13,15 +14,18 @@ namespace BLL.Services
         private readonly AppDbContext _context;
         private readonly ICategoryRepository _categoryRepo;
         private readonly ILanguageRepository _languageRepo;
+        private readonly INotifier _notifier;
 
         public CourseCreationService(
             AppDbContext context,
             ICategoryRepository categoryRepo,
-            ILanguageRepository languageRepo)
+            ILanguageRepository languageRepo,
+            INotifier notifier)
         {
             _context = context;
             _categoryRepo = categoryRepo;
             _languageRepo = languageRepo;
+            _notifier = notifier;
         }
 
         public async Task<CourseCreationResultDto> CreateCourseAsync(CreateCourseDto dto)
@@ -32,7 +36,7 @@ namespace BLL.Services
                 Console.WriteLine($"?? Instructor ID: {dto.InstructorId}");
                 Console.WriteLine($"?? Title: {dto.Title}");
 
-                // 1. Create the course
+                // 1. Create the course with Pending status
                 var course = new Course
                 {
                     InstructorId = dto.InstructorId,
@@ -40,6 +44,7 @@ namespace BLL.Services
                     Description = dto.Description,
                     ThumbnailImageUrl = dto.ThumbnailImageUrl,
                     Level = dto.Level,
+                    Status = LearningEntityStatus.Pending, // Set status to Pending for admin review
                     CreatedDate = DateOnly.FromDateTime(DateTime.Now)
                 };
 
@@ -213,7 +218,33 @@ namespace BLL.Services
                     }
                 }
 
-                Console.WriteLine($"?? Course published successfully! CourseId: {course.Id}");
+                // 6. Get instructor name for notification
+                var instructorName = await _context.InstructorProfiles
+                    .Where(i => i.InstructorId == dto.InstructorId)
+                    .Select(i => i.User != null ? $"{i.User.FirstName} {i.User.LastName}" : "Unknown Instructor")
+                    .FirstOrDefaultAsync() ?? "Unknown Instructor";
+
+                // 7. Create notification for admins (UserId = null means it's for admins)
+                var adminNotification = new Notification
+                {
+                    UserId = null, // null means notification is for admins
+                    Title = "New Course Submitted ??",
+                    Message = $"'{course.Title}' by {instructorName} is waiting for review.",
+                    Url = "/admin/pending-courses",
+                    CreatedAt = DateTime.Now
+                };
+                _context.Notifications.Add(adminNotification);
+                await _context.SaveChangesAsync();
+
+                // 8. Send real-time notification to admins via SignalR
+                await _notifier.SendToAdminsAsync(
+                    adminNotification.Title,
+                    adminNotification.Message,
+                    adminNotification.Url
+                );
+
+                Console.WriteLine($"?? Notification sent to admins for course: {course.Title}");
+                Console.WriteLine($"?? Course submitted for review successfully! CourseId: {course.Id}");
 
                 return new CourseCreationResultDto
                 {

@@ -3,6 +3,12 @@ namespace Web.ViewModels.Home
     public class HomeIndexViewModel
     {
         public List<HomeFeaturedTrackViewModel> FeaturedTracks { get; set; } = new();
+        
+        // Platform statistics
+        public int TotalStudents { get; set; }
+        public int TotalCourses { get; set; }
+        public int TotalInstructors { get; set; }
+        public decimal AverageRating { get; set; } = 4.9m;
     }
 
     public class HomeFeaturedTrackViewModel
