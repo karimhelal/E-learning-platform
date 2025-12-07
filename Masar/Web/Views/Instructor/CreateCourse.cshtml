@@ -1,0 +1,178 @@
+﻿@model CreateCourseViewModel;
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-container">
+        <div class="page-title-section">
+            <h1 class="page-title">Create New Course</h1>
+            <p class="page-subtitle">
+                Build an amazing learning experience and publish it directly
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="base-container">
+    <div class="create-container">
+        <!-- Create Card -->
+        <div class="create-card">
+            <div class="left-side">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h1 class="card-title">Create Your Course</h1>
+                    <p class="card-subtitle">
+                        Let's start with the basics. You can always
+                        change these later.
+                    </p>
+                </div>
+
+                <div class="card-body">
+                    <form id="createCourseForm" method="post" asp-action="CreateCourse" asp-controller="Instructor">
+
+                        <div class="form-group">
+                            <label class="form-label" asp-for="CourseTitle">Course Title <span>*</span></label>
+
+                            <input type="text"
+                                   class="form-input"
+                                   asp-for="CourseTitle"
+                                   id="courseTitle"
+                                   placeholder="e.g., Complete JavaScript Masterclass 2024"
+                                   maxlength="40" />
+
+                            <div class="char-counter">
+                                <span id="titleCharCount">0</span>/40 characters
+                            </div>
+
+                            <span asp-validation-for="CourseTitle" class="form-error text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" asp-for="MainCategoryId">Category <span>*</span></label>
+
+                            <select class="form-select"
+                                    asp-for="MainCategoryId"
+                                    asp-items="Model.CategoryOptions">
+                                <option value="">Select a main category</option>
+                            </select>
+
+                            <span asp-validation-for="MainCategoryId" class="form-error text-danger"></span>
+                        </div>
+
+                        <div class="card-footer">
+
+                            <a asp-action="Dashboard" asp-controller="Instructor" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                Cancel
+                            </a>
+
+                            <button type="submit" class="btn btn-primary" id="createBtn">
+                                <span class="btn-text">Create Course</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="right-side">
+                <div class="tips-section">
+                    <div class="tips-header">
+                        <div class="tips-icon-wrapper">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="tips-header-text">
+                            <h4 class="tips-title">Quick Tips</h4>
+                            <span class="tips-subtitle">Best practices for success</span>
+                        </div>
+                    </div>
+
+                    <div class="tips-content">
+                        <ul class="tips-list">
+                            <li class="tip-item">
+                                <div class="tip-icon">
+                                    <i class="fas fa-key"></i>
+                                </div>
+                                <span class="tip-text">
+                                    Choose a clear, descriptive title
+                                    that includes keywords
+                                </span>
+                            </li>
+                            <li class="tip-item">
+                                <div class="tip-icon">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <span class="tip-text">
+                                    Your title should describe what
+                                    students will learn
+                                </span>
+                            </li>
+                            <li class="tip-item">
+                                <div class="tip-icon">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                                <span class="tip-text">
+                                    Select the category that best
+                                    matches your course content
+                                </span>
+                            </li>
+                            <li class="tip-item">
+                                <div class="tip-icon">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </div>
+                                <span class="tip-text">
+                                    Don't worry, you can edit
+                                    everything later!
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tips-footer">
+                        <div class="tips-footer-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span class="tips-footer-text">
+                            <strong>Pro tip:</strong> Great titles get
+                            3x more enrollments
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Course created!</span>
+</div>
+
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/Instructor/create-course.css" />
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function() {
+            // 1. Character Counter Logic
+            $('#courseTitle').on('input', function() {
+                var len = $(this).val().length;
+                $('#titleCharCount').text(len);
+            });
+
+            // 2. Prevent Double Submit
+            $('#createCourseForm').on('submit', function() {
+                if ($(this).valid()) {
+                    $('#createBtn').prop('disabled', true);
+                    $('#createBtn .btn-text').text('Creating...');
+                }
+            });
+        });
+    </script>
+}

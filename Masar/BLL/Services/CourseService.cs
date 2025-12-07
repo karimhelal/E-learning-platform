@@ -173,7 +173,8 @@ public class CourseService : ICourseService
 
     public async Task<BrowseResultDto<CourseBrowseCardDto>> GetInitialBrowsePageCoursesAsync(PagingRequestDto request)
     {
-        var query = _courseRepo.GetAllQueryable().Where(c=>c.Status==LearningEntityStatus.Published);
+        var query = _courseRepo.GetAllQueryable()
+            .Where(c => c.Status == LearningEntityStatus.Published);
 
         // applying sorting
         bool isASC = request.SortOrder == SortOrder.Ascending;
@@ -256,7 +257,8 @@ public class CourseService : ICourseService
 
     public async Task<BrowseResultDto<CourseBrowseCardDto>> GetAllCoursesFilteredForBrowsingPagedAsync(BrowseRequestDto request)
     {
-        var query = _courseRepo.GetAllQueryable().Where(c => c.Status == LearningEntityStatus.Published);
+        var query = _courseRepo.GetAllQueryable()
+            .Where(c => c.Status == LearningEntityStatus.Published);
 
 
         if (request == null)

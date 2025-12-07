@@ -44,6 +44,7 @@ builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>(); // ADD THIS
 builder.Services.AddScoped<ILessonRepository, LessonRepository>(); // ADD THIS
 builder.Services.AddScoped<IInstructorProfileRepository, InstructorProfileRepository>();
+builder.Services.AddScoped<IInstructorManageCourseService, InstructorManageCourseService>();
 
 
 // Add generic repositories for LessonProgress and CourseEnrollment

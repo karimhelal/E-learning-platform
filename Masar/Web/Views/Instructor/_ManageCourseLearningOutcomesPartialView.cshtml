@@ -1,0 +1,71 @@
+﻿@model ManageCourseLearningOutcomesViewModel
+
+@{
+    var CourseId = Model.CourseId;
+    var CourseTitle = Model.CourseTitle;
+    var CourseStatus = Model.CourseStatus;
+
+    var OutcomesCount = Model.LearningOutcomes.Count();
+}
+
+<div class="two-col-layout">
+    <div class="section-card">
+        <div class="section-header">
+            <h3 class="section-title">
+                <i class="fas fa-bullseye"></i> Learning Outcomes
+            </h3>
+            <span class="badge badge-cyan" id="outcomeCount">@OutcomesCount outcomes</span>
+        </div>
+        <div class="section-body">
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                What will students learn in your course? Add at least 4 learning outcomes.
+            </p>
+            <div class="outcomes-list" id="outcomesList">
+                <!-- Outcomes rendered here -->
+                @foreach(var outcome in Model.LearningOutcomes)
+                {
+                    <div class="outcome-item" draggable="true" data-outcome-id="@outcome.LearningOutcomeId">
+                        <div class="outcome-icon"><i class="fas fa-check"></i></div>
+                        <span class="outcome-text">@outcome.OutcomeName</span>
+                        <div class="outcome-actions">
+                            <button onclick="editOutcome(@outcome.LearningOutcomeId)" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="delete" onclick="deleteOutcome(@outcome.LearningOutcomeId)" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="add-outcome-row">
+                <input type="text" class="form-input" id="newOutcome" placeholder="e.g., Build responsive websites from scratch">
+                <button class="btn btn-primary btn-small" onclick="addOutcome()">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-panel">
+        <div class="panel-card">
+            <h4 class="panel-title">
+                <i class="fas fa-lightbulb"></i> Writing Good Outcomes
+            </h4>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <p style="margin-bottom: 0.75rem;">• Start with action verbs: Build, Create, Design, Implement</p>
+                <p style="margin-bottom: 0.75rem;">• Be specific and measurable</p>
+                <p style="margin-bottom: 0.75rem;">• Focus on skills students will gain</p>
+                <p>• Add 4-8 outcomes for best results</p>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <h4 class="panel-title">
+                <i class="fas fa-magic"></i> Example Outcomes
+            </h4>
+            <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.6;">
+                <p style="margin-bottom: 0.5rem; cursor: pointer;" onclick="addExampleOutcome('Build 16 web development projects')">• Build 16 web development projects</p>
+                <p style="margin-bottom: 0.5rem; cursor: pointer;" onclick="addExampleOutcome('Master React, Node.js, and MongoDB')">• Master React, Node.js, and MongoDB</p>
+                <p style="margin-bottom: 0.5rem; cursor: pointer;" onclick="addExampleOutcome('Deploy applications to production')">• Deploy applications to production</p>
+                <p style="cursor: pointer;" onclick="addExampleOutcome('Write clean, maintainable code')">• Write clean, maintainable code</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -61,4 +61,9 @@ public class InstructorProfileRepository : IInstructorProfileRepository
             .AsNoTracking();
     }
 
+
+    public async Task<bool> HasCourseAsync(int instructorId, int courseId)
+    {
+        return (await _context.Courses.FindAsync(courseId))?.InstructorId == instructorId;
+    }
 }
