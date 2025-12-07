@@ -227,4 +227,9 @@ public class InstructorProfileService : IInstructorProfileService
             .Select(c => c.Id)
             .FirstOrDefaultAsync();
     }
+
+    public Task<bool> UpdateInstructorProfileAsync(int instructorId, UpdateInstructorProfileDto profileDto)
+    {
+        throw new NotImplementedException();
+    }
 }
