@@ -1,19 +1,25 @@
-﻿using BLL.DTOs.Misc;
+﻿using BLL.DTOs.Admin;
+using BLL.DTOs.Instructor;
+using BLL.DTOs.Instructor.CreateCourse;
+using BLL.DTOs.Instructor.ManageCourse;
+using BLL.DTOs.Misc;
 using BLL.Helpers;
 using BLL.Interfaces.Instructor;
-using Microsoft.AspNetCore.Mvc;
-using Web.ViewModels.Instructor;
-using Web.ViewModels.Instructor.Dashboard;
-using Web.ViewModels.Misc;
-using Core.Entities.Enums;
-using BLL.DTOs.Instructor;
-using Microsoft.AspNetCore.Identity;
 using Core.Entities;
-using Microsoft.AspNetCore.Authorization;
+using Core.Entities.Enums;
 using Core.RepositoryInterfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Web.Interfaces;
-
-using InstructorCourseEditDto = BLL.DTOs.Instructor.InstructorCourseEditDto;
+using Web.ViewModels.Instructor;
+using Web.ViewModels.Instructor.CreateCourse;
+using Web.ViewModels.Instructor.Dashboard;
+using Web.ViewModels.Instructor.ManageCourse;
+using Web.ViewModels.Misc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Web.Controllers.Instructor;
 
@@ -28,6 +34,9 @@ public class InstructorController : Controller
     private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IInstructorProfileService _instructorProfileService;
+    private readonly IInstructorManageCourseService _instructorManageCourseService;
+
 
     public InstructorController(
         IInstructorDashboardService dashboardService, 
@@ -37,7 +46,9 @@ public class InstructorController : Controller
         UserManager<User> userManager,
         IUserRepository userRepository,
         ICurrentUserService currentUserService,
-        ICategoryRepository categoryRepository)
+        ICategoryRepository categoryRepository,
+        IInstructorProfileService instructorProfileService,
+        IInstructorManageCourseService instructorManageCourseService)
     {
         _dashboardService = dashboardService;
         _coursesService = courseService;
@@ -47,6 +58,8 @@ public class InstructorController : Controller
         _userRepository = userRepository;
         _currentUserService = currentUserService;
         _categoryRepository = categoryRepository;
+        _instructorProfileService = instructorProfileService;
+        _instructorManageCourseService = instructorManageCourseService;
     }
 
     private async Task<int> GetInstructorIdAsync()
@@ -79,6 +92,7 @@ public class InstructorController : Controller
     /// Instructor Dashboard - Overview of performance, stats, and quick actions.
     /// </summary>
     [HttpGet("/instructor/dashboard")]
+    [HttpGet("/instructor")]
     public async Task<IActionResult> Dashboard()
     {
         ViewBag.Title = "Instructor Dashboard | Masar";
@@ -716,4 +730,348 @@ public class InstructorController : Controller
             return Json(new { success = false, message = "Upload failed: " + ex.Message });
         }
     }
+
+
+    [HttpGet("/instructor/create-course")]
+    public async Task<IActionResult> CreateCourse()
+    {
+        var categories = await _categoryRepository.GetAllQueryable()
+            .Select(c => new SelectListItem
+            {
+                Value = c.CategoryId.ToString(),
+                Text = c.Name
+            })
+            .ToListAsync();
+
+        var viewModel = new CreateCourseViewModel
+        {
+            CategoryOptions = categories
+        };
+
+        return View(viewModel);
+    }
+
+    [HttpPost("/instructor/create-course")]
+    public async Task<IActionResult> CreateCourse(CreateCourseViewModel model)
+    {
+        // is instructor logged in and authenticated
+        var instructorId = _currentUserService.GetInstructorId();
+        if (!await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Unauthorized();
+
+        // 1. Validation
+        if (!ModelState.IsValid)
+        {
+            // RE-POPULATE the dropdown if validation fails!
+            // The View does not "remember" the list between requests.
+            model.CategoryOptions = await _categoryRepository.GetAllQueryable()
+                .Select(c => new SelectListItem
+                {
+                    Value = c.CategoryId.ToString(),
+                    Text = c.Name,
+                })
+                .ToListAsync();
+
+            return View(model);
+        }
+
+        // 2. Success Logic (Creating the course row int the database)
+        var dto = new CreateCourseBasicDetailsDto
+        {
+            CourseTitle = model.CourseTitle,
+            MainCategoryId = model.MainCategoryId ?? 0,
+        };
+
+        var newCourseId = await _coursesService.CreateCourseAsync(instructorId, dto);
+        if (newCourseId == null)
+            return Unauthorized();
+
+        // 3. Redirect
+        return RedirectToAction("ManageCourse", new { courseId = newCourseId });
+    }
+
+
+    [HttpGet("/instructor/manage-course/{courseId:int:required}")]
+    public async Task<IActionResult> ManageCourse(int courseId)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction("MyCourses");
+
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Unauthorized("Instructor profile not found");
+
+        var haveCourse = await _instructorProfileService.HasCourseWithIdAsync(instructorId, courseId);
+        if (!haveCourse)
+            return NotFound("Requested course doesn't exist or doesn't belong to this instructor");
+
+        // validated both instructor and course (both exist and course is owned by this instructor)
+        var data = await _instructorManageCourseService.GetCourseForManageAsync(instructorId, courseId);
+        if (data == null)
+            return NotFound("Can't load course data");
+
+
+        var viewModel = new ManageCourseViewModel
+        {
+            CourseId = data.CourseId,
+            CourseTitle = data.CourseTitle,
+            CourseStatus = data.CourseStatus.ToString(),
+
+            Curriculum = new ManageCourseCurriculumViewModel
+            {
+                CourseId = data.CourseId,
+                CourseTitle = data.CourseTitle,
+                CourseStatus = data.CourseStatus.ToString(),
+
+                Modules = data.Curriculum.Modules.Select(m => new ManageViewModuleViewModel
+                {
+                    ModuleId = m.ModuleId,
+                    ModuleTitle = m.ModuleTitle,
+                    ModuleOrder = m.ModuleOrder,
+                    LessonsCount = m.LessonsCount,
+                    FormattedLessonDuration = FormatDuration(m.DurationInMinutes ?? 0),
+
+                    Lessons = m.Lessons.Select(l => new ManageViewLessonViewModel
+                    {
+                        LessonId = l.LessonId,
+                        LessonTitle = l.LessonTitle,
+                        LessonOrder = l.LessonOrder,
+                        ContentType = l.ContentType.ToString(),
+
+                        FormattedLessonDuration = FormatDuration(l.DurationInMinutes ?? 0)
+                    }),
+                }),
+
+                CurriculumStats = new ManageCourseCurriculumStatsViewModel
+                {
+                    TotalModules = data.Curriculum.Modules.Count(),
+
+                    VideoLessonsCount = data.Curriculum.Modules
+                        .SelectMany(m => m.Lessons)
+                        .Count(l => l.ContentType == LessonContentType.Video),
+
+                    ArticleLessonsCount = data.Curriculum.Modules
+                        .SelectMany(m => m.Lessons)
+                        .Count(l => l.ContentType == LessonContentType.Article),
+
+                    FormattedCourseDuration = FormatDuration(data.Curriculum.Modules
+                        .Where(m => m.DurationInMinutes != null)
+                        .Sum(m => m.DurationInMinutes) ?? 0
+                    )
+                }
+            }
+        };
+        
+
+        return View(viewModel);
+    }
+
+    [HttpGet("/instructor/manage-course/{courseId:int:required}/curriculum")]
+    public async Task<IActionResult> GetCourseCurriculumPartialAsync(int courseId)
+    {
+        if (!ModelState.IsValid)
+            return NotFound("Requseted course is not found");
+
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Unauthorized("Instructor profile not found");
+
+        var haveCourse = await _instructorProfileService.HasCourseWithIdAsync(instructorId, courseId);
+        if (!haveCourse)
+            return NotFound("Requested course doesn't exist or doesn't belong to this instructor");
+
+        // validated both instructor and course (both exist and course is owned by this instructor)
+        var curriculumDataDto = await _instructorManageCourseService.GetCourseCurriculumAsync(instructorId, courseId);
+        if (curriculumDataDto == null)
+            return NotFound("Course curriculum couldn't be loaded");
+
+
+        var curriculumViewModel = new ManageCourseCurriculumViewModel
+        {
+            CourseId = curriculumDataDto.CourseId,
+            CourseTitle = curriculumDataDto.CourseTitle,
+            CourseStatus = curriculumDataDto.CourseStatus.ToString(),
+
+            Modules = curriculumDataDto.Modules.Select(m => new ManageViewModuleViewModel
+            {
+                ModuleId = m.ModuleId,
+                ModuleTitle = m.ModuleTitle,
+                ModuleOrder = m.ModuleOrder,
+                LessonsCount = m.LessonsCount,
+                FormattedLessonDuration = FormatDuration(m.DurationInMinutes ?? 0),
+
+                Lessons = m.Lessons.Select(l => new ManageViewLessonViewModel
+                {
+                    LessonId = l.LessonId,
+                    LessonTitle = l.LessonTitle,
+                    LessonOrder = l.LessonOrder,
+                    ContentType = l.ContentType.ToString(),
+
+                    FormattedLessonDuration = FormatDuration(l.DurationInMinutes ?? 0)
+                }),
+            }),
+
+            CurriculumStats = new ManageCourseCurriculumStatsViewModel
+            {
+                TotalModules = curriculumDataDto.Modules.Count(),
+
+                VideoLessonsCount = curriculumDataDto.Modules
+                        .SelectMany(m => m.Lessons)
+                        .Count(l => l.ContentType == LessonContentType.Video),
+
+                ArticleLessonsCount = curriculumDataDto.Modules
+                        .SelectMany(m => m.Lessons)
+                        .Count(l => l.ContentType == LessonContentType.Article),
+
+                FormattedCourseDuration = FormatDuration(curriculumDataDto.Modules
+                        .Where(m => m.DurationInMinutes != null)
+                        .Sum(m => m.DurationInMinutes) ?? 0
+                )
+            }
+        };
+
+        var CoursesGrid = await _razorRenderer.RenderViewToStringAsync(ControllerContext, "_ManageCourseCurriculumPartialView", curriculumViewModel);
+
+        return Json(new
+        {
+            CoursesGrid = CoursesGrid,
+
+            CourseId = curriculumDataDto.CourseId,
+            CourseTitle = curriculumDataDto.CourseTitle,
+            CourseStatus = curriculumDataDto.CourseStatus
+        });
+    }
+
+    [HttpGet("/instructor/manage-course/lesson/{lessonId:int:required}")]
+    public async Task<IActionResult> GetLessonDataJsonAsync(int lessonId)
+    {
+        if (!ModelState.IsValid)
+            return NotFound("requested lesson is not found");
+
+        // authenticate the user
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Unauthorized("user is not an instructor");
+
+        //authorization to access the course and its lessons
+        var courseId = await _instructorProfileService.GetCourseIdForLessonAsync(instructorId, lessonId);
+        if (courseId == null)
+            return Forbid();
+
+        // authenticated and authorized ==> fetch the data
+        var lessonDataDto = await _instructorManageCourseService.GetLessonDataAsync(instructorId, lessonId);
+
+        if (lessonDataDto == null)
+            return NotFound("Requested lesson data couldn't be found");
+
+        var viewModel = new ManageEditLessonViewModel
+        {
+            LessonId = lessonId,
+            LessonTitle = lessonDataDto.LessonTitle,
+            LessonOrder = lessonDataDto.LessonOrder,
+
+            ContentType = lessonDataDto.ContentType.ToString(),
+
+            DurationInMinutes = lessonDataDto.DurationInMinutes ?? 0,
+            VideoUrl = lessonDataDto.VideoUrl ?? "",
+            ArticleContent = lessonDataDto.ArticleContent ?? "",
+
+            Resources = lessonDataDto.Resources.Select(r => new ManageEditLessonResourceViewModel
+            {
+                LessonResourceId = r.LessonResourceId,
+                ResourceType = r.ResourceType.ToString() ?? "",
+                Title = r.Title ?? "---",
+                Url = r.Url
+            })
+        };
+
+        return Json(viewModel);
+    }
+
+    //[HttpPost("/instructor/manage-course/lesson/{lessonId:int:required}")]
+    //public async Task<IActionResult> UpdateLessonDataAsync(int lessonId, [FromBody] ManageEditLessonDto newLessonData)
+    //{
+    //    if (!ModelState.IsValid)
+    //        return NotFound("requested lesson is not found");
+
+    //    // authenticate the user
+    //    var instructorId = _currentUserService.GetInstructorId();
+    //    if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+    //        return Unauthorized("user is not an instructor");
+
+    //    //authorization to access the course and its lessons
+    //    var courseId = await _instructorProfileService.GetCourseIdForLessonAsync(instructorId, lessonId);
+    //    if (courseId == null)
+    //        return Forbid();
+
+    //    // authenticated and authorized ==> update lesson data
+    //    _coursesService.UpdateLessonAsync()
+    //}
+
+
+
+    //[HttpPost("/instructor/manage-course/{courseId:int:required}/curriculum")]
+    //public IActionResult SaveCourseCurriculumPartialAsync(ManageCourseCurriculumViewModel model)
+    //{
+
+    //}
+
+    //[HttpPost("/instructor/manage-course/{courseId:int:required}")]
+    //[ValidateAntiForgeryToken]
+    //public IActionResult ManageCourse(int courseId)
+    //{
+
+    //    return View();
+    //}
+
+
+
+
+    private string FormatDuration(int durationInMinutes)
+    {
+        int h = durationInMinutes / 60;
+        int m = durationInMinutes % 60;
+
+        List<string> parts = new();
+
+        if (h > 0)
+            parts.Add($"{h} {(h == 1 ? "hr" : "hrs")}");
+
+        if (m > 0)
+            parts.Add($"{m} {(m == 1 ? "min" : "mins")}");
+
+        return parts.Count > 0 ? string.Join(" ", parts) : "---";
+    }
 }
+
+
+
+
+// Course Name
+//  -)
+//      Header (Course Title, Status)       =============> Never changes unless page refreshed
+
+//  1) Curriculum 
+//      CourseCurriculumDto ----> List<ModuleDto> ---> ModuleDto has List<LessonDto> ---> having (name, type, duration)
+//      CourseStatsDto ---->
+//          1) Total Modules (first time from the data base and then from the js (or just everytime from the database))
+//          2) Video Lessons 
+//          3) Article Lessons
+//          4) Total Course Duration
+//          5) Total Number of Students enrolled   XXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+//  2) Basic Info
+//      Course Title
+//      Course Description
+//      Categories
+//      Level
+//      Languages
+//      
+//      Course Summary
+//          - Languages
+//          - Level
+//          - Main Category
+
+// 3) Learning Outcomes
+//      Course Learning Outcomes;

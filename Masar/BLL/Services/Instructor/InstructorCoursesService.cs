@@ -1,27 +1,37 @@
 ﻿using BLL.DTOs.Course;
 using BLL.DTOs.Instructor;
+using BLL.DTOs.Instructor.CreateCourse;
+using BLL.DTOs.Instructor.ManageCourse;
 using BLL.DTOs.Misc;
 using BLL.Interfaces.Instructor;
 using Core.Entities;
 using Core.Entities.Enums;
 using Core.RepositoryInterfaces;
-using Microsoft.EntityFrameworkCore;
 using DAL.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BLL.Services.Instructor;
 
 public class InstructorCoursesService : IInstructorCoursesService
 {
     private readonly ICourseRepository _courseRepo;
+    private readonly IUserRepository _userRepo;
+    private readonly ICategoryRepository _categRepo;
     private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
     public InstructorCoursesService(
         ICourseRepository courseRepo, 
         ICategoryRepository categoryRepo,
-        AppDbContext context)
+        AppDbContext context,
+        IUserRepository userRepo,
+        IUnitOfWork unitOfWork)
     {
         _courseRepo = courseRepo;
         _context = context;
+        _userRepo = userRepo;
+        _unitOfWork = unitOfWork;
+        _categRepo = categoryRepo;
     }
 
     public async Task<PagedResultDto<InstructorCourseDto>> GetInstructorCoursesPagedAsync(int instructorId, PagingRequestDto request)
@@ -89,6 +99,46 @@ public class InstructorCoursesService : IInstructorCoursesService
                 PageSize = request.PageSize
             }
         };
+    }
+
+    public async Task<int?> CreateCourseAsync(int instructorId, CreateCourseBasicDetailsDto courseBasicDetailsDto)
+    {
+        // 1. Validation (Do we have an instructor with this id)
+        if (!await _userRepo.HasInstructorProfileWithIdAsync(instructorId))
+            return null;
+
+        // 2. Instructor Exists (Add the course)
+        var course = new Course
+        {
+            InstructorId = instructorId,
+
+            Title = courseBasicDetailsDto.CourseTitle,
+            ThumbnailImageUrl = "",
+            
+            Status = LearningEntityStatus.Draft,
+            CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+            Level = CourseLevel.Beginner,
+
+            Categories = new List<Category>()
+        };
+
+        var category = await _categRepo.GetByIdAsync(courseBasicDetailsDto.MainCategoryId);
+        if (category != null)
+            course.Categories.Add(category);
+
+        // adding to the repo
+        await _courseRepo.AddAsync(course);
+
+        // commiting the changes to the database
+        // this generated the id for the course cause it adds a physical row in the table Courses and the relevant tables too
+        await _unitOfWork.CompleteAsync();
+
+        return course.Id;
+    }
+
+    public async Task<bool> UpdateLessonAsync(int instructorId, int courseId, ManageEditLessonDto lessonEditDto)
+    {
+        return false;
     }
 
 

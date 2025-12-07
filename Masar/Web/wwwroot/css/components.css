@@ -617,3 +617,37 @@
     color: var(--text-secondary);
     margin-top: 0.3rem;
 }
+
+
+/* 1. The Error Message Text */
+.field-validation-error {
+    color: var(--accent-red); /* Uses your defined red variable */
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+    display: block;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+}
+
+/* 2. The Input Field itself (when invalid) */
+.input-validation-error {
+    border-color: var(--accent-red) !important;
+    background-image: none !important; /* Removes default browser icons if any */
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important; /* Red Glow */
+}
+
+/* 3. The Summary Box (if you use asp-validation-summary) */
+.validation-summary-errors {
+    border: 1px solid var(--accent-red);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-red);
+    padding: 1rem;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 1.5rem;
+}
+
+    .validation-summary-errors ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }

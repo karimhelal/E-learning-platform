@@ -9,11 +9,13 @@ public class InstructorProfileService : IInstructorProfileService
 {
     private readonly IUserRepository _userRepo;
     private readonly ICourseRepository _courseRepo;
+    private readonly ILessonRepository _lessonRepo;
 
-    public InstructorProfileService(IUserRepository userRepo, ICourseRepository courseRepo)
+    public InstructorProfileService(IUserRepository userRepo, ICourseRepository courseRepo, ILessonRepository lessonRepository)
     {
         _userRepo = userRepo;
         _courseRepo = courseRepo;
+        _lessonRepo = lessonRepository;
     }
 
     public async Task<InstructorProfileDto?> GetInstructorProfileAsync(int instructorId)
@@ -104,6 +106,16 @@ public class InstructorProfileService : IInstructorProfileService
         };
     }
 
+    public async Task<bool> HasCourseWithIdAsync(int instructorId, int courseId)
+    {
+        var course = await _courseRepo.GetByIdAsync(courseId);
+
+        if (course == null || course.InstructorId != instructorId)
+            return false;
+
+        return true;
+    }
+
     public async Task<bool> UpdateInstructorProfileAsync(int instructorId, InstructorProfileDto profileDto)
     {
         var instructorProfile = await _userRepo.GetInstructorProfileAsync(instructorId, includeUserBase: true);
@@ -124,5 +136,21 @@ public class InstructorProfileService : IInstructorProfileService
         _userRepo.Update(instructorProfile.User);
 
         return true;
+    }
+
+    public async Task<int?> GetCourseIdForLessonAsync(int instructorId, int lessonId)
+    {
+        if (!await _userRepo.HasInstructorProfileWithIdAsync(instructorId))
+            return null;
+
+        var courseQueryable = _lessonRepo.GetContainingCourseQueryable(lessonId);
+
+        if (courseQueryable == null || !courseQueryable.Any())
+            return null;
+
+        return await courseQueryable
+            .Where(c => c.InstructorId == instructorId)
+            .Select(c => c.Id)
+            .FirstOrDefaultAsync();
     }
 }

@@ -1,0 +1,128 @@
+﻿@model ManageCourseBasicInfoViewModel
+
+@{
+    var CourseId = Model.CourseId;
+    var CourseTitle = Model.CourseTitle;
+    var CourseStatus = Model.CourseStatus;
+
+    var MainCategoryId = Model.Categories.Any() ? Model.Categories[0].CategoryId : 0;
+    var MainCategoryName = Model.Categories.Any() ? Model.Categories[0].CategoryName : "UnCategorized";
+
+    var LevelName = Model.Level.ToString();
+
+    var MainLanguageId = Model.Languages.Any() ? Model.Languages[0].LanguageId : 0;
+    var MainLanguageName = Model.Languages.Any() ? Model.Languages[0].LanguageName : "N/A";
+}
+
+<div class="two-col-layout">
+    <div class="section-card">
+        <div class="section-header">
+            <h3 class="section-title">
+                <i class="fas fa-edit"></i> Course Information
+            </h3>
+        </div>
+        <div class="section-body">
+            <div class="form-group">
+                <label class="form-label">Course Title <span>*</span></label>
+                <input type="text" class="form-input" id="courseTitle" value="@CourseTitle" placeholder="Enter course title">
+                <p class="form-hint">A clear, specific title helps students find your course</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Course Subtitle</label>
+                <input type="text" class="form-input" id="courseSubtitle" placeholder="A brief tagline for your course">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Course Description <span>*</span></label>
+                <textarea class="form-textarea" id="courseDescription" rows="6" placeholder="Describe what students will learn...">
+                    @Model.CourseDescription
+                </textarea>
+                <p class="form-hint">Minimum 200 characters. Explain what makes your course unique.</p>
+            </div>
+
+            <div class="settings-grid">
+                <div class="form-group">
+                    <label class="form-label">Category <span>*</span></label>
+                    <select class="form-select" id="courseCategory">
+                        <option value="" selected>Select category</option>
+                        @foreach (var category in Model.AllCategories)
+                        {
+                            <option value="@category.CategoryId">@category.CategoryName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Subcategory</label>
+                    <select class="form-select" id="courseSubcategory">
+                        <option value="">Select subcategory</option>
+                        <option value="frontend">Frontend</option>
+                        <option value="backend">Backend</option>
+                        <option value="fullstack" selected>Full Stack</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Level <span>*</span></label>
+                    <select class="form-select" id="courseLevel">
+                        <option value="">Select level</option>
+                        @foreach(var level in Model.AllLevels)
+                        {
+                            if (level == Model.Level) {
+                                <option value="@level.ToString()" selected>@level.ToString()</option>
+                            } else {
+                                <option value="@level.ToString()">@level.ToString()</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Language <span>*</span></label>
+                    <select class="form-select" id="courseLanguage">
+                        <option value="" selected>Select language</option>
+                        @foreach (var language in Model.AllLanguages)
+                        {
+                            <option value="@language.LanguageId">@language.LanguageName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-panel">
+        <div class="panel-card">
+            <h4 class="panel-title">
+                <i class="fas fa-lightbulb"></i> Tips
+            </h4>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <p style="margin-bottom: 0.75rem;">• Use keywords students might search for</p>
+                <p style="margin-bottom: 0.75rem;">• Be specific about what you'll teach</p>
+                <p style="margin-bottom: 0.75rem;">• Mention the technologies/tools covered</p>
+                <p>• Keep your title under 60 characters</p>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <h4 class="panel-title">
+                <i class="fas fa-info-circle"></i> Course Summary
+            </h4>
+            <div class="quick-stats">
+                <div class="quick-stat">
+                    <span class="quick-stat-label">Category</span>
+                    <span class="quick-stat-value" id="infoCategory">@MainCategoryName</span>
+                </div>
+                <div class="quick-stat">
+                    <span class="quick-stat-label">Level</span>
+                    <span class="quick-stat-value" id="infoLevel">@LevelName</span>
+                </div>
+                <div class="quick-stat">
+                    <span class="quick-stat-label">Language</span>
+                    <span class="quick-stat-value" id="infoLanguage">@MainLanguageName</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

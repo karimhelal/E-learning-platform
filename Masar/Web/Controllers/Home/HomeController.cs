@@ -74,7 +74,7 @@ public class HomeController : Controller
     [HttpGet("~/browse-courses")]
     public async Task<IActionResult> BrowseCourses()
     {
-        var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 2 };
+        var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 3 };
         var initialRequest = new BrowseRequestDto();
         initialRequest.PagingRequest = pagingRequest;
 
