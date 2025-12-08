@@ -79,7 +79,7 @@ function renderCourses(courses) {
                 </div>
 
                 <div class="course-review-actions">
-                    <a href="/Course/Details/${c.id}" target="_blank" class="btn btn-secondary btn-view">
+                    <a href="/Course/${c.id}" target="_blank" class="btn btn-secondary btn-view">
                         <i class="fas fa-eye"></i> View
                     </a>
                     <button class="btn btn-danger btn-reject" onclick="openRejectModal(${c.id})">
