@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (sortOrder) {
         sortOrder.addEventListener("change", function () {
             const sortOrderValue = this.value;
-            const sortBy = sortFilter ? sortFilter.value : "createdDate";
+            const sortBy = sortFilter ? sortFilter.value : "CreationDate";
             sortCourses(sortBy, sortOrderValue);
         });
     }
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (sortFilter) {
         sortFilter.addEventListener("change", function () {
             const sortBy = this.value;
-            const sortOrderValue = sortOrder ? sortOrder.value : "desc";
+            const sortOrderValue = sortOrder ? sortOrder.value : "Descending";
             sortCourses(sortBy, sortOrderValue);
         });
     }
@@ -171,12 +171,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         cards.sort((a, b) => {
             switch (sortBy) {
-                case "createdDate":
+                case "CreationDate":
                     // Sort by date created
                     const dateA = new Date(a.dataset.creationDate);
                     const dateB = new Date(b.dataset.creationDate);
 
-                    if (sortOrder == "asc")
+                    if (sortOrder == "Ascending")
                         return dateA - dateB;
                     else
                         return dateB - dateA;
@@ -193,21 +193,21 @@ document.addEventListener("DOMContentLoaded", function () {
                             .querySelector(".stat-item.total-students .stat-value")
                             .textContent.replace(',', "")
                     );
-                    if (sortOrder == "asc")
+                    if (sortOrder == "Ascending")
                         return studentsA - studentsB;
                     else
                         return studentsB - studentsA;
 
-                case "title":
+                case "Title":
                     // Sort by title
                     const titleA = a.querySelector(".course-title").textContent.toLowerCase();
                     const titleB = b.querySelector(".course-title").textContent.toLowerCase();
-                    if (sortOrder == "asc")
+                    if (sortOrder == "Ascending")
                         return titleA.localeCompare(titleB);
                     else
                         return titleB.localeCompare(titleA);
 
-                case "rate":
+                case "Rating":
                     // Sort by rating
                     const ratingA = parseFloat(
                         a.querySelector(".rating-value").textContent
@@ -215,7 +215,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const ratingB = parseFloat(
                         b.querySelector(".rating-value").textContent
                     );
-                    if (sortOrder == "asc")
+                    if (sortOrder == "Ascending")
                         return ratingA - ratingB;
                     else
                         return ratingB - ratingA;
