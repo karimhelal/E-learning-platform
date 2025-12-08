@@ -71,14 +71,14 @@
 
                 <li><a href="/browse-courses">Courses</a></li>
                 <li><a href="/browse-tracks">Tracks</a></li>
-                <li><a href="/#how-it-works">How It Works</a></li>
+                @* <li><a href="/#how-it-works">How It Works</a></li>
                 <li><a href="/#testimonials">Reviews</a></li>
-                <li><a href="/#contact">Contact</a></li>
+                <li><a href="/#contact">Contact</a></li> *@
 
                 @if (!User.Identity.IsAuthenticated)
                 {
                     <li>
-                        <a href="/Account/Login" class="nav-btn">Get Started</a>
+                        <a href="/Account/Login" class="nav-btn log-in">Get Started</a>
                     </li>
                 }
                 else
@@ -114,7 +114,7 @@
                     /* ================================================== */
 
                     <li>
-                        <a href="/Account/Logout" class="nav-btn">Logout</a>
+                        <a href="/Account/Logout" class="nav-btn log-out">Logout</a>
                     </li>
                 }
             </ul>

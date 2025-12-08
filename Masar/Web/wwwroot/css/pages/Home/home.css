@@ -196,6 +196,17 @@ nav.scrolled {
     display: inline-block;
 }
 
+.nav-btn.log-out {
+    background-color: red;
+    color: black;
+}
+
+    .nav-btn.log-out:hover {
+        background: red;
+        color: black;
+        box-shadow: 0 10px 30px rgba(255, 30, 10, 0.4);
+    } 
+
 .nav-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);
