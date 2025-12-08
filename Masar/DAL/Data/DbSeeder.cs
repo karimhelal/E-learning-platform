@@ -11,6 +11,8 @@ public static class DbSeeder
 {
     public static async Task SeedDatabaseAsync(IServiceProvider serviceProvider)
     {
+        return;
+
         var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
         var context = serviceProvider.GetRequiredService<AppDbContext>();

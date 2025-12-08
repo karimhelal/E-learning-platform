@@ -1,0 +1,188 @@
+﻿@model ManageEditLessonViewModel
+
+@{
+    var IsVideo = Model.ContentType == "Video";
+    var IsArticle = Model.ContentType == "Article";
+    var IsNewLesson = Model.LessonId == 0;
+}
+
+<!-- Lesson Modal -->
+<div id="lessonModal" class="modal show">
+    <div class="modal-overlay" data-action="close-modal" data-target="lessonModal"></div>
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3 class="modal-title" id="lessonModalTitle">
+                @(IsNewLesson ? "Add New Lesson" : "Edit Lesson")
+            </h3>
+            <button type="button" class="modal-close" data-action="close-modal" data-target="lessonModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form id="lessonForm">
+                <!-- Hidden Fields -->
+                <input type="hidden" id="lessonIdInput" name="LessonId" value="@Model.LessonId" />
+                <input type="hidden" id="lessonModuleIdInput" name="ModuleId" value="@Model.ModuleId" />
+                <input type="hidden" id="lessonCourseIdInput" name="CourseId" value="@Model.CourseId" />
+                <input type="hidden" id="contentTypeInput" name="ContentType" value="@Model.ContentType" />
+
+                <!-- Lesson Type Selector -->
+                <div class="lesson-type-selector" id="lessonTypeSelector">
+                    <div class="lesson-type-option @(IsVideo ? "selected" : "")" 
+                         data-type="Video" 
+                         data-action="select-lesson-type">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Video Lesson</span>
+                    </div>
+                    <div class="lesson-type-option @(IsArticle ? "selected" : "")" 
+                         data-type="Article" 
+                         data-action="select-lesson-type">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Article Lesson</span>
+                    </div>
+                </div>
+
+                <!-- Lesson Title -->
+                <div class="form-group">
+                    <label class="form-label">Lesson Title <span>*</span></label>
+                    <input type="text" 
+                           class="form-input" 
+                           id="lessonTitleInput" 
+                           name="Title" 
+                           value="@Model.LessonTitle"
+                           placeholder="e.g., Introduction to CSS Flexbox" 
+                           required />
+                </div>
+
+                <!-- Video Fields -->
+                <div id="videoFields" class="@(IsVideo ? "" : "hidden")">
+                    <div class="form-group">
+                        <label class="form-label">Video URL</label>
+                        <input type="url" 
+                               class="form-input" 
+                               id="videoUrlInput"
+                               name="VideoUrl" 
+                               value="@Model.VideoUrl"
+                               placeholder="YouTube, Vimeo, or direct video URL" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Duration (Minutes)</label>
+                        <input type="number" 
+                               class="form-input" 
+                               id="durationMinutesInput"
+                               name="DurationMinutes" 
+                               value="@Model.DurationInMinutes"
+                               placeholder="e.g., 15" 
+                               min="0" />
+                    </div>
+                </div>
+
+                <!-- Article Fields -->
+                <div id="articleFields" class="@(IsArticle ? "" : "hidden")">
+                    <div class="form-group">
+                        <label class="form-label">Article Content <span>*</span></label>
+                        <div class="rich-editor-container">
+                            <div class="editor-toolbar">
+                                <div class="toolbar-group">
+                                    <button type="button" class="toolbar-btn" onclick="document.execCommand('bold')" title="Bold">
+                                        <i class="fas fa-bold"></i>
+                                    </button>
+                                    <button type="button" class="toolbar-btn" onclick="document.execCommand('italic')" title="Italic">
+                                        <i class="fas fa-italic"></i>
+                                    </button>
+                                    <button type="button" class="toolbar-btn" onclick="document.execCommand('underline')" title="Underline">
+                                        <i class="fas fa-underline"></i>
+                                    </button>
+                                </div>
+                                <div class="toolbar-group">
+                                    <button type="button" class="toolbar-btn" onclick="document.execCommand('insertUnorderedList')" title="Bullet List">
+                                        <i class="fas fa-list-ul"></i>
+                                    </button>
+                                    <button type="button" class="toolbar-btn" onclick="document.execCommand('insertOrderedList')" title="Numbered List">
+                                        <i class="fas fa-list-ol"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="editor-content" 
+                                 id="articleContentEditor" 
+                                 contenteditable="true">@Html.Raw(Model.ArticleContent ?? "<p>Start writing your article content here...</p>")</div>
+                            <textarea id="hiddenArticleContent" 
+                                      name="ArticleContent" 
+                                      style="display:none;">@Model.ArticleContent</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson Resources Section -->
+                <div class="form-section-resources">
+                    <div class="section-header-resources">
+                        <h4 class="section-heading-resources">
+                            <i class="fas fa-paperclip"></i>
+                            Lesson Resources
+                        </h4>
+                        <p class="section-description-resources">Add downloadable resources, external links, or files for students</p>
+                    </div>
+
+                    <div id="lessonResourcesList" class="resources-list">
+                        @if (Model.Resources != null && Model.Resources.Any())
+                        {
+                            var index = 0;
+                            foreach (var resource in Model.Resources)
+                            {
+                                <div class="resource-item" data-resource-id="@resource.LessonResourceId" data-index="@index">
+                                    <div class="form-group">
+                                        <label class="form-label">Type</label>
+                                        <select class="form-select resource-type">
+                                            <option value="URL">@resource.ResourceType Link</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Title</label>
+                                        <input type="text" 
+                                               class="form-input resource-title"
+                                               placeholder="Resource title" 
+                                               value="@resource.Title" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">URL</label>
+                                        <input type="url" 
+                                               class="form-input resource-url"
+                                               placeholder="https://..." 
+                                               value="@resource.Url" />
+                                    </div>
+                                    <button type="button" class="btn-remove-resource" data-action="remove-resource" title="Remove">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <input type="hidden" class="resource-id" value="@resource.LessonResourceId" />
+                                </div>
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-resources">
+                                <i class="fas fa-link"></i>
+                                <p>No resources added. Click "Add Resource" to add one.</p>
+                            </div>
+                        }
+                    </div>
+
+                    <button type="button" class="btn btn-secondary btn-small" id="addLessonResource">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Resource</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary danger" data-action="close-modal" data-target="lessonModal">
+                Cancel
+            </button>
+            <button type="button" class="btn btn-primary" data-action="save-lesson">
+                <i class="fas fa-save"></i> Save Lesson
+            </button>
+        </div>
+    </div>
+</div>

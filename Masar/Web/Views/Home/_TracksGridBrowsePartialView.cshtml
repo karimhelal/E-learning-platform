@@ -1,0 +1,116 @@
+@model IEnumerable<HomeTrackCardViewModel>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var track in Model)
+    {
+        <div class="catalog-course-card catalog-track-card" data-category="@track.CategoryName.ToLower()" data-level="@track.Level.ToLower()">
+            <a href="/track/@track.TrackId" class="course-thumbnail" style="display: block; text-decoration: none;">
+                <div class="course-thumbnail-placeholder">
+                    <i class="fas @track.CategoryIcon" style="font-size: 4rem; color: var(--accent-purple);"></i>
+                </div>
+                <div class="course-overlay">
+                    <span class="btn btn-primary btn-small view-details-overlay">
+                        <span>Explore Track</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+                <span class="course-level-badge @track.LevelBadgeClass">@track.Level</span>
+                <span class="course-tag bestseller">FEATURED</span>
+            </a>
+
+            <div class="course-card-content">
+                <div class="course-header">
+                    <span class="course-category">
+                        <i class="fas @track.CategoryIcon"></i>
+                        @track.CategoryName
+                    </span>
+                </div>
+
+                <a href="/track/@track.TrackId" class="course-card-title-link" style="text-decoration: none; color: inherit;">
+                    <h3 class="course-card-title">@track.Title</h3>
+                </a>
+
+                <p class="course-card-description">@track.Description</p>
+
+                <div class="track-stats-grid course-stats-row" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
+                    <div class="course-stat">
+                        <i class="fas fa-book"></i>
+                        <span>@track.CoursesCount Courses</span>
+                    </div>
+                    <div class="course-stat">
+                        <i class="fas fa-clock"></i>
+                        <span>@track.DurationHours Hours</span>
+                    </div>
+                    <div class="course-stat">
+                        <i class="fas fa-star"></i>
+                        <span>@track.Rating.ToString("0.0") Rating</span>
+                    </div>
+                    <div class="course-stat">
+                        <i class="fas fa-users"></i>
+                        <span>@(track.StudentsCount > 999 ? (track.StudentsCount / 1000.0).ToString("0.#") + "K" : track.StudentsCount.ToString()) Students</span>
+                    </div>
+                </div>
+
+                @if (track.Skills.Any())
+                {
+                    <div class="track-skills" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0;">
+                        @foreach (var skill in track.Skills.Take(3))
+                        {
+                            <span class="skill-tag" style="padding: 0.25rem 0.75rem; background: rgba(124, 58, 237, 0.1); color: var(--accent-cyan); border-radius: 12px; font-size: 0.75rem; font-weight: 600;">@skill</span>
+                        }
+                        @if (track.Skills.Count > 3)
+                        {
+                            <span class="skill-tag" style="padding: 0.25rem 0.75rem; background: rgba(124, 58, 237, 0.1); color: var(--accent-cyan); border-radius: 12px; font-size: 0.75rem; font-weight: 600;">+@(track.Skills.Count - 3)</span>
+                        }
+                    </div>
+                }
+
+                @if (track.CoursesPreview.Any())
+                {
+                    <div class="track-courses-preview" style="padding: 1rem 0; border-top: 1px solid rgba(124, 58, 237, 0.2);">
+                        <h4 style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Included Courses</h4>
+                        <div class="courses-preview-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            @foreach (var course in track.CoursesPreview.Take(2))
+                            {
+                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                                    <i class="fas fa-check-circle" style="color: var(--accent-green); font-size: 0.75rem;"></i>
+                                    <span>@course.Title</span>
+                                </div>
+                            }
+                            @if (track.CoursesPreview.Count > 2)
+                            {
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-left: 1.25rem;">
+                                    +@(track.CoursesPreview.Count - 2) more courses
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="course-card-footer" style="display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <a href="/track/@track.TrackId" class="btn btn-outline view-details-btn" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; text-decoration: none; position: relative; z-index: 10;">
+                        <i class="fas fa-info-circle"></i>
+                        <span>View Details</span>
+                    </a>
+                    <a href="/track/@track.TrackId" class="btn btn-gradient enroll-btn" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; text-decoration: none; position: relative; z-index: 10;">
+                        <i class="fas fa-route"></i>
+                        <span>Start Track</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem;">
+        <div class="empty-state-icon" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;">
+            <i class="fas fa-inbox"></i>
+        </div>
+        <h3 class="empty-state-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">No tracks available</h3>
+        <p class="empty-state-description" style="color: var(--text-secondary);">
+            Learning tracks will be available soon. Check back later!
+        </p>
+    </div>
+}

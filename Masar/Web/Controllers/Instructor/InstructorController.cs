@@ -19,15 +19,7 @@ using Web.ViewModels.Instructor.CreateCourse;
 using Web.ViewModels.Instructor.Dashboard;
 using Web.ViewModels.Instructor.ManageCourse;
 using Web.ViewModels.Misc;
-using Core.Entities.Enums;
-using BLL.DTOs.Instructor;
-using Microsoft.AspNetCore.Identity;
-using Core.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Core.RepositoryInterfaces;
-using Web.Interfaces;
 using DAL.Data;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Web.Controllers.Instructor;
 
@@ -777,7 +769,7 @@ public class InstructorController : Controller
     }
 
     [HttpPost("/instructor/upload-course-thumbnail")]
-    [ValidateAntiForgeryToken]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> UploadCourseThumbnail(IFormFile file)
     {
         if (file == null || file.Length == 0)
@@ -786,13 +778,17 @@ public class InstructorController : Controller
         var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!allowedExtensions.Contains(extension))
-            return Json(new { success = false, message = "Invalid file type" });
+            return Json(new { success = false, message = "Invalid file type. Allowed: jpg, jpeg, png, webp" });
 
         if (file.Length > 5 * 1024 * 1024)
             return Json(new { success = false, message = "File size exceeds 5MB" });
 
         try
         {
+            var instructorId = await GetInstructorIdAsync();
+            if (instructorId == 0)
+                return Json(new { success = false, message = "Instructor profile not found" });
+
             var fileName = $"course-thumbnail-{Guid.NewGuid()}{extension}";
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "thumbnails");
             
@@ -810,6 +806,7 @@ public class InstructorController : Controller
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"UploadCourseThumbnail error: {ex.Message}");
             return Json(new { success = false, message = "Upload failed: " + ex.Message });
         }
     }
@@ -881,6 +878,8 @@ public class InstructorController : Controller
             return Json(new { success = false, message = "Upload failed: " + ex.Message });
         }
     }
+
+
 
 
     [HttpGet("/instructor/create-course")]
@@ -961,6 +960,16 @@ public class InstructorController : Controller
         if (data == null)
             return NotFound("Can't load course data");
 
+        // Fetch additional course data for BasicInfo and LearningOutcomes tabs
+        var course = await _context.Courses
+            .Include(c => c.Categories)
+            .Include(c => c.Languages)
+            .Include(c => c.LearningOutcomes)
+            .FirstOrDefaultAsync(c => c.Id == courseId);
+
+        // Get all categories and languages for dropdowns
+        var allCategories = await _categoryRepository.GetAllAsync();
+        var allLanguages = await _context.Languages.ToListAsync();
 
         var viewModel = new ManageCourseViewModel
         {
@@ -968,13 +977,14 @@ public class InstructorController : Controller
             CourseTitle = data.CourseTitle,
             CourseStatus = data.CourseStatus.ToString(),
 
+            // Curriculum Tab
             Curriculum = new ManageCourseCurriculumViewModel
             {
                 CourseId = data.CourseId,
                 CourseTitle = data.CourseTitle,
                 CourseStatus = data.CourseStatus.ToString(),
 
-                Modules = data.Curriculum.Modules.Select(m => new ManageViewModuleViewModel
+                Modules = data.Curriculum?.Modules.Select(m => new ManageViewModuleViewModel
                 {
                     ModuleId = m.ModuleId,
                     ModuleTitle = m.ModuleTitle,
@@ -988,31 +998,79 @@ public class InstructorController : Controller
                         LessonTitle = l.LessonTitle,
                         LessonOrder = l.LessonOrder,
                         ContentType = l.ContentType.ToString(),
-
                         FormattedLessonDuration = FormatDuration(l.DurationInMinutes ?? 0)
                     }),
-                }),
+                }) ?? [],
 
                 CurriculumStats = new ManageCourseCurriculumStatsViewModel
                 {
-                    TotalModules = data.Curriculum.Modules.Count(),
+                    TotalModules = data.Curriculum?.Modules.Count() ?? 0,
 
-                    VideoLessonsCount = data.Curriculum.Modules
+                    VideoLessonsCount = data.Curriculum?.Modules
                         .SelectMany(m => m.Lessons)
-                        .Count(l => l.ContentType == LessonContentType.Video),
+                        .Count(l => l.ContentType == LessonContentType.Video) ?? 0,
 
-                    ArticleLessonsCount = data.Curriculum.Modules
+                    ArticleLessonsCount = data.Curriculum?.Modules
                         .SelectMany(m => m.Lessons)
-                        .Count(l => l.ContentType == LessonContentType.Article),
+                        .Count(l => l.ContentType == LessonContentType.Article) ?? 0,
 
-                    FormattedCourseDuration = FormatDuration(data.Curriculum.Modules
+                    FormattedCourseDuration = FormatDuration(data.Curriculum?.Modules
                         .Where(m => m.DurationInMinutes != null)
-                        .Sum(m => m.DurationInMinutes) ?? 0
-                    )
+                        .Sum(m => m.DurationInMinutes) ?? 0)
                 }
+            },
+
+            // Basic Info Tab
+            BasicInfo = new ManageCourseBasicInfoViewModel
+            {
+                CourseId = courseId,
+                CourseStatus = data.CourseStatus.ToString(),
+                CourseTitle = course?.Title ?? data.CourseTitle,
+                CourseDescription = course?.Description ?? "",
+                ThumbnailImageUrl = course?.ThumbnailImageUrl,
+                Level = course?.Level ?? CourseLevel.Beginner,
+
+                Categories = course?.Categories?.Select(c => new ManageCourseCategoryViewModel
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.Name
+                }).ToList() ?? [],
+
+                Languages = course?.Languages?.Select(l => new ManageCourseLanguageViewModel
+                {
+                    LanguageId = l.LanguageId,
+                    LanguageName = l.Name
+                }).ToList() ?? [],
+
+                AllCategories = allCategories.Select(c => new ManageCourseCategoryViewModel
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.Name
+                }).ToList(),
+
+                AllLanguages = allLanguages.Select(l => new ManageCourseLanguageViewModel
+                {
+                    LanguageId = l.LanguageId,
+                    LanguageName = l.Name
+                }).ToList(),
+
+                AllLevels = Enum.GetValues<CourseLevel>().ToList()
+            },
+
+            // Learning Outcomes Tab
+            LearningOutcomes = new ManageCourseLearningOutcomesViewModel
+            {
+                CourseId = courseId,
+                CourseTitle = data.CourseTitle,
+                CourseStatus = data.CourseStatus.ToString(),
+
+                LearningOutcomes = course?.LearningOutcomes?.Select(lo => new CourseLearningOutcomeViewModel
+                {
+                    LearningOutcomeId = lo.Id,
+                    OutcomeName = lo.Title ?? lo.Description ?? ""
+                }).ToList() ?? []
             }
         };
-        
 
         return View(viewModel);
     }
@@ -1176,7 +1234,135 @@ public class InstructorController : Controller
     //}
 
 
+    // Add these using statements if not present
+    // using BLL.DTOs.Instructor.ManageCourse;
 
+    // ============================================
+    // MANAGE COURSE - MODULE ENDPOINTS
+    // ============================================
+
+    [HttpPost("/instructor/manage-course/{courseId:int}/module")]
+    public async Task<IActionResult> SaveModuleAsync(int courseId, [FromBody] ManageSaveModuleDto moduleDto)
+    {
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Json(new { success = false, message = "Unauthorized" });
+
+        moduleDto.CourseId = courseId;
+        var result = await _instructorManageCourseService.SaveModuleAsync(instructorId, courseId, moduleDto);
+
+        if (result.Success)
+            return Json(new { success = true, moduleId = result.EntityId, message = "Module saved successfully" });
+
+        return Json(new { success = false, message = result.Message ?? "Failed to save module" });
+    }
+
+    [HttpDelete("/instructor/manage-course/{courseId:int}/module/{moduleId:int}")]
+    public async Task<IActionResult> DeleteModuleAsync(int courseId, int moduleId)
+    {
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Json(new { success = false, message = "Unauthorized" });
+
+        var result = await _instructorManageCourseService.DeleteModuleAsync(instructorId, courseId, moduleId);
+
+        if (result)
+            return Json(new { success = true, message = "Module deleted successfully" });
+
+        return Json(new { success = false, message = "Failed to delete module" });
+    }
+
+    // ============================================
+    // MANAGE COURSE - LESSON ENDPOINTS
+    // ============================================
+
+    [HttpPost("/instructor/manage-course/{courseId:int}/lesson")]
+    public async Task<IActionResult> SaveLessonAsync(int courseId, [FromBody] ManageSaveLessonDto lessonDto)
+    {
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Json(new { success = false, message = "Unauthorized" });
+
+        lessonDto.CourseId = courseId;
+        var result = await _instructorManageCourseService.SaveLessonAsync(instructorId, courseId, lessonDto);
+
+        if (result.Success)
+            return Json(new { success = true, lessonId = result.EntityId, message = "Lesson saved successfully" });
+
+        return Json(new { success = false, message = result.Message ?? "Failed to save lesson" });
+    }
+
+    [HttpDelete("/instructor/manage-course/{courseId:int}/lesson/{lessonId:int}")]
+    public async Task<IActionResult> DeleteLessonAsync(int courseId, int lessonId)
+    {
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Json(new { success = false, message = "Unauthorized" });
+
+        var result = await _instructorManageCourseService.DeleteLessonAsync(instructorId, courseId, lessonId);
+
+        if (result)
+            return Json(new { success = true, message = "Lesson deleted successfully" });
+
+        return Json(new { success = false, message = "Failed to delete lesson" });
+    }
+
+    [HttpGet("/instructor/manage-course/{courseId:int}/module/{moduleId:int}/lesson/{lessonId:int}/modal")]
+    public async Task<IActionResult> GetLessonModalAsync(int courseId, int moduleId, int lessonId)
+    {
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Unauthorized();
+
+        // Verify course ownership
+        var hasCourse = await _instructorProfileService.HasCourseWithIdAsync(instructorId, courseId);
+        if (!hasCourse)
+            return Forbid();
+
+        ManageEditLessonViewModel viewModel;
+
+        if (lessonId == 0)
+        {
+            // New lesson - return empty form
+            viewModel = new ManageEditLessonViewModel
+            {
+                CourseId = courseId,
+                ModuleId = moduleId,
+                LessonId = 0,
+                ContentType = "Video",
+                Resources = []
+            };
+        }
+        else
+        {
+            // Existing lesson - fetch data
+            var lessonData = await _instructorManageCourseService.GetLessonDataAsync(instructorId, lessonId);
+            if (lessonData == null)
+                return NotFound();
+
+            viewModel = new ManageEditLessonViewModel
+            {
+                CourseId = courseId,
+                ModuleId = moduleId,
+                LessonId = lessonData.LessonId,
+                LessonTitle = lessonData.LessonTitle,
+                LessonOrder = lessonData.LessonOrder,
+                ContentType = lessonData.ContentType.ToString(),
+                VideoUrl = lessonData.VideoUrl,
+                DurationInMinutes = lessonData.DurationInMinutes,
+                ArticleContent = lessonData.ArticleContent,
+                Resources = lessonData.Resources.Select(r => new ManageEditLessonResourceViewModel
+                {
+                    LessonResourceId = r.LessonResourceId,
+                    ResourceType = r.ResourceType.ToString(),
+                    Title = r.Title,
+                    Url = r.Url
+                })
+            };
+        }
+
+        return PartialView("_ManageCourseLessonModalPartialView", viewModel);
+    }
 
     private string FormatDuration(int durationInMinutes)
     {
@@ -1193,36 +1379,110 @@ public class InstructorController : Controller
 
         return parts.Count > 0 ? string.Join(" ", parts) : "---";
     }
+
+    /// <summary>
+    /// Submit Course For Review - Submit the course for admin review.
+    /// </summary>
+    [HttpPost("/instructor/manage-course/{courseId:int}/submit-for-review")]
+    public async Task<IActionResult> SubmitCourseForReviewAsync(int courseId)
+    {
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Json(new { success = false, message = "Unauthorized" });
+
+        // Verify course ownership
+        var hasCourse = await _instructorProfileService.HasCourseWithIdAsync(instructorId, courseId);
+        if (!hasCourse)
+            return Json(new { success = false, message = "Course not found" });
+
+        // Get the course and update status
+        var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == courseId);
+        if (course == null)
+            return Json(new { success = false, message = "Course not found" });
+
+        // Only allow submission if course is in Draft status
+        if (course.Status != LearningEntityStatus.Draft)
+            return Json(new { success = false, message = "Only draft courses can be submitted for review" });
+
+        // Update status to Pending
+        course.Status = LearningEntityStatus.Pending;
+        await _context.SaveChangesAsync();
+
+        return Json(new { success = true, message = "Course submitted for review successfully!" });
+    }
+
+    /// <summary>
+    /// Save Basic Info - Update course title, description, categories, level, and languages.
+    /// </summary>
+    [HttpPost("/instructor/manage-course/{courseId:int}/basic-info")]
+    public async Task<IActionResult> SaveBasicInfoAsync(int courseId, [FromBody] ManageSaveBasicInfoDto basicInfoDto)
+    {
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Json(new { success = false, message = "Unauthorized" });
+
+        // Verify course ownership
+        var hasCourse = await _instructorProfileService.HasCourseWithIdAsync(instructorId, courseId);
+        if (!hasCourse)
+            return Json(new { success = false, message = "Course not found" });
+
+        basicInfoDto.CourseId = courseId;
+        var result = await _instructorManageCourseService.SaveBasicInfoAsync(instructorId, courseId, basicInfoDto);
+
+        if (result.Success)
+            return Json(new { success = true, message = result.Message ?? "Basic info saved successfully" });
+
+        return Json(new { success = false, message = result.Message ?? "Failed to save basic info" });
+    }
+
+    // ============================================
+    // MANAGE COURSE - LEARNING OUTCOMES ENDPOINTS
+    // ============================================
+
+    /// <summary>
+    /// Save Learning Outcome - Add or update a learning outcome for the course.
+    /// </summary>
+    [HttpPost("/instructor/manage-course/{courseId:int}/learning-outcome")]
+    public async Task<IActionResult> SaveLearningOutcomeAsync(int courseId, [FromBody] ManageSaveLearningOutcomeDto outcomeDto)
+    {
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Json(new { success = false, message = "Unauthorized" });
+
+        // Verify course ownership
+        var hasCourse = await _instructorProfileService.HasCourseWithIdAsync(instructorId, courseId);
+        if (!hasCourse)
+            return Json(new { success = false, message = "Course not found" });
+
+        outcomeDto.CourseId = courseId;
+        var result = await _instructorManageCourseService.SaveLearningOutcomeAsync(instructorId, courseId, outcomeDto);
+
+        if (result.Success)
+            return Json(new { success = true, outcomeId = result.EntityId, message = result.Message ?? "Learning outcome saved successfully" });
+
+        return Json(new { success = false, message = result.Message ?? "Failed to save learning outcome" });
+    }
+
+    /// <summary>
+    /// Delete Learning Outcome - Remove a learning outcome from the course.
+    /// </summary>
+    [HttpDelete("/instructor/manage-course/{courseId:int}/learning-outcome/{outcomeId:int}")]
+    public async Task<IActionResult> DeleteLearningOutcomeAsync(int courseId, int outcomeId)
+    {
+        var instructorId = _currentUserService.GetInstructorId();
+        if (instructorId == 0 || !await _userRepository.HasInstructorProfileWithIdAsync(instructorId))
+            return Json(new { success = false, message = "Unauthorized" });
+
+        // Verify course ownership
+        var hasCourse = await _instructorProfileService.HasCourseWithIdAsync(instructorId, courseId);
+        if (!hasCourse)
+            return Json(new { success = false, message = "Course not found" });
+
+        var result = await _instructorManageCourseService.DeleteLearningOutcomeAsync(instructorId, courseId, outcomeId);
+
+        if (result)
+            return Json(new { success = true, message = "Learning outcome deleted successfully" });
+
+        return Json(new { success = false, message = "Failed to delete learning outcome" });
+    }
 }
-
-
-
-
-// Course Name
-//  -)
-//      Header (Course Title, Status)       =============> Never changes unless page refreshed
-
-//  1) Curriculum 
-//      CourseCurriculumDto ----> List<ModuleDto> ---> ModuleDto has List<LessonDto> ---> having (name, type, duration)
-//      CourseStatsDto ---->
-//          1) Total Modules (first time from the data base and then from the js (or just everytime from the database))
-//          2) Video Lessons 
-//          3) Article Lessons
-//          4) Total Course Duration
-//          5) Total Number of Students enrolled   XXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-
-//  2) Basic Info
-//      Course Title
-//      Course Description
-//      Categories
-//      Level
-//      Languages
-//      
-//      Course Summary
-//          - Languages
-//          - Level
-//          - Main Category
-
-// 3) Learning Outcomes
-//      Course Learning Outcomes;

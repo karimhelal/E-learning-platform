@@ -12,6 +12,9 @@
             <p class="page-subtitle">Track your learning progress across all enrolled courses</p>
         </div>
         <div class="page-actions">
+            <a href="/student/browse-courses" class="btn btn-primary btn-small">
+                <i class="fas fa-plus"></i> Browse More Courses
+            </a>
             <div class="search-box">
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search courses..." id="courseSearchInput">
@@ -123,11 +126,11 @@
                     <div class="course-card-footer">
                         @if (course.Status == "InProgress")
                         {
-                            <a href="~/Classroom/Course/@course.CourseId" class="btn btn-primary">
+                            <a href="/Classroom/Course/@course.CourseId" class="btn btn-primary">
                                 <span>Continue Learning</span>
                                 <i class="fas fa-arrow-right"></i>
                             </a>
-                            <a href="~/student/course/details/@course.CourseId" class="btn btn-outline">
+                            <a href="/student/course/details/@course.CourseId" class="btn btn-outline">
                                 <span>View Details</span>
                             </a>
                         }
@@ -137,7 +140,7 @@
                                 <i class="fas fa-certificate"></i>
                                 <span>View Certificate</span>
                             </a>
-                            <a href="/classroom/course/@course.CourseId" class="btn btn-outline">
+                            <a href="/Classroom/Course/@course.CourseId" class="btn btn-outline">
                                 <span>Review Course</span>
                             </a>
                         }
@@ -148,8 +151,14 @@
         else
         {
             <div class="empty-state">
-                <i class="fas fa-book-open"></i>
-                <p>No courses enrolled yet. <a href="~/browse-courses">Browse courses</a> to get started!</p>
+                <div class="empty-state-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h3>No courses enrolled yet</h3>
+                <p>Start your learning journey by enrolling in a course</p>
+                <a href="/student/browse-courses" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Browse Courses
+                </a>
             </div>
         }
     </div>

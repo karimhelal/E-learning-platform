@@ -5,13 +5,19 @@
     var CourseTitle = Model.CourseTitle;
     var CourseStatus = Model.CourseStatus;
 
-    var MainCategoryId = Model.Categories.Any() ? Model.Categories[0].CategoryId : 0;
-    var MainCategoryName = Model.Categories.Any() ? Model.Categories[0].CategoryName : "UnCategorized";
-
     var LevelName = Model.Level.ToString();
 
-    var MainLanguageId = Model.Languages.Any() ? Model.Languages[0].LanguageId : 0;
-    var MainLanguageName = Model.Languages.Any() ? Model.Languages[0].LanguageName : "N/A";
+    // Get selected category and language IDs for multi-select
+    var selectedCategoryIds = Model.Categories.Select(c => c.CategoryId).ToList();
+    var selectedLanguageIds = Model.Languages.Select(l => l.LanguageId).ToList();
+
+    // For display in summary
+    var categoriesDisplay = Model.Categories.Any() 
+        ? string.Join(", ", Model.Categories.Select(c => c.CategoryName)) 
+        : "Uncategorized";
+    var languagesDisplay = Model.Languages.Any() 
+        ? string.Join(", ", Model.Languages.Select(l => l.LanguageName)) 
+        : "N/A";
 }
 
 <div class="two-col-layout">
@@ -20,58 +26,99 @@
             <h3 class="section-title">
                 <i class="fas fa-edit"></i> Course Information
             </h3>
+            <button class="btn btn-primary btn-small" data-action="save-basic-info">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
         </div>
         <div class="section-body">
+            <input type="hidden" id="basicInfoCourseId" value="@CourseId" />
+
+            <!-- Course Thumbnail -->
+            <div class="form-group">
+                <label class="form-label">Course Thumbnail</label>
+                <div class="thumbnail-upload-container">
+                    <div class="thumbnail-preview" id="thumbnailPreview">
+                        @if (!string.IsNullOrEmpty(Model.ThumbnailImageUrl))
+                        {
+                            <img src="@Model.ThumbnailImageUrl" alt="Course Thumbnail" id="thumbnailImage" />
+                            <div class="thumbnail-overlay">
+                                <button type="button" class="btn-thumbnail-action" onclick="CourseManager.functions.triggerThumbnailUpload()">
+                                    <i class="fas fa-camera"></i> Change
+                                </button>
+                                <button type="button" class="btn-thumbnail-action btn-remove" onclick="CourseManager.functions.removeThumbnail()">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="thumbnail-placeholder" id="thumbnailPlaceholder">
+                                <i class="fas fa-image"></i>
+                                <span>Click to upload thumbnail</span>
+                                <span class="thumbnail-hint">Recommended: 1280x720px (16:9)</span>
+                            </div>
+                        }
+                    </div>
+                    <input type="file" id="thumbnailFileInput" accept="image/jpeg,image/png,image/webp" style="display: none;" />
+                    <input type="hidden" id="thumbnailUrlInput" value="@Model.ThumbnailImageUrl" />
+                </div>
+                <p class="form-hint">Upload a thumbnail image (JPG, PNG, WebP). Max 5MB.</p>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Course Title <span>*</span></label>
-                <input type="text" class="form-input" id="courseTitle" value="@CourseTitle" placeholder="Enter course title">
+                <input type="text" class="form-input" id="courseTitleInput" value="@CourseTitle" placeholder="Enter course title">
                 <p class="form-hint">A clear, specific title helps students find your course</p>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Course Subtitle</label>
-                <input type="text" class="form-input" id="courseSubtitle" placeholder="A brief tagline for your course">
-            </div>
-
-            <div class="form-group">
                 <label class="form-label">Course Description <span>*</span></label>
-                <textarea class="form-textarea" id="courseDescription" rows="6" placeholder="Describe what students will learn...">
-                    @Model.CourseDescription
-                </textarea>
+                <textarea class="form-textarea" id="courseDescriptionInput" rows="6" placeholder="Describe what students will learn...">@Model.CourseDescription.Trim()</textarea>
                 <p class="form-hint">Minimum 200 characters. Explain what makes your course unique.</p>
             </div>
 
             <div class="settings-grid">
                 <div class="form-group">
-                    <label class="form-label">Category <span>*</span></label>
-                    <select class="form-select" id="courseCategory">
-                        <option value="" selected>Select category</option>
-                        @foreach (var category in Model.AllCategories)
-                        {
-                            <option value="@category.CategoryId">@category.CategoryName</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Subcategory</label>
-                    <select class="form-select" id="courseSubcategory">
-                        <option value="">Select subcategory</option>
-                        <option value="frontend">Frontend</option>
-                        <option value="backend">Backend</option>
-                        <option value="fullstack" selected>Full Stack</option>
-                    </select>
+                    <label class="form-label">Categories <span>*</span></label>
+                    <div class="multi-select-container" id="categoriesContainer">
+                        <div class="selected-tags" id="selectedCategories">
+                            @foreach (var category in Model.Categories)
+                            {
+                                <span class="tag" data-id="@category.CategoryId">
+                                    @category.CategoryName
+                                    <button type="button" class="tag-remove" data-action="remove-category" data-id="@category.CategoryId">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </span>
+                            }
+                        </div>
+                        <select class="form-select" id="addCategorySelect" data-action="add-category">
+                            <option value="">+ Add category</option>
+                            @foreach (var category in Model.AllCategories)
+                            {
+                                if (!selectedCategoryIds.Contains(category.CategoryId))
+                                {
+                                    <option value="@category.CategoryId">@category.CategoryName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <p class="form-hint">Select one or more categories for your course</p>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Level <span>*</span></label>
-                    <select class="form-select" id="courseLevel">
+                    <select class="form-select" id="courseLevelSelect">
                         <option value="">Select level</option>
-                        @foreach(var level in Model.AllLevels)
+                        @foreach (var level in Model.AllLevels)
                         {
-                            if (level == Model.Level) {
+                            var isSelected = level == Model.Level;
+                            if (isSelected)
+                            {
                                 <option value="@level.ToString()" selected>@level.ToString()</option>
-                            } else {
+                            }
+                            else
+                            {
                                 <option value="@level.ToString()">@level.ToString()</option>
                             }
                         }
@@ -79,14 +126,31 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Language <span>*</span></label>
-                    <select class="form-select" id="courseLanguage">
-                        <option value="" selected>Select language</option>
-                        @foreach (var language in Model.AllLanguages)
-                        {
-                            <option value="@language.LanguageId">@language.LanguageName</option>
-                        }
-                    </select>
+                    <label class="form-label">Languages <span>*</span></label>
+                    <div class="multi-select-container" id="languagesContainer">
+                        <div class="selected-tags" id="selectedLanguages">
+                            @foreach (var language in Model.Languages)
+                            {
+                                <span class="tag" data-id="@language.LanguageId">
+                                    @language.LanguageName
+                                    <button type="button" class="tag-remove" data-action="remove-language" data-id="@language.LanguageId">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </span>
+                            }
+                        </div>
+                        <select class="form-select" id="addLanguageSelect" data-action="add-language">
+                            <option value="">+ Add language</option>
+                            @foreach (var language in Model.AllLanguages)
+                            {
+                                if (!selectedLanguageIds.Contains(language.LanguageId))
+                                {
+                                    <option value="@language.LanguageId">@language.LanguageName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <p class="form-hint">Select one or more languages for your course</p>
                 </div>
             </div>
         </div>
@@ -101,7 +165,8 @@
                 <p style="margin-bottom: 0.75rem;">• Use keywords students might search for</p>
                 <p style="margin-bottom: 0.75rem;">• Be specific about what you'll teach</p>
                 <p style="margin-bottom: 0.75rem;">• Mention the technologies/tools covered</p>
-                <p>• Keep your title under 60 characters</p>
+                <p style="margin-bottom: 0.75rem;">• Keep your title under 60 characters</p>
+                <p>• Use a high-quality thumbnail image</p>
             </div>
         </div>
 
@@ -111,16 +176,20 @@
             </h4>
             <div class="quick-stats">
                 <div class="quick-stat">
-                    <span class="quick-stat-label">Category</span>
-                    <span class="quick-stat-value" id="infoCategory">@MainCategoryName</span>
+                    <span class="quick-stat-label">Thumbnail</span>
+                    <span class="quick-stat-value" id="infoThumbnail">@(string.IsNullOrEmpty(Model.ThumbnailImageUrl) ? "Not set" : "✓ Uploaded")</span>
+                </div>
+                <div class="quick-stat">
+                    <span class="quick-stat-label">Categories</span>
+                    <span class="quick-stat-value" id="infoCategories">@categoriesDisplay</span>
                 </div>
                 <div class="quick-stat">
                     <span class="quick-stat-label">Level</span>
                     <span class="quick-stat-value" id="infoLevel">@LevelName</span>
                 </div>
                 <div class="quick-stat">
-                    <span class="quick-stat-label">Language</span>
-                    <span class="quick-stat-value" id="infoLanguage">@MainLanguageName</span>
+                    <span class="quick-stat-label">Languages</span>
+                    <span class="quick-stat-value" id="infoLanguages">@languagesDisplay</span>
                 </div>
             </div>
         </div>

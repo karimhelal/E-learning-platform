@@ -125,8 +125,9 @@ public class StudentDashboardService : IStudentDashboardService
         };
 
         return courseEnrollments
-            .Where(e => e.ProgressPercentage < 100 && e.ProgressPercentage > 0)
-            .OrderByDescending(e => e.ProgressPercentage)
+            .Where(e => e.ProgressPercentage < 100) // Include all courses that are not completed (including 0% progress)
+            .OrderByDescending(e => e.ProgressPercentage) // Courses with more progress first
+            .ThenByDescending(e => e.EnrollmentDate) // Then by most recently enrolled
             .Take(2)
             .Select(e =>
             {

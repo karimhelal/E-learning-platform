@@ -1638,7 +1638,6 @@ body {
     cursor: pointer;
     box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
     z-index: 999;
-    border: none;
 }
 
 /* Toast Notification */
@@ -1948,5 +1947,227 @@ body {
     .btn-remove-resource {
         margin-top: 0;
         width: 100%;
+    }
+}
+
+.status-message {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 0.4rem 0.75rem;
+    background: rgba(6, 182, 212, 0.1);
+    border-radius: var(--border-radius-sm);
+}
+
+.status-message i {
+    color: var(--accent-cyan);
+}
+
+.status-message.success {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.status-message.success i {
+    color: var(--accent-green);
+}
+
+/* ========================================
+   MULTI-SELECT TAGS
+   ======================================== */
+
+.multi-select-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-height: 32px;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(124, 58, 237, 0.15);
+    border: 1px solid var(--accent-purple);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.tag:hover {
+    background: rgba(124, 58, 237, 0.25);
+}
+
+.tag-remove {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    transition: all var(--transition-fast);
+}
+
+.tag-remove:hover {
+    background: var(--accent-red);
+    color: white;
+}
+
+.multi-select-container .form-select {
+    max-width: 200px;
+}
+
+/* ========================================
+   THUMBNAIL UPLOAD
+   ======================================== */
+
+.thumbnail-upload-container {
+    margin-bottom: 0.5rem;
+}
+
+.thumbnail-preview {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 16 / 9;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    background: var(--secondary-bg);
+}
+
+.thumbnail-preview:hover {
+    border-color: var(--accent-purple);
+    background: rgba(124, 58, 237, 0.05);
+}
+
+.thumbnail-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-preview.has-image {
+    border-style: solid;
+    border-color: var(--border-color);
+}
+
+.thumbnail-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.thumbnail-preview:hover .thumbnail-overlay {
+    opacity: 1;
+}
+
+.btn-thumbnail-action {
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--border-radius-sm);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all var(--transition-fast);
+    font-family: var(--ui-font);
+}
+
+.btn-thumbnail-action:hover {
+    background: var(--accent-purple);
+    border-color: var(--accent-purple);
+}
+
+.btn-thumbnail-action.btn-remove:hover {
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+}
+
+.thumbnail-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+    gap: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+}
+
+.thumbnail-placeholder i {
+    font-size: 2.5rem;
+    opacity: 0.5;
+    color: var(--accent-purple);
+}
+
+.thumbnail-placeholder span {
+    font-size: 0.9rem;
+}
+
+.thumbnail-placeholder .thumbnail-hint {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.thumbnail-preview.uploading {
+    pointer-events: none;
+}
+
+.thumbnail-preview.uploading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid rgba(124, 58, 237, 0.2);
+    border-top-color: var(--accent-purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive adjustments for thumbnail */
+@media (max-width: 768px) {
+    .thumbnail-preview {
+        max-width: 100%;
     }
 }

@@ -1,6 +1,7 @@
 using BLL.DTOs.Misc;
 using BLL.Helpers;
 using BLL.Interfaces;
+using BLL.Interfaces.Enrollment;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Web.ViewModels;
@@ -22,13 +23,15 @@ public class HomeController : Controller
     private readonly ICurrentUserService _currentUserService;
     private readonly ICourseService _courseService;
     private readonly RazorViewToStringRenderer _razorRenderer;
+    private readonly IEnrollmentService _enrollmentService;
 
     public HomeController(
         ILogger<HomeController> logger,
         ICourseService courseService,
         RazorViewToStringRenderer razorRenderer,
         AppDbContext context,
-        ICurrentUserService currentUserService
+        ICurrentUserService currentUserService,
+        IEnrollmentService enrollmentService
     )
     {
         _logger = logger;
@@ -36,6 +39,7 @@ public class HomeController : Controller
         _razorRenderer = razorRenderer;
         _context = context;
         _currentUserService = currentUserService;
+        _enrollmentService = enrollmentService;
     }
 
 
@@ -204,18 +208,30 @@ public class HomeController : Controller
 
         var userId = _currentUserService.GetUserId();
 
-        // TODO: Check if student is enrolled
+        // Check if student is enrolled
         bool isEnrolled = false;
         int? enrollmentId = null;
         decimal? progress = null;
 
         if (userId > 0)
         {
-            // Check enrollment status
-            // var enrollment = await _enrollmentService.GetStudentEnrollmentAsync(userId, courseId);
-            // isEnrolled = enrollment != null;
-            // enrollmentId = enrollment?.EnrollmentId;
-            // progress = enrollment?.ProgressPercentage;
+            // Get studentId from userId
+            var studentProfile = await _context.StudentProfiles
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+
+            if (studentProfile != null)
+            {
+                isEnrolled = await _enrollmentService.IsStudentEnrolledAsync(studentProfile.StudentId, courseId);
+
+                if (isEnrolled)
+                {
+                    var enrollment = await _context.CourseEnrollments
+                        .FirstOrDefaultAsync(e => e.StudentId == studentProfile.StudentId && e.CourseId == courseId);
+                    
+                    enrollmentId = enrollment?.EnrollmentId;
+                    progress = enrollment?.ProgressPercentage;
+                }
+            }
         }
 
         var viewModel = new CourseDetailsViewModel
@@ -228,6 +244,136 @@ public class HomeController : Controller
         };
 
         return View(viewModel);
+    }
+
+    /// <summary>
+    /// Public enrollment check - redirects to login if not authenticated
+    /// </summary>
+    [HttpGet("/api/enrollment/status/{courseId:int}")]
+    public async Task<IActionResult> GetPublicEnrollmentStatus(int courseId)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        if (userId == 0)
+            return Json(new { isEnrolled = false, isLoggedIn = false });
+
+        var studentProfile = await _context.StudentProfiles
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (studentProfile == null)
+            return Json(new { isEnrolled = false, isLoggedIn = true, needsProfile = true });
+
+        var isEnrolled = await _enrollmentService.IsStudentEnrolledAsync(studentProfile.StudentId, courseId);
+
+        return Json(new
+        {
+            isEnrolled = isEnrolled,
+            isLoggedIn = true,
+            courseUrl = isEnrolled ? $"/student/course/details/{courseId}" : null
+        });
+    }
+
+    /// <summary>
+    /// Public track enrollment check - redirects to login if not authenticated
+    /// </summary>
+    [HttpGet("/api/enrollment/track-status/{trackId:int}")]
+    public async Task<IActionResult> GetPublicTrackEnrollmentStatus(int trackId)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        if (userId == 0)
+            return Json(new { isEnrolled = false, isLoggedIn = false });
+
+        var studentProfile = await _context.StudentProfiles
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (studentProfile == null)
+            return Json(new { isEnrolled = false, isLoggedIn = true, needsProfile = true });
+
+        var isEnrolled = await _enrollmentService.IsStudentEnrolledInTrackAsync(studentProfile.StudentId, trackId);
+
+        return Json(new
+        {
+            isEnrolled = isEnrolled,
+            isLoggedIn = true,
+            trackUrl = isEnrolled ? $"/student/track/{trackId}" : null
+        });
+    }
+
+    /// <summary>
+    /// Enroll in a course - creates StudentProfile if needed
+    /// </summary>
+    [HttpPost("/api/enrollment/enroll/{courseId:int}")]
+    public async Task<IActionResult> EnrollInCourse(int courseId)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        if (userId == 0)
+            return Json(new { success = false, message = "Please log in to enroll in courses" });
+
+        // Get or create student profile
+        var studentProfile = await _context.StudentProfiles
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (studentProfile == null)
+        {
+            // Create student profile automatically
+            studentProfile = new StudentProfile
+            {
+                UserId = userId,
+                Bio = "New learner on the platform"
+            };
+            _context.StudentProfiles.Add(studentProfile);
+            await _context.SaveChangesAsync();
+        }
+
+        var result = await _enrollmentService.EnrollInCourseAsync(studentProfile.StudentId, courseId);
+
+        return Json(new
+        {
+            success = result.Success,
+            message = result.Message,
+            enrollmentId = result.EnrollmentId,
+            redirectUrl = result.RedirectUrl
+        });
+    }
+
+    /// <summary>
+    /// Enroll in a track - creates StudentProfile if needed
+    /// </summary>
+    [HttpPost("/api/enrollment/enroll-track/{trackId:int}")]
+    public async Task<IActionResult> EnrollInTrack(int trackId)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        if (userId == 0)
+            return Json(new { success = false, message = "Please log in to enroll in tracks" });
+
+        // Get or create student profile
+        var studentProfile = await _context.StudentProfiles
+            .FirstOrDefaultAsync(s => s.UserId == userId);
+
+        if (studentProfile == null)
+        {
+            // Create student profile automatically
+            studentProfile = new StudentProfile
+            {
+                UserId = userId,
+                Bio = "New learner on the platform"
+            };
+            _context.StudentProfiles.Add(studentProfile);
+            await _context.SaveChangesAsync();
+        }
+
+        var result = await _enrollmentService.EnrollInTrackAsync(studentProfile.StudentId, trackId);
+
+        return Json(new
+        {
+            success = result.Success,
+            message = result.Message,
+            enrollmentId = result.EnrollmentId,
+            redirectUrl = result.RedirectUrl
+        });
     }
 
     public IActionResult Privacy()
@@ -387,9 +533,9 @@ public class HomeController : Controller
 
 
     [HttpGet("~/browse-tracks")]
-    public async Task<IActionResult> BrowseTracks()
+    public async Task<IActionResult> BrowseTracks(int page = 1, int pageSize = 6, string sortBy = "popularity", string sortOrder = "desc")
     {
-        var tracks = await _context.Tracks
+        var tracksQuery = _context.Tracks
             .Include(t => t.TrackCourses)
                 .ThenInclude(tc => tc.Course)
                     .ThenInclude(c => c!.Modules)
@@ -397,11 +543,47 @@ public class HomeController : Controller
                             .ThenInclude(l => l.LessonContent)
             .Include(t => t.Enrollments)
             .Include(t => t.Categories)
+            .AsQueryable();
+
+        // Get total count before pagination
+        var totalCount = await tracksQuery.CountAsync();
+
+        // Apply sorting
+        tracksQuery = sortBy?.ToLower() switch
+        {
+            "title" => sortOrder?.ToLower() == "asc" 
+                ? tracksQuery.OrderBy(t => t.Title) 
+                : tracksQuery.OrderByDescending(t => t.Title),
+            "rating" => sortOrder?.ToLower() == "asc"
+                ? tracksQuery.OrderBy(t => t.Id) // Placeholder for rating
+                : tracksQuery.OrderByDescending(t => t.Id),
+            "duration" => sortOrder?.ToLower() == "asc"
+                ? tracksQuery.OrderBy(t => t.TrackCourses.Count)
+                : tracksQuery.OrderByDescending(t => t.TrackCourses.Count),
+            _ => sortOrder?.ToLower() == "asc"
+                ? tracksQuery.OrderBy(t => t.Enrollments.Count)
+                : tracksQuery.OrderByDescending(t => t.Enrollments.Count) // popularity
+        };
+
+        // Apply pagination
+        var tracks = await tracksQuery
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
         var viewModel = new HomeBrowseTracksViewModel
         {
             PageTitle = "Browse Learning Tracks | Masar",
+            TotalCount = totalCount,
+            PaginationSettings = new PaginationSettingsViewModel
+            {
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalPages = totalPages,
+                TotalCount = totalCount
+            },
             Tracks = tracks.Select(t => new HomeTrackCardViewModel
             {
                 TrackId = t.Id,
@@ -430,76 +612,88 @@ public class HomeController : Controller
         return View(viewModel);
     }
 
-
-    [HttpGet("~/track/{trackId:int}")]
-    public async Task<IActionResult> TrackDetails(int trackId)
+    [HttpPost("~/filter-tracks")]
+    public async Task<IActionResult> FilterTracksPartial([FromBody] BrowseTracksRequestDto request)
     {
-        var track = await _context.Tracks
+        var tracksQuery = _context.Tracks
             .Include(t => t.TrackCourses)
                 .ThenInclude(tc => tc.Course)
                     .ThenInclude(c => c!.Modules)
                         .ThenInclude(m => m.Lessons)
                             .ThenInclude(l => l.LessonContent)
-            .Include(t => t.TrackCourses)
-                .ThenInclude(tc => tc.Course)
-                    .ThenInclude(c => c!.Instructor)
-                        .ThenInclude(i => i!.User)
-            .Include(t => t.Categories)
             .Include(t => t.Enrollments)
-            .FirstOrDefaultAsync(t => t.Id == trackId);
+            .Include(t => t.Categories)
+            .AsQueryable();
 
-        if (track == null)
+        // Get total count
+        var totalCount = await tracksQuery.CountAsync();
+
+        // Apply sorting
+        tracksQuery = request.SortBy?.ToLower() switch
         {
-            return NotFound("Track not found");
-        }
-
-        var userId = _currentUserService.GetUserId();
-        bool isEnrolled = false;
-
-        if (userId > 0)
-        {
-            isEnrolled = track.Enrollments?.Any(e => e.StudentId == userId) ?? false;
-        }
-
-        var courses = track.TrackCourses?
-            .Select(tc => tc.Course)
-            .Where(c => c != null)
-            .Select(c => new TrackCourseDetailViewModel
-            {
-                CourseId = c!.Id,
-                Title = c.Title,
-                Description = c.Description ?? "",
-                InstructorName = c.Instructor?.User != null
-                    ? $"{c.Instructor.User.FirstName} {c.Instructor.User.LastName}"
-                    : "Instructor",
-                ThumbnailImageUrl = c.ThumbnailImageUrl,
-                Level = c.Level.ToString(),
-                DurationHours = CalculateCourseDuration(c),
-                ModulesCount = c.Modules?.Count ?? 0,
-                LessonsCount = c.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0,
-                Rating = 4.7m
-            })
-            .ToList() ?? new List<TrackCourseDetailViewModel>();
-
-        var viewModel = new TrackDetailsViewModel
-        {
-            TrackId = track.Id,
-            Title = track.Title,
-            Description = track.Description ?? "Start your learning journey",
-            CategoryName = track.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
-            CategoryIcon = GetCategoryIcon(track.Categories?.FirstOrDefault()?.Name),
-            Level = "Beginner",
-            DurationHours = CalculateTrackDuration(track),
-            CoursesCount = courses.Count,
-            StudentsCount = track.Enrollments?.Count ?? 0,
-            Rating = 4.8m,
-            Skills = ExtractSkills(track),
-            Courses = courses,
-            IsEnrolled = isEnrolled,
-            PageTitle = track.Title
+            "title" => request.SortOrder?.ToLower() == "asc"
+                ? tracksQuery.OrderBy(t => t.Title)
+                : tracksQuery.OrderByDescending(t => t.Title),
+            "rating" => request.SortOrder?.ToLower() == "asc"
+                ? tracksQuery.OrderBy(t => t.Id)
+                : tracksQuery.OrderByDescending(t => t.Id),
+            "duration" => request.SortOrder?.ToLower() == "asc"
+                ? tracksQuery.OrderBy(t => t.TrackCourses.Count)
+                : tracksQuery.OrderByDescending(t => t.TrackCourses.Count),
+            _ => request.SortOrder?.ToLower() == "asc"
+                ? tracksQuery.OrderBy(t => t.Enrollments.Count)
+                : tracksQuery.OrderByDescending(t => t.Enrollments.Count)
         };
 
-        return View(viewModel);
+        // Apply pagination
+        var tracks = await tracksQuery
+            .Skip((request.CurrentPage - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+        var totalPages = (int)Math.Ceiling((double)totalCount / request.PageSize);
+
+        var trackCards = tracks.Select(t => new HomeTrackCardViewModel
+        {
+            TrackId = t.Id,
+            Title = t.Title,
+            Description = t.Description ?? "Explore this learning track",
+            CoursesCount = t.TrackCourses?.Count ?? 0,
+            DurationHours = CalculateTrackDuration(t),
+            StudentsCount = t.Enrollments?.Count ?? 0,
+            CategoryName = t.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
+            CategoryIcon = GetCategoryIcon(t.Categories?.FirstOrDefault()?.Name),
+            Level = "Beginner",
+            Rating = 4.8m,
+            Skills = ExtractSkills(t),
+            CoursesPreview = t.TrackCourses?
+                .Take(3)
+                .Select(tc => new HomeCoursePreviewViewModel
+                {
+                    CourseId = tc.Course?.Id ?? 0,
+                    Title = tc.Course?.Title ?? "",
+                    Difficulty = tc.Course?.Level.ToString() ?? "Beginner"
+                })
+                .ToList() ?? new List<HomeCoursePreviewViewModel>()
+        });
+
+        var paginationSettings = new PaginationSettingsViewModel
+        {
+            CurrentPage = request.CurrentPage,
+            PageSize = request.PageSize,
+            TotalPages = totalPages,
+            TotalCount = totalCount
+        };
+
+        var TracksGrid = await _razorRenderer.RenderViewToStringAsync(ControllerContext, "_TracksGridBrowsePartialView", trackCards);
+        var Pagination = await _razorRenderer.RenderViewToStringAsync(ControllerContext, "_PaginationPartialView", paginationSettings);
+
+        return Json(new
+        {
+            TracksGrid = TracksGrid,
+            Pagination = Pagination,
+            TotalCount = totalCount
+        });
     }
 
     // HELPER METHODS - Keep only ONE instance of each
@@ -556,5 +750,82 @@ public class HomeController : Controller
             "devops" => "fa-server",
             _ => "fa-book"
         };
+    }
+
+    [HttpGet("~/track/{trackId:int}")]
+    public async Task<IActionResult> TrackDetails(int trackId)
+    {
+        var track = await _context.Tracks
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Modules)
+                        .ThenInclude(m => m.Lessons)
+                            .ThenInclude(l => l.LessonContent)
+            .Include(t => t.TrackCourses)
+                .ThenInclude(tc => tc.Course)
+                    .ThenInclude(c => c!.Instructor)
+                        .ThenInclude(i => i!.User)
+            .Include(t => t.Categories)
+            .Include(t => t.Enrollments)
+            .FirstOrDefaultAsync(t => t.Id == trackId);
+
+        if (track == null)
+        {
+            return NotFound("Track not found");
+        }
+
+        var userId = _currentUserService.GetUserId();
+        bool isEnrolled = false;
+
+        if (userId > 0)
+        {
+            var studentProfile = await _context.StudentProfiles
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+            
+            if (studentProfile != null)
+            {
+                isEnrolled = await _enrollmentService.IsStudentEnrolledInTrackAsync(studentProfile.StudentId, trackId);
+            }
+        }
+
+        var courses = track.TrackCourses?
+            .Select(tc => tc.Course)
+            .Where(c => c != null)
+            .Select(c => new TrackCourseDetailViewModel
+            {
+                CourseId = c!.Id,
+                Title = c.Title,
+                Description = c.Description ?? "",
+                InstructorName = c.Instructor?.User != null
+                    ? $"{c.Instructor.User.FirstName} {c.Instructor.User.LastName}"
+                    : "Instructor",
+                ThumbnailImageUrl = c.ThumbnailImageUrl,
+                Level = c.Level.ToString(),
+                DurationHours = CalculateCourseDuration(c),
+                ModulesCount = c.Modules?.Count ?? 0,
+                LessonsCount = c.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0,
+                Rating = 4.7m
+            })
+            .ToList() ?? new List<TrackCourseDetailViewModel>();
+
+        var viewModel = new TrackDetailsViewModel
+        {
+            TrackId = track.Id,
+            Title = track.Title,
+            Description = track.Description ?? "Start your learning journey",
+            CategoryName = track.Categories?.FirstOrDefault()?.Name ?? "Learning Track",
+            CategoryIcon = GetCategoryIcon(track.Categories?.FirstOrDefault()?.Name),
+            Level = "Beginner",
+            DurationHours = CalculateTrackDuration(track),
+            CoursesCount = courses.Count,
+            StudentsCount = track.Enrollments?.Count ?? 0,
+            Rating = 4.8m,
+            Skills = ExtractSkills(track),
+            Courses = courses,
+            IsEnrolled = isEnrolled,
+            PageTitle = track.Title
+        };
+
+        return View(viewModel);
     }
 }

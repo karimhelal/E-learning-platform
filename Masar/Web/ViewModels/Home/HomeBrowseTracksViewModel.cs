@@ -1,9 +1,13 @@
+using Web.ViewModels.Misc;
+
 namespace Web.ViewModels.Home;
 
 public class HomeBrowseTracksViewModel
 {
     public string PageTitle { get; set; } = "Browse Learning Tracks";
     public List<HomeTrackCardViewModel> Tracks { get; set; } = new();
+    public PaginationSettingsViewModel PaginationSettings { get; set; } = new();
+    public int TotalCount { get; set; }
 }
 
 public class HomeTrackCardViewModel
@@ -32,4 +36,13 @@ public class HomeCoursePreviewViewModel
     public int CourseId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Difficulty { get; set; } = "Intermediate";
+}
+
+// DTO for filtering/sorting tracks
+public class BrowseTracksRequestDto
+{
+    public int CurrentPage { get; set; } = 1;
+    public int PageSize { get; set; } = 6;
+    public string? SortBy { get; set; } = "popularity";
+    public string? SortOrder { get; set; } = "desc";
 }

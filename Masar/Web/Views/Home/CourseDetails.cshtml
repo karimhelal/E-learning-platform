@@ -82,7 +82,16 @@
                     
                     @if (Model.IsEnrolled)
                     {
-                        <a href="/student/course/@Model.Course.CourseId" class="btn btn-primary btn-block">
+                        @if (Model.ProgressPercentage.HasValue && Model.ProgressPercentage > 0)
+                        {
+                            <div class="progress-info" style="margin: 1rem 0;">
+                                <div class="progress-bar" style="background: rgba(124, 58, 237, 0.2); border-radius: 10px; height: 8px; overflow: hidden;">
+                                    <div class="progress-fill" style="background: linear-gradient(90deg, #7c3aed, #06b6d4); height: 100%; width: @Model.ProgressPercentage%"></div>
+                                </div>
+                                <span style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem; display: block;">@Model.ProgressPercentage% Complete</span>
+                            </div>
+                        }
+                        <a href="/student/course/details/@Model.Course.CourseId" class="btn btn-primary btn-block">
                             <i class="fas fa-play"></i>
                             Continue Learning
                         </a>
@@ -91,7 +100,7 @@
                     {
                         <button class="btn btn-primary btn-block" onclick="enrollCourse(@Model.Course.CourseId)">
                             <i class="fas fa-plus"></i>
-                            Enroll Now
+                            Enroll Now - Free
                         </button>
                     }
                 </div>
@@ -156,12 +165,29 @@
                                         <div class="lesson-title">@lesson.Title</div>
                                         <div class="lesson-duration">@lesson.FormattedDuration</div>
                                     </div>
+                                    @if (!Model.IsEnrolled)
+                                    {
+                                        <div class="lesson-lock">
+                                            <i class="fas fa-lock" title="Enroll to access"></i>
+                                        </div>
+                                    }
                                 </div>
                             }
                         </div>
                     </div>
                 }
             </div>
+            
+            @if (!Model.IsEnrolled)
+            {
+                <div class="enroll-cta" style="text-align: center; padding: 2rem; margin-top: 2rem; background: rgba(124, 58, 237, 0.05); border-radius: 12px; border: 1px dashed rgba(124, 58, 237, 0.3);">
+                    <h3 style="margin-bottom: 0.5rem;">Ready to Start Learning?</h3>
+                    <p style="color: #94a3b8; margin-bottom: 1rem;">Enroll now to access all @Model.Course.TotalLessons lessons</p>
+                    <button class="btn btn-primary" onclick="enrollCourse(@Model.Course.CourseId)">
+                        <i class="fas fa-plus"></i> Enroll Now - Free
+                    </button>
+                </div>
+            }
         </div>
 
         <!-- Overview Tab -->
@@ -225,8 +251,50 @@
     </div>
 </section>
 
+<!-- Toast for notifications -->
+<div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Changes saved!</span>
+</div>
+
 @section Styles {
     <link rel="stylesheet" href="~/css/pages/course-details.css" />
+    <style>
+        .lesson-lock {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        .lesson-lock i {
+            opacity: 0.5;
+        }
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 1.5rem;
+            background: #1a1a2e;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast.success { border-color: #10b981; }
+        .toast.success i { color: #10b981; }
+        .toast.error { border-color: #ef4444; }
+        .toast.error i { color: #ef4444; }
+    </style>
 }
 
 @section Scripts {

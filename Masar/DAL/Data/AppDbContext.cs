@@ -424,7 +424,7 @@ namespace DAL.Data
                 entity.ToTable("CourseLearningOutcomes");
 
                 // CourseLearningOutcome - Composite Primary Key
-                entity.HasKey(co => new { co.Id, co.CourseId });
+                entity.HasKey(co => co.Id);
 
                 // CourseLearningOutcome - Course (One-to-Many - WEAK Entity)
                 entity

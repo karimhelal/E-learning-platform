@@ -6,7 +6,14 @@
         <div class="course-thumbnail">
             <div class="course-thumbnail-placeholder"
                  style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));">
-                <img src="@courseCard.ThumbnailImageUrl" alt="@courseCard.Title" />
+                @if (!string.IsNullOrEmpty(courseCard.ThumbnailImageUrl))
+                {
+                    <img src="@courseCard.ThumbnailImageUrl" alt="@courseCard.Title" />
+                }
+                else
+                {
+                    <i class="fas fa-book"></i>
+                }
             </div>
             <div class="course-overlay">
                 <a href="/course/@courseCard.CourseId" class="btn btn-primary btn-small">
@@ -15,11 +22,10 @@
                 </a>
             </div>
             <span class="course-level-badge @courseCard.Level.ToLower()">@courseCard.Level</span>
-            <span class="course-tag bestseller">Bestseller</span>
         </div>
         <div class="course-card-content">
             <span class="course-category">
-                <i class="fas fa-paint-brush"></i>
+                <i class="fas fa-book"></i>
                 @courseCard.MainCategory
             </span>
             <h3 class="course-card-title">
@@ -29,7 +35,22 @@
                 @courseCard.Description
             </p>
             <div class="course-instructor">
-                <div class="avatar avatar-sm">@courseCard.InstructorName[0]@courseCard.InstructorName.Substring(1).First(c => char.IsUpper(c))</div>
+                @{
+                    var initials = "IN";
+                    if (!string.IsNullOrEmpty(courseCard.InstructorName))
+                    {
+                        var parts = courseCard.InstructorName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length >= 2)
+                        {
+                            initials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
+                        }
+                        else if (parts.Length == 1)
+                        {
+                            initials = parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+                        }
+                    }
+                }
+                <div class="avatar avatar-sm">@initials</div>
                 <span class="instructor-name">@courseCard.InstructorName</span>
             </div>
             <div class="course-stats-row">
@@ -47,10 +68,10 @@
                 </div>
             </div>
             <div class="course-card-footer">
-                <button class="btn  enroll-btn btn-gradient">
-                    <i class="fas fa-plus"></i>
-                    <span>Enroll Now</span>
-                </button>
+                <a href="/course/@courseCard.CourseId" class="btn enroll-btn btn-gradient">
+                    <i class="fas fa-info-circle"></i>
+                    <span>View Details</span>
+                </a>
             </div>
         </div>
     </div>

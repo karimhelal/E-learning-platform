@@ -1,6 +1,7 @@
 ﻿@model ManageCourseCurriculumViewModel
 
 @{
+    var ModulesCount = Model.Modules.Count();
     var LessonsCount = Model.Modules.Sum(m => m.LessonsCount);
     var ArticleLessonsCount = Model.CurriculumStats.ArticleLessonsCount;
     var VideoLessonsCount = Model.CurriculumStats.VideoLessonsCount;
@@ -16,15 +17,14 @@
         </div>
         <div class="section-body">
             <div class="modules-list" id="modulesList">
-                <!-- Modules rendered here -->
-                @if(LessonsCount < 1)
+                @if (ModulesCount < 1)
                 {
                     <div class="empty-state">
                         <i class="fas fa-layer-group"></i>
                         <p>No modules yet. Add your first module!</p>
                     </div>
                 }
-                @foreach(var module in Model.Modules)
+                @foreach (var module in Model.Modules)
                 {
                     <div class="module-item" data-module-id="@module.ModuleId" draggable="true">
                         <div class="module-header" data-action="toggle-module">
@@ -37,51 +37,55 @@
                                 </div>
                                 <div class="module-info">
                                     <div class="module-title">Module @module.ModuleOrder: <span class="module-title">@module.ModuleTitle</span></div>
-                                    <div class="module-meta">@module.LessonsCount lesson@(module.LessonsCount > 1 ? "s" : "") • @module.FormattedLessonDuration</div>
+                                    <div class="module-meta">@module.LessonsCount lesson@(module.LessonsCount != 1 ? "s" : "") • @module.FormattedLessonDuration</div>
                                 </div>
                             </div>
                             <div class="module-actions">
-                                <button title="Edit" 
-                                    data-action="open-edit-module"
-                                    data-module-id="@module.ModuleId" 
-                                    data-module-title="@module.ModuleTitle"><i class="fas fa-edit"></i>
+                                <button title="Edit"
+                                        data-action="open-edit-module"
+                                        data-module-id="@module.ModuleId"
+                                        data-module-title="@module.ModuleTitle">
+                                    <i class="fas fa-edit"></i>
                                 </button>
-                                <button title="Add Lesson" 
-                                    data-action="open-add-lesson"
-                                    data-module-id="@module.ModuleId"><i class="fas fa-plus"></i>
+                                <button title="Add Lesson"
+                                        data-action="open-add-lesson"
+                                        data-module-id="@module.ModuleId">
+                                    <i class="fas fa-plus"></i>
                                 </button>
-                                <button class="delete" title="Delete" onclick="deleteModule(@module.ModuleId)"><i class="fas fa-trash"></i></button>
+                                <button class="delete" title="Delete" onclick="deleteModule(@module.ModuleId)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="lessons-list" data-module-id="@module.ModuleId">
-                            @foreach(var lesson in module.Lessons)
+                            @foreach (var lesson in module.Lessons)
                             {
                                 <div class="lesson-item" data-lesson-id="@lesson.LessonId" data-module-id="@module.ModuleId" draggable="true">
                                     <div class="lesson-drag"><i class="fas fa-grip-vertical"></i></div>
-                                    <div class="lesson-icon @lesson.ContentType">
-                                        <i class="fas fa-@(lesson.ContentType == "video" ? "play-circle" : "file-alt")"></i>
+                                    <div class="lesson-icon @(lesson.ContentType.ToLower())">
+                                        <i class="fas fa-@(lesson.ContentType == "Video" ? "play-circle" : "file-alt")"></i>
                                     </div>
                                     <div class="lesson-info">
                                         <div class="lesson-title">@lesson.LessonTitle</div>
-                                        <div class="lesson-meta">@(lesson.ContentType == "Video" ? "Video" : "Article") • @lesson.FormattedLessonDuration</div>
-                                    </div>
-                                    <div class="lesson-status">
-                                        <div class="lesson-status-dot ${lesson.content ? 'complete' : 'incomplete'}"></div>
+                                        <div class="lesson-meta">@lesson.ContentType • @lesson.FormattedLessonDuration</div>
                                     </div>
                                     <div class="lesson-actions">
-                                        <button title="Edit" 
-                                            data-action="open-edit-lesson"
-                                            data-module-id="@module.ModuleId"
-                                            data-lesson-id="@lesson.LessonId"><i class="fas fa-edit"></i>
+                                        <button title="Edit"
+                                                data-action="open-edit-lesson"
+                                                data-module-id="@module.ModuleId"
+                                                data-lesson-id="@lesson.LessonId">
+                                            <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="delete" title="Delete" onclick="deleteLesson(@module.ModuleId, @lesson.LessonId)"><i class="fas fa-trash"></i></button>
+                                        <button class="delete" title="Delete" onclick="deleteLesson(@module.ModuleId, @lesson.LessonId)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </div>
                             }
-                            <button class="add-lesson-btn" 
-                                data-action="open-add-lesson" 
-                                data-module-id="@module.ModuleId"><i class="fas fa-plus"></i> 
-                                Add Lesson
+                            <button class="add-lesson-btn"
+                                    data-action="open-add-lesson"
+                                    data-module-id="@module.ModuleId">
+                                <i class="fas fa-plus"></i> Add Lesson
                             </button>
                         </div>
                     </div>
@@ -94,40 +98,7 @@
     </div>
 
     <div class="sidebar-panel">
-        <!-- Checklist -->
-        <div class="panel-card">
-            <h4 class="panel-title">
-                <i class="fas fa-clipboard-check"></i> Publishing Checklist
-            </h4>
-            <div id="checklist">
-                <div class="checklist-item" data-check="title">
-                    <div class="check-icon pending"><i class="fas fa-check"></i></div>
-                    <span class="checklist-text">Course title added</span>
-                </div>
-                <div class="checklist-item" data-check="description">
-                    <div class="check-icon pending"><i class="fas fa-check"></i></div>
-                    <span class="checklist-text">Course description</span>
-                </div>
-                <div class="checklist-item" data-check="outcomes">
-                    <div class="check-icon pending"><i class="fas fa-check"></i></div>
-                    <span class="checklist-text">At least 4 outcomes</span>
-                </div>
-                <div class="checklist-item" data-check="modules">
-                    <div class="check-icon pending"><i class="fas fa-check"></i></div>
-                    <span class="checklist-text">At least 1 module</span>
-                </div>
-                <div class="checklist-item" data-check="lessons">
-                    <div class="check-icon pending"><i class="fas fa-check"></i></div>
-                    <span class="checklist-text">At least 5 lessons</span>
-                </div>
-                <div class="checklist-item" data-check="video">
-                    <div class="check-icon pending"><i class="fas fa-check"></i></div>
-                    <span class="checklist-text">At least 1 video</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Stats -->
+        <!-- Course Stats Only (Checklist Removed) -->
         <div class="panel-card">
             <h4 class="panel-title">
                 <i class="fas fa-chart-bar"></i> Course Stats
@@ -149,6 +120,19 @@
                     <span class="quick-stat-label">Total Duration</span>
                     <span class="quick-stat-value" id="statDuration">@Model.CurriculumStats.FormattedCourseDuration</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- Tips Panel -->
+        <div class="panel-card">
+            <h4 class="panel-title">
+                <i class="fas fa-lightbulb"></i> Tips
+            </h4>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                <p style="margin-bottom: 0.75rem;">• Organize content into logical modules</p>
+                <p style="margin-bottom: 0.75rem;">• Keep lessons focused and concise</p>
+                <p style="margin-bottom: 0.75rem;">• Mix video and article content</p>
+                <p>• Add resources to enhance learning</p>
             </div>
         </div>
     </div>

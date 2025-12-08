@@ -168,6 +168,127 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
+// ENROLLMENT FUNCTIONS
+// ==========================================
+
+function enrollCourse(courseId) {
+    const enrollBtn = document.querySelector(`[onclick="enrollCourse(${courseId})"]`);
+    
+    // Show loading state
+    if (enrollBtn) {
+        enrollBtn.disabled = true;
+        enrollBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enrolling...';
+    }
+    
+    // Proceed with enrollment
+    fetch(`/api/enrollment/enroll/${courseId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message || 'Successfully enrolled!', 'success');
+            
+            // Update button to show enrolled state
+            if (enrollBtn) {
+                enrollBtn.innerHTML = '<i class="fas fa-check"></i> Enrolled!';
+                enrollBtn.classList.add('btn-success');
+            }
+            
+            // Redirect to course after a short delay
+            setTimeout(() => {
+                window.location.href = data.redirectUrl || `/student/course/details/${courseId}`;
+            }, 1500);
+        } else {
+            showToast(data.message || 'Failed to enroll. Please try again.', 'error');
+            
+            // Reset button
+            if (enrollBtn) {
+                enrollBtn.disabled = false;
+                enrollBtn.innerHTML = '<i class="fas fa-plus"></i> Enroll Now';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+        
+        // Reset button
+        if (enrollBtn) {
+            enrollBtn.disabled = false;
+            enrollBtn.innerHTML = '<i class="fas fa-plus"></i> Enroll Now';
+        }
+    });
+}
+
+function showToast(message, type = 'success') {
+    let toast = document.getElementById('toast');
+    
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <span id="toastMessage">${message}</span>
+        `;
+        document.body.appendChild(toast);
+        
+        if (!document.getElementById('toast-styles')) {
+            const style = document.createElement('style');
+            style.id = 'toast-styles';
+            style.textContent = `
+                .toast {
+                    position: fixed;
+                    bottom: 2rem;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(100px);
+                    padding: 1rem 1.5rem;
+                    background: #1a1a2e;
+                    border: 1px solid rgba(124, 58, 237, 0.3);
+                    border-radius: 12px;
+                    color: white;
+                    font-size: 0.9rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                    z-index: 10000;
+                    opacity: 0;
+                    transition: all 0.3s ease;
+                }
+                .toast.show {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
+                .toast.success { border-color: #10b981; }
+                .toast.success i { color: #10b981; }
+                .toast.error { border-color: #ef4444; }
+                .toast.error i { color: #ef4444; }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    const toastMessage = toast.querySelector('#toastMessage') || toast.querySelector('span');
+    const icon = toast.querySelector('i');
+    
+    if (toastMessage) toastMessage.textContent = message;
+    if (icon) {
+        icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    }
+    
+    toast.className = `toast ${type} show`;
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+// ==========================================
 // FILTER STATE & API
 // ==========================================
 

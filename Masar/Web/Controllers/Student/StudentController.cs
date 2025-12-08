@@ -15,6 +15,7 @@ using Web.ViewModels.Misc;
 using static System.Net.WebRequestMethods;
 using BLL.Interfaces.Student;
 using BLL.Interfaces;
+using BLL.Interfaces.Enrollment;
 using BLL.DTOs.Misc;
 using BLL.Helpers;
 using Microsoft.AspNetCore.Hosting;
@@ -40,6 +41,7 @@ public class StudentController : Controller
     private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly ICourseService _courseService;
     private readonly RazorViewToStringRenderer _razorRenderer;
+    private readonly IEnrollmentService _enrollmentService;
 
     public StudentController(
         Web.Interfaces.IStudentDashboardService dashboardService,
@@ -57,7 +59,8 @@ public class StudentController : Controller
         AppDbContext context,
         IWebHostEnvironment webHostEnvironment,
         ICourseService courseService,
-        RazorViewToStringRenderer razorRenderer)
+        RazorViewToStringRenderer razorRenderer,
+        IEnrollmentService enrollmentService)
     {
         _dashboardService = dashboardService;
         _coursesService = coursesService;
@@ -75,6 +78,7 @@ public class StudentController : Controller
         _webHostEnvironment = webHostEnvironment;
         _courseService = courseService;
         _razorRenderer = razorRenderer;
+        _enrollmentService = enrollmentService;
     }
 
     /// <summary>
@@ -328,6 +332,16 @@ public class StudentController : Controller
         };
 
         return View(viewModel);
+    }
+
+    /// <summary>
+    /// Redirect from short URL to full course details URL
+    /// Handles /student/course/{courseId} -> /student/course/details/{courseId}
+    /// </summary>
+    [HttpGet("/student/course/{courseId:int}")]
+    public IActionResult CourseDetailsRedirect(int courseId)
+    {
+        return RedirectToActionPermanent(nameof(CourseDetails), new { courseId });
     }
 
     [HttpGet("/student/course/details/{courseId}")]

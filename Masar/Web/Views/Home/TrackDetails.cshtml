@@ -6,6 +6,35 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/pages/Home/track-details.css" />
+    <style>
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 1rem 1.5rem;
+            background: #1a1a2e;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast.success { border-color: #10b981; }
+        .toast.success i { color: #10b981; }
+        .toast.error { border-color: #ef4444; }
+        .toast.error i { color: #ef4444; }
+    </style>
 }
 
 <!-- Hero Section -->
@@ -99,7 +128,7 @@
                 {
                     <button class="btn btn-primary btn-block" onclick="enrollTrack(@Model.TrackId)">
                         <i class="fas fa-route"></i>
-                        Start Track
+                        Start Track - Free
                     </button>
                 }
             </div>
@@ -184,18 +213,19 @@
                 <p>Enroll in this track and gain access to all @Model.CoursesCount courses</p>
                 <button class="btn btn-primary btn-large" onclick="enrollTrack(@Model.TrackId)">
                     <i class="fas fa-route"></i>
-                    Start Track Now
+                    Start Track Now - Free
                 </button>
             </div>
         }
     </div>
 </section>
 
+<!-- Toast for notifications -->
+<div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Changes saved!</span>
+</div>
+
 @section Scripts {
-    <script>
-        function enrollTrack(trackId) {
-            // TODO: Implement enrollment logic
-            alert('Enrollment functionality will be implemented soon!');
-        }
-    </script>
+    <script src="~/js/course-details.js"></script>
 }

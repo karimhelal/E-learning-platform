@@ -18,7 +18,7 @@
             <div class="course-overlay">
                 @if (courseCard.IsEnrolled)
                 {
-                    <a href="~/Classroom/Course/@courseCard.CourseId" class="btn btn-primary btn-small">
+                    <a href="/student/course/details/@courseCard.CourseId" class="btn btn-primary btn-small">
                         <span>Continue</span>
                         <i class="fas fa-play"></i>
                     </a>
@@ -99,17 +99,17 @@
             <div class="course-card-footer">
                 @if (courseCard.IsEnrolled)
                 {
-                    <a href="~/Classroom/Course/@courseCard.CourseId" class="btn enroll-btn btn-gradient">
+                    <a href="/student/course/details/@courseCard.CourseId" class="btn enroll-btn btn-gradient">
                         <i class="fas fa-play"></i>
                         <span>Continue Learning</span>
                     </a>
                 }
                 else
                 {
-                    <a href="/Course/@courseCard.CourseId" class="btn enroll-btn btn-gradient">
-                        <i class="fas fa-info-circle"></i>
-                        <span>View Details</span>
-                    </a>
+                    <button class="btn enroll-btn btn-gradient" onclick="enrollCourse(@courseCard.CourseId)">
+                        <i class="fas fa-plus"></i>
+                        <span>Enroll Now</span>
+                    </button>
                 }
             </div>
         </div>

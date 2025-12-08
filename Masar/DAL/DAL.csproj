@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ExternalServices\" />
+    <Compile Remove="ExternalServices\**" />
+    <EmbeddedResource Remove="ExternalServices\**" />
+    <None Remove="ExternalServices\**" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />

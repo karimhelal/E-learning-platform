@@ -228,8 +228,101 @@ public class InstructorProfileService : IInstructorProfileService
             .FirstOrDefaultAsync();
     }
 
-    public Task<bool> UpdateInstructorProfileAsync(int instructorId, UpdateInstructorProfileDto profileDto)
+    public async Task<bool> UpdateInstructorProfileAsync(int instructorId, UpdateInstructorProfileDto profileDto)
     {
-        throw new NotImplementedException();
+        var instructorProfile = await _userRepo.GetInstructorProfileAsync(instructorId, includeUserBase: true);
+
+        if (instructorProfile == null || instructorProfile.User == null)
+            return false;
+
+        // Update instructor profile fields
+        instructorProfile.Bio = profileDto.Bio;
+        instructorProfile.YearsOfExperience = profileDto.YearsOfExperience;
+        
+        // Update user info
+        instructorProfile.User.FirstName = profileDto.FirstName;
+        instructorProfile.User.LastName = profileDto.LastName;
+        instructorProfile.User.PhoneNumber = profileDto.Phone;
+
+        // Update skills (with SkillType = Instructor)
+        if (profileDto.Skills != null)
+        {
+            // Remove existing instructor skills only
+            var existingInstructorSkills = instructorProfile.User.Skills?
+                .Where(s => s.SkillType == "Instructor")
+                .ToList() ?? new List<Core.Entities.Skill>();
+            
+            foreach (var skill in existingInstructorSkills)
+            {
+                instructorProfile.User.Skills?.Remove(skill);
+            }
+            
+            // Add new skills with SkillType = Instructor
+            foreach (var skillName in profileDto.Skills.Where(s => !string.IsNullOrWhiteSpace(s)))
+            {
+                instructorProfile.User.Skills?.Add(new Core.Entities.Skill
+                {
+                    SkillName = skillName.Trim(),
+                    UserId = instructorProfile.UserId,
+                    SkillType = "Instructor"
+                });
+            }
+        }
+
+        // Update social links
+        // First, remove existing social links
+        if (instructorProfile.User.UserSocialLinks != null)
+        {
+            instructorProfile.User.UserSocialLinks.Clear();
+        }
+        else
+        {
+            instructorProfile.User.UserSocialLinks = new List<Core.Entities.UserSocialLink>();
+        }
+
+        if (!string.IsNullOrEmpty(profileDto.GithubUrl))
+        {
+            instructorProfile.User.UserSocialLinks.Add(new Core.Entities.UserSocialLink
+            {
+                Url = profileDto.GithubUrl,
+                SocialPlatform = Core.Entities.Enums.SocialPlatform.Github,
+                UserId = instructorProfile.UserId
+            });
+        }
+
+        if (!string.IsNullOrEmpty(profileDto.LinkedInUrl))
+        {
+            instructorProfile.User.UserSocialLinks.Add(new Core.Entities.UserSocialLink
+            {
+                Url = profileDto.LinkedInUrl,
+                SocialPlatform = Core.Entities.Enums.SocialPlatform.LinkedIn,
+                UserId = instructorProfile.UserId
+            });
+        }
+
+        if (!string.IsNullOrEmpty(profileDto.FacebookUrl))
+        {
+            instructorProfile.User.UserSocialLinks.Add(new Core.Entities.UserSocialLink
+            {
+                Url = profileDto.FacebookUrl,
+                SocialPlatform = Core.Entities.Enums.SocialPlatform.Facebook,
+                UserId = instructorProfile.UserId
+            });
+        }
+
+        if (!string.IsNullOrEmpty(profileDto.WebsiteUrl))
+        {
+            instructorProfile.User.UserSocialLinks.Add(new Core.Entities.UserSocialLink
+            {
+                Url = profileDto.WebsiteUrl,
+                SocialPlatform = Core.Entities.Enums.SocialPlatform.Personal,
+                UserId = instructorProfile.UserId
+            });
+        }
+
+        // Save changes using Unit of Work
+        await _unitOfWork.CompleteAsync();
+
+        return true;
     }
 }
