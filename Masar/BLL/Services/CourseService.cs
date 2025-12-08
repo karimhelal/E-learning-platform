@@ -480,6 +480,7 @@ public class CourseService : ICourseService
         var result = new FilterGroupsStatsDto();
 
         result.CategoryCounts = await query
+            .Where(c => c.Status == LearningEntityStatus.Published)
             .SelectMany(c => c.Categories!)
             .GroupBy(c => c.Name)
             .Select(g => new
@@ -491,6 +492,7 @@ public class CourseService : ICourseService
 
 
         result.LevelCounts = await query
+            .Where(c => c.Status == LearningEntityStatus.Published)
             .Select(c => c.Level.ToString().ToLower())
             .GroupBy(l => l)
             .Select(g => new
@@ -501,6 +503,7 @@ public class CourseService : ICourseService
             .ToDictionaryAsync(x => x.Id, x => x.Count);
 
         result.LanguageCounts = await query
+            .Where(c => c.Status == LearningEntityStatus.Published)
             .SelectMany(c => c.Languages!)
             .GroupBy(l => l.Name)
             .Select(g => new

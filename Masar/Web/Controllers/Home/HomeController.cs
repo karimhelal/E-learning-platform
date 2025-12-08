@@ -90,7 +90,7 @@ public class HomeController : Controller
     [HttpGet("~/browse-courses")]
     public async Task<IActionResult> BrowseCourses()
     {
-        var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 3 };
+        var pagingRequest = new PagingRequestDto { CurrentPage = 1, PageSize = 6 };
         var initialRequest = new BrowseRequestDto();
         initialRequest.PagingRequest = pagingRequest;
 
