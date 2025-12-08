@@ -322,7 +322,7 @@ namespace BLL.Services.Admin
         {
             return await _context.Courses
                 .AsNoTracking()
-                // Remove the Published filter to show all courses
+                .Where(c => c.Status == LearningEntityStatus.Published)
                 .OrderBy(c => c.Title)
                 .Select(c => new CourseSimpleDto
                 {
