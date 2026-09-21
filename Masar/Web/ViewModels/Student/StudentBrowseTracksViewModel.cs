@@ -1,10 +1,11 @@
-﻿using Web.Interfaces;
+﻿using BLL.DTOs.Student;
+using Web.Interfaces;
 
 namespace Web.ViewModels.Student
 {
     public class StudentBrowseTracksViewModel
     {
-        public StudentBrowseTracksPageData Data { get; set; } = new();
+        public StudentBrowseTracksPageDto Data { get; set; } = new();
     }
 
     /// <summary>

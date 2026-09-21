@@ -1,8 +1,10 @@
-﻿namespace Web.ViewModels.Student
+﻿using BLL.DTOs.Student;
+
+namespace Web.ViewModels.Student
 {
     public class StudentTrackDetailsViewModel
     {
-        public StudentTrackDetailsData? Data { get; set; }
+        public StudentTrackDetailsDto? Data { get; set; }
         public string PageTitle { get; set; } = "Track Details";
     }
 

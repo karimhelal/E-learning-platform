@@ -41,18 +41,12 @@ builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
 builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
-builder.Services.AddScoped<IModuleRepository, ModuleRepository>(); // ADD THIS
-builder.Services.AddScoped<ILessonRepository, LessonRepository>(); // ADD THIS
+builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 builder.Services.AddScoped<IInstructorProfileRepository, InstructorProfileRepository>();
 builder.Services.AddScoped<IInstructorManageCourseService, InstructorManageCourseService>();
 
-
-// Add generic repositories for LessonProgress and CourseEnrollment
+// Add generic repositories
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
-// Add generic repositories for LessonProgress and CourseEnrollment
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
 
 // Current User Service
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -68,34 +62,27 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICourseLearningService, CourseLearningService>();
 builder.Services.AddScoped<IInstructorCoursesService, InstructorCoursesService>();
 builder.Services.AddScoped<IInstructorProfileService, InstructorProfileService>();
-builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
-builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
 builder.Services.AddScoped<IInstructorDashboardService, InstructorDashboardService>();
-
-builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
-builder.Services.AddScoped<ICourseCreationService, CourseCreationService>(); // ADDED THIS LINE
-builder.Services.AddScoped<ITrackService, TrackService>(); // ADDED THIS LINE
-
+builder.Services.AddScoped<IStudentProfileService, StudentProfileService>(); // مكتوبة مرة واحدة فقط
+builder.Services.AddScoped<ICourseCreationService, CourseCreationService>();
+builder.Services.AddScoped<ITrackService, TrackService>();
 
 // ========================================
-// WEB SERVICES (Your simplified layer)
+// WEB/STUDENT SERVICES (Refactored Layer)
 // ========================================
-builder.Services.AddScoped<BLL.Interfaces.Student.IStudentDashboardService, BLL.Services.Student.StudentDashboardService>();
-builder.Services.AddScoped<Web.Interfaces.IStudentDashboardService, Web.Services.StudentDashboardService>();
-builder.Services.AddScoped<Web.Interfaces.IStudentCoursesService, Web.Services.StudentCoursesService>();
+builder.Services.AddScoped<IStudentDashboardService, StudentDashboardService>();
+builder.Services.AddScoped<IStudentCoursesService, StudentCoursesService>();
 builder.Services.AddScoped<IStudentTrackService, StudentTracksService>();
 builder.Services.AddScoped<IStudentTrackDetailsService, StudentTrackDetailsService>();
 builder.Services.AddScoped<IStudentBrowseTrackService, StudentBrowseTrackService>();
-builder.Services.AddScoped<IStudentCourseDetailsService, StudentCourseDetailsService>(); // ADDED THIS LINE
-builder.Services.AddScoped<IStudentBrowseCoursesService, StudentBrowseCoursesService>(); // ADDED THIS LINE
+builder.Services.AddScoped<IStudentCourseDetailsService, StudentCourseDetailsService>();
+builder.Services.AddScoped<IStudentBrowseCoursesService, StudentBrowseCoursesService>();
 builder.Services.AddScoped<IStudentCertificatesService, StudentCertificatesService>();
 builder.Services.AddScoped<ICertificateGenerationService, CertificateGenerationService>();
 
-
-// Authentication Services
+// Authentication & Core Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
-
 builder.Services.AddScoped<RazorViewToStringRenderer>();
 
 // Configure Antiforgery to accept tokens from headers
@@ -121,15 +108,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             errorNumbersToAdd: null
     )
 ));
+
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options => {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
-    //options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
-
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
@@ -141,7 +127,6 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options => {
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
@@ -154,10 +139,19 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IPublicInstructorService, PublicInstructorService>();
+builder.Services.AddAutoMapper(config =>
+{
+    config.AddProfile<Web.Mappings.StudentMappingProfile>();
+    config.AddProfile<Web.Mappings.InstructorMappingProfile>();
+    config.AddProfile<Web.Mappings.HomeMappingProfile>();
+    config.AddProfile<Web.Mappings.CourseLearningMappingProfile>();
+    config.AddProfile<Web.Mappings.PublicMappingProfile>();
+});
 
 var app = builder.Build();
+
 app.UseAuthentication();
-// Configure the HTTP request pipeline
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -177,14 +171,11 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Add this BEFORE MapControllerRoute
-app.MapRazorPages(); // ADD THIS LINE
-
+app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Instructor}/{action=Dashboard}"
 );
-
 
 // --- Seed roles and admin user ---
 using (var scope = app.Services.CreateScope())
@@ -208,7 +199,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         await DbSeeder.SeedDatabaseAsync(services);
-        Console.WriteLine("? Database seeded successfully");
+        Console.WriteLine("✅ Database seeded successfully");
     }
     catch (Exception ex)
     {
@@ -220,4 +211,3 @@ using (var scope = app.Services.CreateScope())
 app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
-

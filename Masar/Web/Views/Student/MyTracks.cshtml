@@ -45,8 +45,8 @@
             @foreach (var track in Model.Data.Tracks)
             {
                 var statusClass = track.Status;
-                var progressPercent = track.Progress;
-                var coursesCompleted = (int)Math.Round(track.Courses.Count * progressPercent / 100.0);
+                var progressPercent = track.ProgressPercentage;
+                var coursesCompleted = (int)Math.Round(track.Courses.Count * progressPercent / (decimal)100.0);
                 var isCompleted = statusClass == "completed";
 
                 <div class="track-card-detailed" data-status="@statusClass">
@@ -76,7 +76,7 @@
                             <div class="track-stat-item">
                                 <i class="fas fa-clock"></i>
                                 <div class="track-stat-info">
-                                    <span class="track-stat-value">@track.Duration</span>
+                                    <span class="track-stat-value">@track.DurationHours Hours</span>
                                     <span class="track-stat-label">Duration</span>
                                 </div>
                             </div>
@@ -100,9 +100,9 @@
                             </div>
                             <div class="track-progress-details">
                                 <span class="progress-detail">@coursesCompleted of @track.CoursesCount courses completed</span>
-                                @if (track.CertificatesEarned > 0)
+                                @if (isCompleted)
                                 {
-                                    <span class="progress-detail">@track.CertificatesEarned @(track.CertificatesEarned == 1 ? "certificate" : "certificates") earned</span>
+                                    <span class="progress-detail text-success"><i class="fas fa-award"></i> Certificate Available</span>
                                 }
                             </div>
                         </div>
@@ -116,7 +116,7 @@
                                     var courseClass = course.Status;
                                     var iconClass = courseClass == "completed" ? "fa-check-circle" :
                                     courseClass == "in-progress" ? "fa-spinner fa-spin" : "fa-lock";
-                                    
+
                                     <div class="course-preview-item @courseClass">
                                         <i class="fas @iconClass"></i>
                                         <span>@course.Title</span>
