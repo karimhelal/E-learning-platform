@@ -1,3 +1,4 @@
+using BLL.DTOs.Student;
 using Web.ViewModels.Home;
 using Web.ViewModels.Misc;
 using Web.ViewModels.Misc.FilterRequestVMs;
@@ -6,7 +7,7 @@ namespace Web.ViewModels.Student
 {
     public class StudentBrowseCoursesViewModel
     {
-        public StudentBrowseCoursesPageData Data { get; set; } = new();
+        public StudentBrowseCoursesPageDto Data { get; set; } = new();
         public string PageTitle { get; set; } = "Browse Courses";
     }
 
